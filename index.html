@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <meta name="description" content="PlayZone - Play the best free online HTML5 games. Action, Puzzle, Arcade, Snake games and more. No downloads required!">
+  <meta name="keywords" content="free online games, HTML5 games, browser games, action games, puzzle games, arcade games, snake games">
+  <meta name="theme-color" content="#f8f8f8">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="PlayZone - Free Online Games">
+  <meta property="og:description" content="Play the best free HTML5 games directly in your browser. No downloads needed!">
+  <meta property="og:type" content="website">
+
+  <title>PlayZone - Play Free Online Games | Action, Puzzle, Arcade & Snake</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Google H5 Games Ad Placement API -->
+  <script async
+    data-adbreak-test="on"
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+    crossorigin="anonymous">
+  </script>
+  <script>
+    window.adsbygoogle = window.adsbygoogle || [];
+    const adConfig = adsbygoogle.push({
+      preloadAdBreaks: 'on',
+      sound: 'on',
+      onReady: () => console.log('[PlayZone Ads] H5 Ads API Ready'),
+    });
+  </script>
+</head>
+<body>
+
+  <div class="main-wrapper">
+
+    <!-- ===== LOGO / WELCOME ===== -->
+    <section class="logo-section">
+      <div class="logo-text">Welcome to <strong style="color:#3B82F6;">PlayZone</strong>. Play games and have fun!</div>
+      <p class="logo-title">Play free <span>online games!</span></p>
+    </section>
+
+    <!-- ===== SEARCH ===== -->
+    <section class="search-section">
+      <div class="search-box">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" class="search-input" id="searchInput"
+               placeholder="Search games..." autocomplete="off" aria-label="Search games">
+      </div>
+    </section>
+
+    <!-- ===== CATEGORIES ===== -->
+    <section class="choose-section">
+      <div class="choose-card">
+        <div class="choose-title">Choose which type of games you prefer!</div>
+        <div class="choose-buttons" id="categoryButtons">
+          <button class="cat-btn active" data-category="all">
+            <span class="cat-icon">&#127918;</span> All
+          </button>
+          <button class="cat-btn" data-category="action">
+            <span class="cat-icon">&#9876;&#65039;</span> Action
+          </button>
+          <button class="cat-btn" data-category="puzzle">
+            <span class="cat-icon">&#129513;</span> Puzzle
+          </button>
+          <button class="cat-btn" data-category="arcade">
+            <span class="cat-icon">&#127923;</span> Arcade
+          </button>
+          <button class="cat-btn" data-category="snake">
+            <span class="cat-icon">&#128013;</span> Snake
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AD SLOT: Top ===== -->
+    <div class="ad-container">
+      <div class="ad-slot" id="adTop">
+        <span>Advertisement</span>
+      </div>
+    </div>
+
+    <!-- ===== TRENDING GAMES ===== -->
+    <section class="games-section" id="trendingSection">
+      <div class="section-label">&#128293; Trending Now</div>
+      <div class="game-grid" id="trendingGrid"></div>
+    </section>
+
+    <!-- ===== ALL GAMES ===== -->
+    <section class="games-section">
+      <div class="section-label" id="allGamesLabel">&#127775; All Games</div>
+      <div class="game-grid" id="allGamesGrid"></div>
+
+      <div class="load-more-container" id="loadMoreContainer" style="display:none;">
+        <button class="load-more-btn" id="loadMoreBtn">Load More Games</button>
+      </div>
+    </section>
+
+    <!-- No Results -->
+    <div class="no-results" id="noResults" style="display:none;">
+      <div class="nr-icon">&#128373;&#65039;</div>
+      <h3>No games found</h3>
+      <p>Try a different search term or browse by category</p>
+    </div>
+
+    <!-- ===== AD SLOT: Bottom ===== -->
+    <div class="ad-container">
+      <div class="ad-slot" id="adBottom">
+        <span>Advertisement</span>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ===== -->
+    <section class="about-section">
+      <div class="about-card">
+        <h3>About PlayZone</h3>
+        <p>PlayZone is your ultimate destination for free online HTML5 games. Play instantly in your browser with no downloads or installations needed. We offer a carefully curated collection of Action, Puzzle, Arcade, and Snake games for players of all ages. Enjoy gaming on any device!</p>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-copy">&copy; 2026 PlayZone. All rights reserved.</div>
+    </footer>
+
+  </div><!-- /main-wrapper -->
+
+  <!-- ===== ON-DEMAND AD BUTTON ===== -->
+  <button class="show-ad-btn" id="showAdBtn" title="Show Ad (Testing)">
+    &#128250; Show Ad
+  </button>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
