@@ -43,7 +43,8 @@
   // --- Load Games from JSON ---
   async function loadGames() {
     try {
-      const res = await fetch('data/games.json');
+      // Cache-bust so stale CDN / browser caches never lock the game list
+      const res = await fetch('data/games.json?v=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       allGames = await res.json();
       filteredGames = [...allGames];

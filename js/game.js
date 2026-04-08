@@ -77,7 +77,7 @@
   // --- Load Games ---
   async function loadGames() {
     try {
-      const res = await fetch('data/games.json');
+      const res = await fetch('data/games.json?v=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       allGames = await res.json();
     } catch (e) {
