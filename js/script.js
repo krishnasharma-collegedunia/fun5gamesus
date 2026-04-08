@@ -146,8 +146,8 @@
       <div class="game-card" data-category="${game.category}">
         <div class="game-card-thumb">
           ${game.trending ? '<span class="trending-badge">\uD83D\uDD25 HOT</span>' : ''}
-          <img data-src="${game.thumbnail}" alt="${escapeHtml(game.title)}"
-               class="lazy-img"
+          <img src="${game.thumbnail}" alt="${escapeHtml(game.title)}"
+               class="lazy-img loaded" loading="lazy" decoding="async"
                onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb-placeholder',innerHTML:'${categoryEmoji[game.category] || '\uD83C\uDFAE'}'}))">
         </div>
         <div class="game-card-title">${escapeHtml(game.title)}</div>
