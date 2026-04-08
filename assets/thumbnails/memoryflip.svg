@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#1a0933"/>
+<stop offset="1" stop-color="#340d5c"/>
+</linearGradient>
+<linearGradient id="back" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#ff00ff"/>
+<stop offset="1" stop-color="#7700cc"/>
+</linearGradient>
+<linearGradient id="front" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff"/>
+<stop offset="1" stop-color="#e0e0ff"/>
+</linearGradient>
+</defs>
+<rect width="400" height="300" fill="url(#bg)"/>
+<!-- stars -->
+<g fill="#fff">
+<circle cx="30" cy="30" r="1"/>
+<circle cx="80" cy="60" r="1.5"/>
+<circle cx="360" cy="40" r="1"/>
+<circle cx="370" cy="90" r="1"/>
+<circle cx="340" cy="200" r="1.5"/>
+<circle cx="20" cy="200" r="1"/>
+</g>
+<g font-family="Arial Black, sans-serif" font-weight="900" stroke="rgba(255,255,255,0.4)" stroke-width="2">
+<!-- row 1 -->
+<rect x="80" y="50" width="55" height="75" rx="8" fill="url(#back)"/>
+<text x="107" y="100" font-size="36" fill="#fff" text-anchor="middle">?</text>
+<rect x="143" y="50" width="55" height="75" rx="8" fill="url(#front)"/>
+<text x="170" y="100" font-size="34" fill="#ff00cc" text-anchor="middle">★</text>
+<rect x="206" y="50" width="55" height="75" rx="8" fill="url(#back)"/>
+<text x="233" y="100" font-size="36" fill="#fff" text-anchor="middle">?</text>
+<rect x="269" y="50" width="55" height="75" rx="8" fill="url(#front)"/>
+<text x="296" y="100" font-size="34" fill="#ff0066" text-anchor="middle">♥</text>
+<!-- row 2 -->
+<rect x="80" y="135" width="55" height="75" rx="8" fill="url(#front)"/>
+<text x="107" y="185" font-size="34" fill="#0088ff" text-anchor="middle">♦</text>
+<rect x="143" y="135" width="55" height="75" rx="8" fill="url(#back)"/>
+<text x="170" y="185" font-size="36" fill="#fff" text-anchor="middle">?</text>
+<rect x="206" y="135" width="55" height="75" rx="8" fill="url(#front)"/>
+<text x="233" y="185" font-size="34" fill="#00cc00" text-anchor="middle">♣</text>
+<rect x="269" y="135" width="55" height="75" rx="8" fill="url(#back)"/>
+<text x="296" y="185" font-size="36" fill="#fff" text-anchor="middle">?</text>
+<text x="200" y="265" font-size="34" fill="#ff66ff" stroke="#000" stroke-width="4" paint-order="stroke" text-anchor="middle">MEMORY FLIP</text>
+</g>
+</svg>

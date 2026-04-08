@@ -15,7 +15,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Google H5 Games Ad Placement API -->
@@ -33,57 +32,51 @@
     });
   </script>
 
-  <!-- JSON-LD Structured Data -->
+  <!-- JSON-LD (set by JS) -->
   <script type="application/ld+json" id="jsonLd">
-  {
-    "@context": "https://schema.org",
-    "@type": "VideoGame",
-    "name": "",
-    "description": "",
-    "genre": "",
-    "playMode": "SinglePlayer",
-    "applicationCategory": "Game",
-    "operatingSystem": "Web Browser"
-  }
+  {"@context":"https://schema.org","@type":"VideoGame","name":"","description":"","genre":"","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web Browser"}
   </script>
 </head>
 <body>
 
   <div class="main-wrapper">
-
     <div class="game-page">
 
       <!-- Back Navigation -->
       <div class="back-nav">
-        <a href="index.html">&#8592; Home</a>
-        <span>/</span>
-        <span id="breadcrumbCategory">Games</span>
-        <span>/</span>
-        <span id="breadcrumbTitle">Loading...</span>
-      </div>
-
-      <!-- Pre-roll Ad -->
-      <div class="ad-container" id="prerollAdContainer">
-        <div class="ad-slot" id="adPreroll">
-          <span>Loading ad...</span>
+        <a href="index.html" class="back-link">&#8592; <span>PlayZone</span></a>
+        <div class="breadcrumb-trail">
+          <span id="breadcrumbCategory">Games</span>
+          <span class="sep">&#8250;</span>
+          <span id="breadcrumbTitle" class="current">Loading...</span>
         </div>
       </div>
 
-      <!-- Game iFrame Container -->
+      <!-- ===== AD SLOT: Pre-roll Top ===== -->
+      <div class="ad-container" id="prerollAdContainer">
+        <div class="ad-slot ad-banner" id="adPreroll">
+          <span class="ad-label">Ad loading...</span>
+        </div>
+      </div>
+
+      <!-- ===== GAME iFrame ===== -->
       <div class="game-frame-container" id="gameFrameContainer">
         <div class="game-frame-wrapper" id="gameFrameWrapper">
           <div class="game-loading" id="gameLoading">
             <div class="spinner"></div>
             <p>Loading game...</p>
           </div>
-          <!-- iFrame injected by JS after pre-roll -->
+          <!-- iFrame injected by JS after pre-roll ad -->
         </div>
       </div>
 
-      <!-- Game Title -->
+      <!-- Game Title & Info -->
       <div class="game-header">
         <h1 id="gameTitle">Loading...</h1>
-        <div class="game-cat" id="gameCat"></div>
+        <div class="game-rating-row">
+          <span class="game-stars" id="gameStars"></span>
+          <span class="game-cat-badge" id="gameCatBadge"></span>
+        </div>
       </div>
 
       <!-- Control Buttons -->
@@ -92,15 +85,22 @@
         <button class="game-btn reload-btn" id="reloadBtn">&#128260; Reload</button>
       </div>
 
-      <!-- Play More Button -->
+      <!-- ===== AD SLOT: Below Game Controls ===== -->
+      <div class="ad-container">
+        <div class="ad-slot ad-rectangle" id="adBelowGame">
+          <span class="ad-label">Advertisement</span>
+        </div>
+      </div>
+
+      <!-- Play More CTA -->
       <div class="game-buttons">
-        <a href="index.html" class="game-btn play-more-btn" style="text-align:center;">&#127918; Play More Games</a>
+        <a href="index.html" class="game-btn play-more-btn">&#127918; Play More Games</a>
       </div>
 
       <!-- Game Description -->
       <div class="game-desc-section">
         <div class="game-desc-card">
-          <h3>How to Play</h3>
+          <h3>&#128214; How to Play</h3>
           <p id="gameDescription">Loading game information...</p>
 
           <div class="game-tags" id="gameTags"></div>
@@ -119,25 +119,32 @@
               <div class="meta-value" id="metaControls">-</div>
             </div>
             <div class="meta-box">
-              <div class="meta-label">Type</div>
-              <div class="meta-value">HTML5</div>
+              <div class="meta-label">Platform</div>
+              <div class="meta-value">HTML5 Browser</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Ad Slot -->
+      <!-- ===== AD SLOT: Mid-page Rectangle ===== -->
       <div class="ad-container">
-        <div class="ad-slot" id="adMidPage">
-          <span>Advertisement</span>
+        <div class="ad-slot ad-rectangle" id="adMidPage">
+          <span class="ad-label">Advertisement</span>
         </div>
       </div>
 
       <!-- Related Games -->
       <section class="related-section">
-        <div class="section-label">&#127919; Related Games</div>
+        <div class="section-label">&#127919; You May Also Like</div>
         <div class="game-grid" id="relatedGamesGrid"></div>
       </section>
+
+      <!-- ===== AD SLOT: Bottom of Related ===== -->
+      <div class="ad-container">
+        <div class="ad-slot ad-banner" id="adBottomRelated">
+          <span class="ad-label">Advertisement</span>
+        </div>
+      </div>
 
     </div><!-- /game-page -->
 
@@ -154,7 +161,7 @@
   </div><!-- /main-wrapper -->
 
   <!-- On-Demand Ad Button -->
-  <button class="show-ad-btn" id="showAdBtn" title="Show Ad (Testing)">
+  <button class="show-ad-btn" id="showAdBtn" title="Show Rewarded Ad (Testing)">
     &#128250; Show Ad
   </button>
 

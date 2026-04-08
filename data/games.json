@@ -1,434 +1,114 @@
 [
   {
     "id": 1,
-    "title": "Snake Arena",
-    "slug": "snake-arena",
-    "category": "snake",
-    "thumbnail": "assets/thumbnails/snake-arena.svg",
-    "game_url": "public/games/snake-arena/index.html",
-    "description": "Classic snake game with a modern competitive twist. Eat, grow, and dominate the arena!",
+    "title": "Fruit Slice Master",
+    "slug": "fruitninjanew",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/fruitninjanew.svg",
+    "game_url": "public/games/fruitninjanew.html",
+    "description": "Slice flying fruits with lightning-fast swipes! Juicy physics, combo multipliers, and explosive bombs. 100% original HTML5 game.",
     "featured": true,
     "trending": true,
-    "tags": [
-      "snake",
-      "classic",
-      "multiplayer"
-    ],
-    "controls": "Arrow keys or swipe to move",
-    "rating": 4.8
+    "tags": ["arcade", "slicing", "casual", "original"],
+    "controls": "Swipe or click and drag to slice fruits. Avoid bombs!",
+    "rating": 4.9
   },
   {
     "id": 2,
-    "title": "Block Blast",
-    "slug": "block-blast",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/block-blast.svg",
-    "game_url": "public/games/block-blast/index.html",
-    "description": "Fit blocks into the grid and clear lines to score big. A satisfying brain teaser!",
+    "title": "Snake.Go",
+    "slug": "snakego",
+    "category": "snake",
+    "thumbnail": "assets/thumbnails/snakego.svg",
+    "game_url": "public/games/snakego.html",
+    "description": "A neon retro snake reimagined! Glide across a pixel grid, eat glowing apples, and grow longer. Mobile-friendly with swipe controls.",
     "featured": true,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "blocks",
-      "brain"
-    ],
-    "controls": "Drag and drop blocks",
-    "rating": 4.6
+    "trending": true,
+    "tags": ["snake", "retro", "arcade", "original"],
+    "controls": "Arrow keys or swipe to change direction",
+    "rating": 4.8
   },
   {
     "id": 3,
-    "title": "Zombie Shooter",
-    "slug": "zombie-shooter",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/zombie-shooter.svg",
-    "game_url": "public/games/zombie-shooter/index.html",
-    "description": "Survive endless waves of zombies. Upgrade weapons and fight for survival!",
+    "title": "Pixel Flap",
+    "slug": "pixelflap",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/pixelflap.svg",
+    "game_url": "public/games/pixelflap.html",
+    "description": "Tap to flap your wings and weave through endless pipes! Classic side-scroller with pixel-art charm and buttery-smooth physics.",
     "featured": true,
     "trending": true,
-    "tags": [
-      "action",
-      "shooter",
-      "survival"
-    ],
-    "controls": "WASD to move, mouse to aim and shoot",
+    "tags": ["arcade", "casual", "endless", "original"],
+    "controls": "Tap / Click / Space to flap",
     "rating": 4.7
   },
   {
     "id": 4,
-    "title": "Fruit Ninja Slash",
-    "slug": "fruit-ninja-slash",
+    "title": "Coin Catcher",
+    "slug": "coincatcher",
     "category": "arcade",
-    "thumbnail": "assets/thumbnails/fruit-ninja-slash.svg",
-    "game_url": "public/games/fruit-ninja-slash/index.html",
-    "description": "Slice through fruits at lightning speed. Avoid the bombs and rack up combos!",
-    "featured": false,
-    "trending": true,
-    "tags": [
-      "arcade",
-      "casual",
-      "slicing"
-    ],
-    "controls": "Swipe or click and drag to slice",
-    "rating": 4.5
+    "thumbnail": "assets/thumbnails/coincatcher.svg",
+    "game_url": "public/games/coincatcher.html",
+    "description": "Catch falling coins and gems in your basket while dodging bombs! Build combos for massive score multipliers.",
+    "featured": true,
+    "trending": false,
+    "tags": ["arcade", "casual", "catch", "original"],
+    "controls": "Drag or Arrow keys to move the basket",
+    "rating": 4.6
   },
   {
     "id": 5,
-    "title": "Color Sort Puzzle",
-    "slug": "color-sort-puzzle",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/color-sort-puzzle.svg",
-    "game_url": "public/games/color-sort-puzzle/index.html",
-    "description": "Sort colored liquids into matching tubes. Simple rules, addictive gameplay.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "sorting",
-      "relaxing"
-    ],
-    "controls": "Click tubes to pour",
-    "rating": 4.4
+    "title": "Brick Smash",
+    "slug": "bricksmash",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/bricksmash.svg",
+    "game_url": "public/games/bricksmash.html",
+    "description": "Smash through colorful neon bricks with a bouncing ball. Progress through levels with increasing difficulty and multi-hit bricks.",
+    "featured": true,
+    "trending": true,
+    "tags": ["arcade", "breakout", "classic", "original"],
+    "controls": "Drag or Arrow keys to move paddle. Tap / Space to launch.",
+    "rating": 4.8
   },
   {
     "id": 6,
-    "title": "Speed Racer 3D",
-    "slug": "speed-racer-3d",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/speed-racer-3d.svg",
-    "game_url": "public/games/speed-racer-3d/index.html",
-    "description": "Race through neon cityscapes at insane speeds. Dodge traffic and beat your record!",
+    "title": "2048 Merge",
+    "slug": "2048merge",
+    "category": "puzzle",
+    "thumbnail": "assets/thumbnails/2048merge.svg",
+    "game_url": "public/games/2048merge.html",
+    "description": "Slide and merge numbered tiles to reach 2048! The iconic addictive puzzle with silky-smooth swipe controls.",
     "featured": true,
     "trending": true,
-    "tags": [
-      "racing",
-      "3d",
-      "speed"
-    ],
-    "controls": "Arrow keys or A/D to steer",
+    "tags": ["puzzle", "numbers", "strategy", "original"],
+    "controls": "Arrow keys or swipe to slide tiles",
     "rating": 4.9
   },
   {
     "id": 7,
-    "title": "Bubble Pop Mania",
-    "slug": "bubble-pop-mania",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/bubble-pop-mania.svg",
-    "game_url": "public/games/bubble-pop-mania/index.html",
-    "description": "Match and pop colorful bubbles before they reach the bottom. Aim carefully!",
+    "title": "Memory Flip",
+    "slug": "memoryflip",
+    "category": "puzzle",
+    "thumbnail": "assets/thumbnails/memoryflip.svg",
+    "game_url": "public/games/memoryflip.html",
+    "description": "Flip cards and match pairs to clear the board. Choose 4x4 or 6x6 difficulty and beat your best time.",
     "featured": false,
-    "trending": false,
-    "tags": [
-      "arcade",
-      "bubble",
-      "matching"
-    ],
-    "controls": "Aim and click to shoot bubbles",
-    "rating": 4.3
+    "trending": true,
+    "tags": ["puzzle", "memory", "cards", "original"],
+    "controls": "Tap or click cards to flip and match pairs",
+    "rating": 4.5
   },
   {
     "id": 8,
-    "title": "Ninja Dash",
-    "slug": "ninja-dash",
+    "title": "Neon Blaster",
+    "slug": "neonblaster",
     "category": "action",
-    "thumbnail": "assets/thumbnails/ninja-dash.svg",
-    "game_url": "public/games/ninja-dash/index.html",
-    "description": "Run, jump, and slash through enemies in this fast-paced ninja platformer!",
-    "featured": false,
-    "trending": true,
-    "tags": [
-      "action",
-      "runner",
-      "ninja"
-    ],
-    "controls": "Tap or Space to jump, Click to attack",
-    "rating": 4.6
-  },
-  {
-    "id": 9,
-    "title": "Chess Master Online",
-    "slug": "chess-master-online",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/chess-master-online.svg",
-    "game_url": "public/games/chess-master-online/index.html",
-    "description": "Play chess against AI or challenge friends. Multiple difficulty levels available.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "chess",
-      "strategy"
-    ],
-    "controls": "Click to select and move pieces",
-    "rating": 4.7
-  },
-  {
-    "id": 10,
-    "title": "Galaxy Invaders",
-    "slug": "galaxy-invaders",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/galaxy-invaders.svg",
-    "game_url": "public/games/galaxy-invaders/index.html",
-    "description": "Defend Earth from alien invasion! Classic space shooter with modern graphics.",
-    "featured": true,
-    "trending": false,
-    "tags": [
-      "arcade",
-      "space",
-      "shooter"
-    ],
-    "controls": "Arrow keys to move, Space to fire",
-    "rating": 4.5
-  },
-  {
-    "id": 11,
-    "title": "Tower Defense Pro",
-    "slug": "tower-defense-pro",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/tower-defense-pro.svg",
-    "game_url": "public/games/tower-defense-pro/index.html",
-    "description": "Build strategic towers to stop the enemy horde. Plan your defense wisely!",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "strategy",
-      "tower-defense",
-      "planning"
-    ],
-    "controls": "Click to place and upgrade towers",
-    "rating": 4.4
-  },
-  {
-    "id": 12,
-    "title": "Snake.io Multiplayer",
-    "slug": "snake-io-multiplayer",
-    "category": "snake",
-    "thumbnail": "assets/thumbnails/snake-io-multiplayer.svg",
-    "game_url": "public/games/snake-io-multiplayer/index.html",
-    "description": "Slither around the arena, eat orbs, and become the biggest snake on the server!",
+    "thumbnail": "assets/thumbnails/neonblaster.svg",
+    "game_url": "public/games/neonblaster.html",
+    "description": "Top-down neon space shooter! Blast through waves of enemy ships, dodge incoming fire, and survive as long as possible.",
     "featured": true,
     "trending": true,
-    "tags": [
-      "snake",
-      "multiplayer",
-      "io"
-    ],
-    "controls": "Mouse to steer, click to boost",
+    "tags": ["action", "shooter", "space", "original"],
+    "controls": "Drag or WASD/Arrows to move. Auto-fire enabled.",
     "rating": 4.8
-  },
-  {
-    "id": 13,
-    "title": "Jewel Match",
-    "slug": "jewel-match",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/jewel-match.svg",
-    "game_url": "public/games/jewel-match/index.html",
-    "description": "Swap and match sparkling jewels in this addictive match-3 puzzle game.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "match-3",
-      "jewels"
-    ],
-    "controls": "Click and drag to swap jewels",
-    "rating": 4.2
-  },
-  {
-    "id": 14,
-    "title": "Stickman Fighter",
-    "slug": "stickman-fighter",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/stickman-fighter.svg",
-    "game_url": "public/games/stickman-fighter/index.html",
-    "description": "Epic stickman combat with crazy physics. Punch, kick, and ragdoll your way to victory!",
-    "featured": false,
-    "trending": true,
-    "tags": [
-      "action",
-      "fighting",
-      "stickman"
-    ],
-    "controls": "WASD + J/K to punch/kick",
-    "rating": 4.5
-  },
-  {
-    "id": 15,
-    "title": "Drift Boss",
-    "slug": "drift-boss",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/drift-boss.svg",
-    "game_url": "public/games/drift-boss/index.html",
-    "description": "Master the art of drifting on an endless road. One-touch controls, infinite fun!",
-    "featured": false,
-    "trending": true,
-    "tags": [
-      "arcade",
-      "driving",
-      "drift"
-    ],
-    "controls": "Tap or click to turn right",
-    "rating": 4.6
-  },
-  {
-    "id": 16,
-    "title": "Word Search Pro",
-    "slug": "word-search-pro",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/word-search-pro.svg",
-    "game_url": "public/games/word-search-pro/index.html",
-    "description": "Find hidden words in a grid of letters. Hundreds of categories to explore!",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "words",
-      "educational"
-    ],
-    "controls": "Click and drag to select words",
-    "rating": 4.3
-  },
-  {
-    "id": 17,
-    "title": "Snake Classic Retro",
-    "slug": "snake-classic-retro",
-    "category": "snake",
-    "thumbnail": "assets/thumbnails/snake-classic-retro.svg",
-    "game_url": "public/games/snake-classic-retro/index.html",
-    "description": "The original Nokia-style snake game reborn in HD. Pure nostalgic fun!",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "snake",
-      "retro",
-      "classic"
-    ],
-    "controls": "Arrow keys to change direction",
-    "rating": 4.4
-  },
-  {
-    "id": 18,
-    "title": "Basketball Stars",
-    "slug": "basketball-stars",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/basketball-stars.svg",
-    "game_url": "public/games/basketball-stars/index.html",
-    "description": "Shoot hoops and pull off trick shots in this addictive basketball game!",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "sports",
-      "basketball",
-      "arcade"
-    ],
-    "controls": "Click and drag to aim, release to shoot",
-    "rating": 4.3
-  },
-  {
-    "id": 19,
-    "title": "Merge Master",
-    "slug": "merge-master",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/merge-master.svg",
-    "game_url": "public/games/merge-master/index.html",
-    "description": "Merge items to create powerful new ones. A satisfying idle puzzle experience!",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "merge",
-      "idle"
-    ],
-    "controls": "Drag items to merge matching ones",
-    "rating": 4.1
-  },
-  {
-    "id": 20,
-    "title": "Survival Island",
-    "slug": "survival-island",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/survival-island.svg",
-    "game_url": "public/games/survival-island/index.html",
-    "description": "Craft, build, and survive on a mysterious island. Explore and uncover secrets!",
-    "featured": true,
-    "trending": false,
-    "tags": [
-      "action",
-      "survival",
-      "crafting"
-    ],
-    "controls": "WASD to move, E to interact, mouse to look",
-    "rating": 4.7
-  },
-  {
-    "id": 21,
-    "title": "Pixel Snake Adventure",
-    "slug": "pixel-snake-adventure",
-    "category": "snake",
-    "thumbnail": "assets/thumbnails/pixel-snake-adventure.svg",
-    "game_url": "public/games/pixel-snake-adventure/index.html",
-    "description": "A snake game with RPG elements! Level up, collect power-ups, and defeat bosses.",
-    "featured": false,
-    "trending": true,
-    "tags": [
-      "snake",
-      "pixel",
-      "rpg"
-    ],
-    "controls": "Arrow keys to move, Space for special ability",
-    "rating": 4.6
-  },
-  {
-    "id": 22,
-    "title": "Flappy Jump",
-    "slug": "flappy-jump",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/flappy-jump.svg",
-    "game_url": "public/games/flappy-jump/index.html",
-    "description": "Navigate through obstacles in this impossibly addictive one-button game!",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "arcade",
-      "casual",
-      "endless"
-    ],
-    "controls": "Tap or click to jump",
-    "rating": 4.2
-  },
-  {
-    "id": 23,
-    "title": "Cyber Assault",
-    "slug": "cyber-assault",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/cyber-assault.svg",
-    "game_url": "public/games/cyber-assault/index.html",
-    "description": "Hack and blast through a cyberpunk world. Intense top-down action shooter!",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "action",
-      "cyberpunk",
-      "shooter"
-    ],
-    "controls": "WASD to move, mouse to aim and shoot",
-    "rating": 4.8
-  },
-  {
-    "id": 24,
-    "title": "Sudoku Challenge",
-    "slug": "sudoku-challenge",
-    "category": "puzzle",
-    "thumbnail": "assets/thumbnails/sudoku-challenge.svg",
-    "game_url": "public/games/sudoku-challenge/index.html",
-    "description": "The classic number puzzle with multiple difficulty levels and daily challenges.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "puzzle",
-      "numbers",
-      "brain"
-    ],
-    "controls": "Click cell, type number",
-    "rating": 4.5
   }
 ]

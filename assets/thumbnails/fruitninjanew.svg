@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#3d1a0a"/>
+      <stop offset="100%" stop-color="#1a0800"/>
+    </radialGradient>
+    <linearGradient id="blade" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ffbe3c" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg)"/>
+  <!-- Slash trail -->
+  <path d="M30 300 Q200 120 380 260" stroke="url(#blade)" stroke-width="18" fill="none" stroke-linecap="round" opacity="0.75"/>
+  <!-- Watermelon pieces -->
+  <circle cx="140" cy="200" r="52" fill="#22c55e"/>
+  <circle cx="140" cy="200" r="42" fill="#ef4444"/>
+  <circle cx="135" cy="195" r="4" fill="#1f2937"/>
+  <circle cx="150" cy="210" r="4" fill="#1f2937"/>
+  <circle cx="148" cy="188" r="3" fill="#1f2937"/>
+  <!-- Orange -->
+  <circle cx="270" cy="170" r="42" fill="#f97316"/>
+  <circle cx="270" cy="170" r="34" fill="#fb923c" opacity="0.7"/>
+  <line x1="270" y1="136" x2="270" y2="204" stroke="#fed7aa" stroke-width="2"/>
+  <line x1="236" y1="170" x2="304" y2="170" stroke="#fed7aa" stroke-width="2"/>
+  <!-- Apple -->
+  <circle cx="220" cy="270" r="36" fill="#dc2626"/>
+  <path d="M220 240 Q228 228 236 238" stroke="#16a34a" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Title -->
+  <text x="200" y="360" text-anchor="middle" fill="#ffbe3c" font-family="Georgia,serif" font-size="36" font-weight="bold">FRUIT NINJA</text>
+</svg>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#050015"/>
+<stop offset="1" stop-color="#150030"/>
+</linearGradient>
+<radialGradient id="engine" cx="0.5" cy="0" r="1">
+<stop offset="0" stop-color="rgba(0,255,200,0.9)"/>
+<stop offset="1" stop-color="rgba(0,255,200,0)"/>
+</radialGradient>
+</defs>
+<rect width="400" height="300" fill="url(#bg)"/>
+<!-- stars -->
+<g fill="#fff">
+<rect x="30" y="30" width="2" height="2"/>
+<rect x="80" y="60" width="1.5" height="1.5"/>
+<rect x="140" y="40" width="1" height="1"/>
+<rect x="220" y="30" width="2" height="2"/>
+<rect x="300" y="55" width="1.5" height="1.5"/>
+<rect x="360" y="80" width="1" height="1"/>
+<rect x="50" y="120" width="1.5" height="1.5"/>
+<rect x="370" y="150" width="1" height="1"/>
+<rect x="20" y="180" width="2" height="2"/>
+<rect x="340" y="220" width="1" height="1"/>
+<rect x="180" y="240" width="1.5" height="1.5"/>
+</g>
+<!-- enemy bullets -->
+<g>
+<circle cx="150" cy="190" r="4" fill="#ff3366"/>
+<circle cx="240" cy="180" r="4" fill="#ff3366"/>
+</g>
+<!-- enemies -->
+<g stroke="#000" stroke-width="1">
+<polygon points="80,50 96,34 112,50 104,66 88,66" fill="#ff00aa"/>
+<polygon points="160,60 176,44 192,60 184,76 168,76" fill="#ff00aa"/>
+<polygon points="240,50 256,34 272,50 264,66 248,66" fill="#ff00aa"/>
+<polygon points="320,60 336,44 352,60 344,76 328,76" fill="#ff00aa"/>
+<!-- zigzag -->
+<polygon points="120,100 140,90 150,110 140,130 100,130 90,110" fill="#ffaa00"/>
+<polygon points="280,100 300,90 310,110 300,130 260,130 250,110" fill="#ffaa00"/>
+<!-- tank -->
+<circle cx="200" cy="100" r="20" fill="#aa00ff"/>
+<circle cx="200" cy="96" r="6" fill="#fff"/>
+</g>
+<!-- player ship with glow -->
+<g transform="translate(200,225)">
+<rect x="-16" y="12" width="32" height="26" fill="url(#engine)"/>
+<polygon points="0,-24 -20,16 -10,12 0,20 10,12 20,16" fill="#00ffcc" stroke="#000" stroke-width="1.5"/>
+<circle cx="0" cy="-6" r="5" fill="#fff"/>
+</g>
+<!-- player bullets -->
+<g fill="#fff">
+<rect x="192" y="195" width="4" height="12"/>
+<rect x="204" y="195" width="4" height="12"/>
+</g>
+<g font-family="Arial Black, sans-serif" font-weight="900" text-anchor="middle">
+<text x="200" y="275" font-size="34" fill="#00ffcc" stroke="#000" stroke-width="4" paint-order="stroke">NEON BLASTER</text>
+</g>
+</svg>

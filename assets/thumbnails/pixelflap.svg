@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#4fc3e3"/>
+<stop offset="0.6" stop-color="#8fd4e6"/>
+<stop offset="1" stop-color="#b8e2ed"/>
+</linearGradient>
+<linearGradient id="pipe" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#3b7a2d"/>
+<stop offset="0.3" stop-color="#73c547"/>
+<stop offset="0.5" stop-color="#8dd764"/>
+<stop offset="0.7" stop-color="#73c547"/>
+<stop offset="1" stop-color="#2d5e22"/>
+</linearGradient>
+<radialGradient id="bird" cx="0.35" cy="0.35" r="0.7">
+<stop offset="0" stop-color="#fff59d"/>
+<stop offset="1" stop-color="#ffc107"/>
+</radialGradient>
+</defs>
+<rect width="400" height="300" fill="url(#sky)"/>
+<!-- clouds -->
+<g fill="rgba(255,255,255,0.85)">
+<circle cx="60" cy="60" r="18"/>
+<circle cx="82" cy="55" r="22"/>
+<circle cx="105" cy="60" r="18"/>
+<circle cx="300" cy="90" r="16"/>
+<circle cx="320" cy="86" r="20"/>
+<circle cx="340" cy="90" r="16"/>
+</g>
+<!-- pipes -->
+<g stroke="#000" stroke-width="3">
+<rect x="260" y="0" width="55" height="90" fill="url(#pipe)"/>
+<rect x="255" y="65" width="65" height="25" fill="url(#pipe)"/>
+<rect x="260" y="170" width="55" height="110" fill="url(#pipe)"/>
+<rect x="255" y="170" width="65" height="25" fill="url(#pipe)"/>
+</g>
+<!-- ground -->
+<rect y="255" width="400" height="45" fill="#c4a860"/>
+<rect y="255" width="400" height="10" fill="#5db83e"/>
+<line x1="0" y1="255" x2="400" y2="255" stroke="#000" stroke-width="3"/>
+<!-- bird -->
+<g transform="translate(140,145) rotate(-10)">
+<ellipse cx="1" cy="1" rx="26" ry="20" fill="rgba(0,0,0,0.25)"/>
+<ellipse rx="25" ry="19" fill="url(#bird)" stroke="#000" stroke-width="2.5"/>
+<ellipse cx="-3" cy="5" rx="16" ry="11" fill="#fff8e1"/>
+<ellipse cx="-5" cy="0" rx="12" ry="8" fill="#ff8f00" transform="rotate(-15)"/>
+<circle cx="9" cy="-7" r="7" fill="#fff"/>
+<circle cx="10" cy="-7" r="3.5" fill="#000"/>
+<polygon points="20,-3 34,-1 34,5 20,6" fill="#ff6f00" stroke="#000" stroke-width="2"/>
+</g>
+<!-- title -->
+<g font-family="Arial Black, sans-serif" font-weight="900" text-anchor="middle">
+<text x="200" y="235" font-size="38" fill="#ffd700" stroke="#000" stroke-width="4" paint-order="stroke">PIXEL FLAP</text>
+</g>
+</svg>

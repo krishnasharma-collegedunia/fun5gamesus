@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Snake.Go</title>
+<style>
+  *, *::before, *::after {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  html {
+    height: -webkit-fill-available;
+  }
+
+  body {
+    background: #0d0d0d;
+    font-family: 'Courier New', monospace;
+    /* Use dvh for dynamic viewport (accounts for browser chrome on mobile) */
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    touch-action: none;
+    position: fixed;
+    width: 100%;
+    top: 0; left: 0;
+  }
+
+  /* ── HUD: always on top, auto height ── */
+  #hud {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #000;
+    border-bottom: 2px solid #1e1e1e;
+    gap: 10px;
+    flex-wrap: nowrap;
+    min-height: 48px;
+  }
+  .hi { /* hud item */
+    color: #cc99ff;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .hi span { color: #fff; }
+  #dw { /* dash wrap */
+    margin-left: auto;
+    display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+  }
+  #dl { color: #cc99ff; font-size: 13px; font-weight: bold; }
+  #dbo { width: 60px; height: 8px; background: #222; border: 1px solid #444; border-radius: 4px; overflow: hidden; }
+  #dbi { height: 100%; width: 0%; background: linear-gradient(90deg,#ffcc00,#ff6600); border-radius: 4px; }
+  #dp { color: #ffcc00; font-size: 12px; font-weight: bold; min-width: 30px; }
+
+  /* ── CANVAS AREA: fills remaining space ── */
+  #gameArea {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0; /* critical for flex child to shrink */
+  }
+
+  canvas {
+    display: block;
+    touch-action: none;
+  }
+
+  /* ── MOBILE CONTROLS: fixed at bottom of gameArea ── */
+  #mobileControls {
+    display: none;
+    position: absolute;
+    bottom: 12px;
+    left: 0; right: 0;
+    padding: 0 16px;
+    align-items: flex-end;
+    justify-content: space-between;
+    pointer-events: none; /* container passthrough */
+    z-index: 5;
+  }
+
+  /* D-PAD */
+  #dpad {
+    position: relative;
+    width: 136px; height: 136px;
+    pointer-events: none;
+  }
+  .db { /* dpad button */
+    position: absolute;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.13);
+    border: 2px solid rgba(255,255,255,0.22);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: rgba(255,255,255,0.8);
+    pointer-events: all;
+    touch-action: manipulation;
+  }
+  .db.pressed {
+    background: rgba(80,180,255,0.35);
+    border-color: rgba(100,200,255,0.8);
+    color: #fff;
+  }
+  #dU { top: 0;    left: 50%; transform: translateX(-50%); }
+  #dD { bottom: 0; left: 50%; transform: translateX(-50%); }
+  #dL { left: 0;   top: 50%;  transform: translateY(-50%); }
+  #dR { right: 0;  top: 50%;  transform: translateY(-50%); }
+  #dC {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.08);
+    pointer-events: none;
+  }
+
+  /* DASH BUTTON */
+  #dashBtn {
+    width: 86px; height: 86px;
+    border-radius: 50%;
+    background: rgba(255,200,0,0.12);
+    border: 3px solid rgba(255,200,0,0.35);
+    color: #ffcc00;
+    font-size: 12px; font-weight: bold;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    pointer-events: all;
+    touch-action: manipulation;
+    letter-spacing: 1px;
+  }
+  #dashBtn .di { font-size: 24px; line-height: 1; }
+  #dashBtn.active {
+    background: rgba(255,190,0,0.35);
+    border-color: #ffcc00;
+    box-shadow: 0 0 20px rgba(255,200,0,0.6);
+  }
+  #dashBtn.empty { opacity: 0.28; }
+
+  /* ── OVERLAYS ── */
+  .ov {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.91);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; z-index: 20; padding: 24px;
+  }
+  .ov h1 {
+    font-size: clamp(30px, 9vw, 54px);
+    font-weight: 900; letter-spacing: 4px; color: #fff;
+    text-shadow: 0 0 24px rgba(120,200,255,0.8);
+    text-align: center;
+  }
+  .ov h1 span { color: #66ccff; }
+  .sub { color: #666; font-size: clamp(10px, 2.8vw, 13px); letter-spacing: 2px; text-align: center; line-height: 1.7; }
+  .leg { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .li  { display: flex; align-items: center; gap: 6px; color: #ccc; font-size: clamp(12px,3vw,14px); font-weight: bold; }
+  .ld  { width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0; }
+  .bs  { font-size: clamp(20px,6vw,32px); color: #ffcc00; font-weight: bold; letter-spacing: 3px; }
+  .btn {
+    background: linear-gradient(135deg,#f0a000,#e05000);
+    color: #fff; border: none;
+    padding: 13px 42px;
+    font-size: clamp(16px,4.5vw,21px); font-weight: bold;
+    font-family: 'Courier New', monospace;
+    border-radius: 10px; cursor: pointer; letter-spacing: 2px;
+    box-shadow: 0 4px 20px rgba(240,100,0,0.5);
+    touch-action: manipulation; pointer-events: all;
+  }
+  .hint { color: #3a3a3a; font-size: clamp(10px,2.4vw,12px); letter-spacing: 1px; text-align: center; line-height: 1.9; }
+</style>
+</head>
+<body>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hi">TIME <span id="hT">02:00</span></div>
+  <div class="hi">FOOD <span id="hF">0</span></div>
+  <div class="hi">SCORE <span id="hS">0</span></div>
+  <div id="dw">
+    <div id="dl">DASH</div>
+    <div id="dbo"><div id="dbi"></div></div>
+    <div id="dp">0%</div>
+  </div>
+</div>
+
+<!-- GAME AREA -->
+<div id="gameArea">
+  <canvas id="c"></canvas>
+
+  <!-- Mobile Controls (inside gameArea, absolute positioned) -->
+  <div id="mobileControls">
+    <div id="dpad">
+      <div class="db" id="dU">▲</div>
+      <div class="db" id="dL">◀</div>
+      <div id="dC"></div>
+      <div class="db" id="dR">▶</div>
+      <div class="db" id="dD">▼</div>
+    </div>
+    <div id="dashBtn">
+      <div class="di">⚡</div>
+      DASH
+    </div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div class="ov" id="S0">
+    <h1>SNAKE<span>.GO</span></h1>
+    <div class="sub">EAT STARS · DODGE ENEMY · DASH TO ESCAPE</div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:#4499ff;box-shadow:0 0 7px #4499ff"></div>YOU</div>
+      <div class="li"><div class="ld" style="background:#44cc44;box-shadow:0 0 7px #44cc44"></div>ENEMY</div>
+      <div class="li">⭐ FOOD</div>
+    </div>
+    <button class="btn" id="bS">▶ PLAY</button>
+    <div class="hint" id="ctrlHint">Arrow / WASD to move · Space = Dash</div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="ov" id="S1" style="display:none">
+    <h1 style="color:#ff4444;text-shadow:0 0 20px rgba(255,50,50,.9)">GAME<br>OVER</h1>
+    <div class="bs" id="os">SCORE: 0</div>
+    <button class="btn" id="bO">PLAY AGAIN</button>
+  </div>
+
+  <!-- TIME UP -->
+  <div class="ov" id="S2" style="display:none">
+    <h1 style="color:#44ff88;text-shadow:0 0 20px rgba(50,255,100,.9)">TIME UP!</h1>
+    <div class="bs" id="ws">SCORE: 0</div>
+    <button class="btn" id="bW">PLAY AGAIN</button>
+  </div>
+</div>
+
+<script>
+// ── DETECT MOBILE ──────────────────────────────────────────
+const MOBILE = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+if (MOBILE) {
+  document.getElementById('mobileControls').style.display = 'flex';
+  document.getElementById('ctrlHint').textContent = 'D-Pad to move · DASH button = speed boost';
+}
+
+// ── CANVAS SETUP ──────────────────────────────────────────
+const CELL = MOBILE ? 14 : 18;
+let COLS, ROWS, W, H;
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+function sizeCanvas() {
+  const ga = document.getElementById('gameArea');
+  W = ga.clientWidth;
+  H = ga.clientHeight;
+  COLS = Math.max(8, Math.floor(W / CELL));
+  ROWS = Math.max(8, Math.floor(H / CELL));
+  // Snap canvas to cell grid
+  canvas.width  = COLS * CELL;
+  canvas.height = ROWS * CELL;
+  canvas.style.width  = canvas.width  + 'px';
+  canvas.style.height = canvas.height + 'px';
+  W = canvas.width;
+  H = canvas.height;
+}
+
+// ── GAME CONFIG ───────────────────────────────────────────
+const TICK  = MOBILE ? 185 : 150;  // ms per step
+const TSECS = 120;
+
+// ── STATE ─────────────────────────────────────────────────
+let P, Es, Fs;           // player, enemies, foods
+let score, fed, tleft, dash;
+let running = false;
+let dashOn  = false;
+let tTick, tDown;
+let aiT = [];
+let pT  = 0;
+
+// ── INIT ──────────────────────────────────────────────────
+function init() {
+  score = 0; fed = 0; tleft = TSECS; dash = 0;
+  dashOn = false; pT = 0;
+
+  const cx = Math.floor(COLS/2), cy = Math.floor(ROWS/2);
+  P  = mk(cx, cy, 6, 1, 0);
+  Es = [ mk(3, 3, 8, 1, 0), mk(COLS-4, ROWS-4, 8, -1, 0) ];
+  aiT = [0, 0];
+  Fs  = [];
+  for (let i=0;i<5;i++) addFood();
+  hud();
+}
+
+function mk(x, y, n, dx, dy) {
+  const body=[];
+  for(let i=0;i<n;i++) body.push({x:x-i*(dx||1), y});
+  return {body, dir:{x:dx||1,y:dy||0}, nd:{x:dx||1,y:dy||0}, grow:0};
+}
+
+function addFood() {
+  for(let a=0;a<300;a++){
+    const x=1+Math.floor(Math.random()*(COLS-2));
+    const y=1+Math.floor(Math.random()*(ROWS-2));
+    if(!occ(x,y)){ Fs.push({x,y,ph:Math.random()*Math.PI*2}); return; }
+  }
+}
+
+function occ(x,y){
+  for(const s of P.body) if(s.x===x&&s.y===y) return true;
+  for(const e of Es) for(const s of e.body) if(s.x===x&&s.y===y) return true;
+  for(const f of Fs) if(f.x===x&&f.y===y) return true;
+  return false;
+}
+
+// ── INPUT: KEYBOARD ───────────────────────────────────────
+const K={};
+window.addEventListener('keydown',e=>{
+  K[e.code]=true;
+  if(e.code==='Space'){e.preventDefault();dashOn=true;}
+  if(!running)return;
+  const d=P.dir;
+  if((e.code==='ArrowUp'   ||e.code==='KeyW')&&d.y!== 1) P.nd={x:0,y:-1};
+  if((e.code==='ArrowDown' ||e.code==='KeyS')&&d.y!==-1) P.nd={x:0,y: 1};
+  if((e.code==='ArrowLeft' ||e.code==='KeyA')&&d.x!== 1) P.nd={x:-1,y:0};
+  if((e.code==='ArrowRight'||e.code==='KeyD')&&d.x!==-1) P.nd={x: 1,y:0};
+});
+window.addEventListener('keyup',e=>{
+  K[e.code]=false;
+  if(e.code==='Space') dashOn=false;
+});
+
+// ── INPUT: D-PAD ──────────────────────────────────────────
+function bindBtn(id,dx,dy){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const on=e=>{
+    e.preventDefault(); e.stopPropagation();
+    if(!running)return;
+    const d=P.dir;
+    if(dy===-1&&d.y!== 1) P.nd={x:0,y:-1};
+    if(dy=== 1&&d.y!==-1) P.nd={x:0,y: 1};
+    if(dx===-1&&d.x!== 1) P.nd={x:-1,y:0};
+    if(dx=== 1&&d.x!==-1) P.nd={x: 1,y:0};
+    el.classList.add('pressed');
+  };
+  const off=e=>{e.preventDefault();el.classList.remove('pressed');};
+  el.addEventListener('touchstart',on,{passive:false});
+  el.addEventListener('touchend',off,{passive:false});
+  el.addEventListener('touchcancel',off,{passive:false});
+  el.addEventListener('mousedown',on);
+  el.addEventListener('mouseup',off);
+  el.addEventListener('mouseleave',off);
+}
+bindBtn('dU',0,-1); bindBtn('dD',0,1);
+bindBtn('dL',-1,0); bindBtn('dR',1,0);
+
+const dbEl = document.getElementById('dashBtn');
+if(dbEl){
+  dbEl.addEventListener('touchstart',e=>{e.preventDefault();dashOn=true;},{passive:false});
+  dbEl.addEventListener('touchend',  e=>{e.preventDefault();dashOn=false;},{passive:false});
+  dbEl.addEventListener('touchcancel',e=>{e.preventDefault();dashOn=false;},{passive:false});
+  dbEl.addEventListener('mousedown',()=>dashOn=true);
+  dbEl.addEventListener('mouseup',  ()=>dashOn=false);
+  dbEl.addEventListener('mouseleave',()=>dashOn=false);
+}
+
+// ── INPUT: SWIPE ──────────────────────────────────────────
+let sx=null,sy=null;
+canvas.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){sx=e.touches[0].clientX;sy=e.touches[0].clientY;}
+},{passive:true});
+canvas.addEventListener('touchend',e=>{
+  if(sx===null||!running)return;
+  const dx=e.changedTouches[0].clientX-sx;
+  const dy=e.changedTouches[0].clientY-sy;
+  const d=P.dir;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>22){
+    if(dx>0&&d.x!==-1)P.nd={x:1,y:0};
+    if(dx<0&&d.x!== 1)P.nd={x:-1,y:0};
+  }else if(Math.abs(dy)>22){
+    if(dy>0&&d.y!==-1)P.nd={x:0,y:1};
+    if(dy<0&&d.y!== 1)P.nd={x:0,y:-1};
+  }
+  sx=null;sy=null;
+},{passive:true});
+
+// ── TICK ──────────────────────────────────────────────────
+function tick(){
+  if(!running)return;
+  pT++;
+
+  const dashing = dashOn && dash>=10;
+  dash = dashing ? Math.max(0,dash-4) : Math.min(100,dash+1.4);
+
+  if(dashing){ step(P); if(dead())return; eat(); }
+  step(P); if(dead())return; eat();
+
+  for(let i=0;i<Es.length;i++){
+    ai(Es[i],i); step(Es[i]); eeat(Es[i]);
+  }
+  while(Fs.length<5) addFood();
+
+  if(dbEl){
+    dbEl.classList.toggle('active',dashing);
+    dbEl.classList.toggle('empty',Math.floor(dash)<10);
+  }
+  hud(); draw();
+}
+
+function step(s){
+  s.dir={...s.nd};
+  const h=s.body[0];
+  const nx=(h.x+s.dir.x+COLS)%COLS;
+  const ny=(h.y+s.dir.y+ROWS)%ROWS;
+  s.body.unshift({x:nx,y:ny});
+  if(s.grow>0)s.grow--;else s.body.pop();
+}
+
+function dead(){
+  const h=P.body[0];
+  for(let i=3;i<P.body.length;i++)
+    if(P.body[i].x===h.x&&P.body[i].y===h.y){end('over');return true;}
+  for(const e of Es)
+    for(const s of e.body)
+      if(s.x===h.x&&s.y===h.y){end('over');return true;}
+  return false;
+}
+
+function eat(){
+  const h=P.body[0];
+  for(let i=Fs.length-1;i>=0;i--){
+    if(Fs[i].x===h.x&&Fs[i].y===h.y){
+      P.grow+=3; score+=100; fed++;
+      dash=Math.min(100,dash+18);
+      Fs.splice(i,1);
+    }
+  }
+}
+
+function eeat(e){
+  const h=e.body[0];
+  for(let i=Fs.length-1;i>=0;i--)
+    if(Fs[i].x===h.x&&Fs[i].y===h.y){e.grow+=3;Fs.splice(i,1);}
+}
+
+// ── AI ────────────────────────────────────────────────────
+function ai(e,idx){
+  aiT[idx]--;
+  if(aiT[idx]>0)return;
+  aiT[idx]=5+Math.floor(Math.random()*10);
+  let best=null,bd=Infinity;
+  for(const f of Fs){
+    const d=Math.abs(f.x-e.body[0].x)+Math.abs(f.y-e.body[0].y);
+    if(d<bd){bd=d;best=f;}
+  }
+  if(!best)return;
+  const dx=best.x-e.body[0].x, dy=best.y-e.body[0].y, dir=e.dir;
+  const H=()=>{if(dx!==0&&!(dir.x===-Math.sign(dx)&&dir.y===0)){e.nd={x:Math.sign(dx),y:0};return true;}return false;};
+  const V=()=>{if(dy!==0&&!(dir.y===-Math.sign(dy)&&dir.x===0)){e.nd={x:0,y:Math.sign(dy)};return true;}return false;};
+  if(Math.abs(dx)>=Math.abs(dy)){if(!H())V();}else{if(!V())H();}
+}
+
+// ── DRAW ──────────────────────────────────────────────────
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  hexBg();
+  for(const f of Fs){f.ph+=0.08;star(f.x*CELL+CELL/2,f.y*CELL+CELL/2,f.ph);}
+  for(const e of Es) snake(e,'#44cc44','#1a7a1a');
+  snake(P,'#4499ff','#1144bb');
+  // YOU label
+  const ph=P.body[0];
+  ctx.save();
+  ctx.font=`bold ${CELL<16?10:12}px Courier New`;
+  ctx.textAlign='center';
+  ctx.fillStyle='#ffee00';
+  ctx.shadowColor='#ffcc00'; ctx.shadowBlur=8;
+  ctx.fillText('YOU▼',ph.x*CELL+CELL/2,ph.y*CELL-3);
+  ctx.restore();
+}
+
+function snake(s,light,dark){
+  const n=s.body.length;
+  for(let i=n-1;i>=0;i--){
+    const seg=s.body[i];
+    const px=seg.x*CELL+CELL/2, py=seg.y*CELL+CELL/2;
+    const r=CELL/2-1.5;
+    const fade=0.45+0.55*(1-i/n);
+    ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
+    const g=ctx.createRadialGradient(px-r*.3,py-r*.3,0,px,py,r);
+    g.addColorStop(0,light); g.addColorStop(1,dark);
+    ctx.fillStyle=g; ctx.globalAlpha=fade; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle='rgba(0,0,0,0.28)'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+  eyes(s);
+}
+
+function eyes(s){
+  if(!s.body.length)return;
+  const h=s.body[0];
+  const cx=h.x*CELL+CELL/2, cy=h.y*CELL+CELL/2, r=CELL/2-1.5;
+  const dx=s.dir.x, dy=s.dir.y, px=-dy, py=dx;
+  for(const sd of[-1,1]){
+    const ex=cx+dx*r*.25+px*sd*r*.48, ey=cy+dy*r*.25+py*sd*r*.48, er=r*.30;
+    ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    ctx.beginPath();ctx.arc(ex+dx*er*.3,ey+dy*er*.3,er*.55,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();
+    ctx.beginPath();ctx.arc(ex-er*.25,ey-er*.25,er*.2,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
+  }
+}
+
+function star(cx,cy,ph){
+  const sc=1+.18*Math.sin(ph), r=CELL*.42*sc;
+  const gl=ctx.createRadialGradient(cx,cy,0,cx,cy,r*2.4);
+  gl.addColorStop(0,'rgba(255,170,20,.4)');gl.addColorStop(1,'rgba(255,80,0,0)');
+  ctx.beginPath();ctx.arc(cx,cy,r*2.4,0,Math.PI*2);ctx.fillStyle=gl;ctx.fill();
+  ctx.beginPath();
+  for(let i=0;i<5;i++){
+    const oa=Math.PI*2*i/5-Math.PI/2,ia=oa+Math.PI/5;
+    i===0?ctx.moveTo(cx+Math.cos(oa)*r,cy+Math.sin(oa)*r)
+         :ctx.lineTo(cx+Math.cos(oa)*r,cy+Math.sin(oa)*r);
+    ctx.lineTo(cx+Math.cos(ia)*r*.42,cy+Math.sin(ia)*r*.42);
+  }
+  ctx.closePath();
+  const sg=ctx.createRadialGradient(cx,cy-r*.2,0,cx,cy,r);
+  sg.addColorStop(0,'#ffee88');sg.addColorStop(.5,'#ff8800');sg.addColorStop(1,'#cc2200');
+  ctx.fillStyle=sg;ctx.fill();
+  ctx.strokeStyle='rgba(255,240,180,.5)';ctx.lineWidth=1;ctx.stroke();
+}
+
+function hexBg(){
+  const sz=CELL*.9, ww=sz*2, hh=Math.sqrt(3)*sz;
+  for(let row=-1;row<H/hh+2;row++){
+    for(let col=-1;col<W/(ww*.75)+2;col++){
+      const x=col*ww*.75, y=row*hh+(col%2===0?0:hh/2);
+      ctx.beginPath();
+      for(let i=0;i<6;i++){
+        const a=Math.PI/3*i-Math.PI/6;
+        i===0?ctx.moveTo(x+(sz-1)*Math.cos(a),y+(sz-1)*Math.sin(a))
+             :ctx.lineTo(x+(sz-1)*Math.cos(a),y+(sz-1)*Math.sin(a));
+      }
+      ctx.closePath();
+      ctx.fillStyle='#141414';ctx.fill();
+      ctx.strokeStyle='#1c1c1c';ctx.lineWidth=1;ctx.stroke();
+    }
+  }
+}
+
+// ── HUD ───────────────────────────────────────────────────
+function hud(){
+  const m=String(Math.floor(tleft/60)).padStart(2,'0');
+  const s=String(tleft%60).padStart(2,'0');
+  document.getElementById('hT').textContent=`${m}:${s}`;
+  document.getElementById('hF').textContent=fed;
+  document.getElementById('hS').textContent=score;
+  const pct=Math.floor(dash);
+  document.getElementById('dbi').style.width=pct+'%';
+  document.getElementById('dp').textContent=pct+'%';
+}
+
+// ── START / END ───────────────────────────────────────────
+function go(){
+  sizeCanvas(); init(); running=true;
+  clearInterval(tTick); clearInterval(tDown);
+  tTick=setInterval(tick,TICK);
+  tDown=setInterval(()=>{
+    if(!running)return;
+    tleft--;hud();
+    if(tleft<=0)end('win');
+  },1000);
+  draw();
+}
+
+function end(t){
+  running=false;
+  clearInterval(tTick);clearInterval(tDown);
+  draw();
+  if(t==='over'){
+    document.getElementById('os').textContent='SCORE: '+score;
+    document.getElementById('S1').style.display='flex';
+  }else{
+    document.getElementById('ws').textContent='SCORE: '+score;
+    document.getElementById('S2').style.display='flex';
+  }
+}
+
+function hide(){
+  ['S0','S1','S2'].forEach(id=>document.getElementById(id).style.display='none');
+}
+
+document.getElementById('bS').addEventListener('click',()=>{hide();go();});
+document.getElementById('bO').addEventListener('click',()=>{hide();go();});
+document.getElementById('bW').addEventListener('click',()=>{hide();go();});
+
+// ── INIT DRAW ─────────────────────────────────────────────
+// Wait for real layout dimensions before sizing
+function ready(){
+  sizeCanvas();
+  hexBg();
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(ready,50));
+}else{
+  setTimeout(ready,50);
+}
+</script>
+</body>
+</html>

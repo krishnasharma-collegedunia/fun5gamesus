@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Fruit Ninja</title>
+<style>
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* FIX 1: overscroll-behavior blocks pull-to-refresh AND swipe-back/forward */
+html, body {
+  overscroll-behavior: none;       /* Blocks browser swipe gestures */
+  overflow: hidden;
+  touch-action: none;              /* No browser touch handling at all */
+  height: 100%; width: 100%;
+  background: #1a0800;
+  font-family: 'Georgia', serif;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* HUD */
+#ui {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 10px 14px;
+  pointer-events: none; z-index: 10;
+}
+.sbox {
+  background: rgba(0,0,0,0.55);
+  border: 1.5px solid rgba(255,190,60,0.4);
+  border-radius: 12px; padding: 6px 14px; text-align: center;
+  min-width: 72px;
+}
+.slbl { color: rgba(255,200,80,0.65); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; }
+.sval { color: #fff; font-size: clamp(22px, 6vw, 30px); font-weight: bold; line-height: 1.1; }
+#lives { display: flex; gap: 5px; align-items: center; padding-top: 6px; }
+.heart { font-size: clamp(18px, 5vw, 24px); transition: opacity 0.3s; }
+.heart.lost { opacity: 0.18; filter: grayscale(1); }
+
+/* OVERLAYS */
+.ovbg {
+  position: fixed; inset: 0;
+  background: rgba(8,3,0,0.9); z-index: 19;
+}
+.ov {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px; z-index: 20; padding: 28px;
+  pointer-events: all;
+}
+.ov h1 {
+  font-size: clamp(42px, 13vw, 82px);
+  color: #ff6b00;
+  text-shadow: 0 0 40px rgba(255,100,0,0.7), 0 4px 8px rgba(0,0,0,0.8);
+  letter-spacing: 4px; text-align: center;
+}
+.sub { color: rgba(255,200,100,0.65); font-size: clamp(11px, 3vw, 15px); letter-spacing: 3px; text-align: center; }
+.fscore { font-size: clamp(26px, 7vw, 46px); color: #ffcc00; font-weight: bold; letter-spacing: 2px; }
+.btn {
+  background: linear-gradient(135deg, #ff8c00, #cc4000);
+  color: #fff; border: 2px solid rgba(255,200,100,0.35);
+  padding: 15px 52px;
+  font-size: clamp(17px, 4.5vw, 23px); font-weight: bold;
+  font-family: 'Georgia', serif; border-radius: 50px;
+  cursor: pointer; letter-spacing: 3px;
+  box-shadow: 0 6px 28px rgba(255,100,0,0.45);
+  touch-action: manipulation;
+  -webkit-appearance: none;
+}
+.btn:active { transform: scale(0.97); }
+.hint { color: rgba(255,170,60,0.35); font-size: 12px; letter-spacing: 2px; text-align: center; }
+
+/* Streak banner */
+#streak {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffcc00; font-size: clamp(36px, 10vw, 56px);
+  font-weight: bold; font-family: 'Georgia', serif;
+  text-shadow: 0 0 20px rgba(255,200,0,0.8), 0 2px 4px rgba(0,0,0,0.9);
+  pointer-events: none; z-index: 15;
+  opacity: 0; will-change: opacity, transform;
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<!-- HUD -->
+<div id="ui">
+  <div class="sbox">
+    <div class="slbl">Score</div>
+    <div class="sval" id="sScore">0</div>
+  </div>
+  <div id="lives">
+    <span class="heart" id="h0">🍉</span>
+    <span class="heart" id="h1">🍉</span>
+    <span class="heart" id="h2">🍉</span>
+  </div>
+  <div class="sbox">
+    <div class="slbl">Best</div>
+    <div class="sval" id="sBest">0</div>
+  </div>
+</div>
+
+<div id="streak"></div>
+
+<!-- START -->
+<div class="ovbg" id="bgStart"></div>
+<div class="ov" id="ovStart">
+  <h1>FRUIT<br>NINJA</h1>
+  <div class="sub">SLICE FRUITS · DODGE BOMBS</div>
+  <button class="btn" id="btnStart">▶ PLAY</button>
+  <div class="hint" id="ctrlHint">Swipe across fruits to slice them</div>
+</div>
+
+<!-- GAME OVER -->
+<div class="ovbg" id="bgOver" style="display:none"></div>
+<div class="ov" id="ovOver" style="display:none">
+  <h1 style="color:#ff3333;text-shadow:0 0 40px rgba(255,40,40,0.7),0 4px 8px rgba(0,0,0,0.8);">GAME<br>OVER</h1>
+  <div class="fscore" id="fScore">Score: 0</div>
+  <button class="btn" id="btnOver">PLAY AGAIN</button>
+</div>
+
+<script>
+'use strict';
+
+// ── FIX 1: Block ALL browser touch navigation globally ──────────
+// This is the critical fix for swipe-back closing the app
+document.addEventListener('touchmove',  e => e.preventDefault(), { passive: false });
+document.addEventListener('touchstart', e => {
+  // Only prevent default for edge swipes (first 30px from left/right)
+  // This stops iOS swipe-back gesture at the source
+  if (e.touches[0].clientX < 30 || e.touches[0].clientX > window.innerWidth - 30) {
+    e.preventDefault();
+  }
+}, { passive: false });
+// Block history navigation via gestures
+window.addEventListener('popstate', e => {
+  history.pushState(null, '', window.location.href);
+});
+history.pushState(null, '', window.location.href);
+
+// ── CANVAS ──────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W = 0, H = 0, fruitScale = 1;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  // FIX: scale based on shortest screen dimension for fair mobile sizing
+  const minDim = Math.min(W, H);
+  fruitScale = Math.min(2.4, Math.max(1.1, 700 / minDim));
+}
+resize();
+window.addEventListener('resize', () => { resize(); if (!running) drawBg(); });
+
+// ── FRUIT DEFINITIONS ────────────────────────────────────────────
+const FDEFS = [
+  { name:'watermelon', emoji:'🍉', color:'#dc2626', inner:'#fca5a5', seeds:true,  pts:5, r:36 },
+  { name:'pineapple',  emoji:'🍍', color:'#d97706', inner:'#fde68a', seeds:false, pts:3, r:30 },
+  { name:'orange',     emoji:'🍊', color:'#ea580c', inner:'#fed7aa', seeds:true,  pts:2, r:28 },
+  { name:'apple',      emoji:'🍎', color:'#b91c1c', inner:'#fecaca', seeds:true,  pts:2, r:26 },
+  { name:'banana',     emoji:'🍌', color:'#ca8a04', inner:'#fef9c3', seeds:false, pts:2, r:24 },
+  { name:'strawberry', emoji:'🍓', color:'#e11d48', inner:'#fda4af', seeds:true,  pts:3, r:22 },
+  { name:'grape',      emoji:'🍇', color:'#7c3aed', inner:'#ddd6fe', seeds:false, pts:4, r:20 },
+  { name:'mango',      emoji:'🥭', color:'#d97706', inner:'#fde68a', seeds:false, pts:4, r:28 },
+  { name:'kiwi',       emoji:'🥝', color:'#16a34a', inner:'#bbf7d0', seeds:true,  pts:3, r:24 },
+  { name:'lemon',      emoji:'🍋', color:'#ca8a04', inner:'#fef9c3', seeds:false, pts:2, r:22 },
+];
+
+// ── GAME STATE ───────────────────────────────────────────────────
+let fruits, particles, splats, popups, trail;
+let score, best, lives, running;
+let combo, comboMs;          // FIX: combo timer in real ms not frames
+let lastSpawnTime, spawnIntervalMs, diffLevel;
+let bombFlashMs;
+let rafId = null;
+let lastFrameTime = 0;
+
+best = parseInt(localStorage.getItem('fn_best') || '0');
+document.getElementById('sBest').textContent = best;
+
+// ── INIT ─────────────────────────────────────────────────────────
+function init() {
+  fruits = []; particles = []; splats = []; popups = []; trail = [];
+  score = 0; lives = 3; combo = 0; comboMs = 0;
+  spawnIntervalMs = 1400;   // FIX: real-time ms, not frames
+  diffLevel = 0; bombFlashMs = 0;
+  lastSpawnTime = performance.now();
+
+  for (let i = 0; i < 3; i++) document.getElementById('h'+i).classList.remove('lost');
+  document.getElementById('sScore').textContent = '0';
+}
+
+// ── SPAWN ─────────────────────────────────────────────────────────
+function spawnFruit(now) {
+  const isBomb = Math.random() < 0.1 + diffLevel * 0.008;
+  const def    = FDEFS[Math.floor(Math.random() * FDEFS.length)];
+  const r      = Math.round((isBomb ? 28 : def.r) * fruitScale);
+  const x      = r * 1.2 + Math.random() * (W - r * 2.4);
+
+  // FIX: speed scaled to screen height so arc height feels consistent
+  const baseSpeed = (H / 700) * (9 + Math.random() * 6 + diffLevel * 0.4);
+  const vy     = -baseSpeed;
+  const vx     = (Math.random() - 0.5) * 3.5;
+  const spin   = (Math.random() - 0.5) * 0.08;
+
+  // FIX: pre-compute seed positions so they don't flicker every frame
+  const seeds = [];
+  if (!isBomb && def.seeds) {
+    for (let i = 0; i < 5; i++) {
+      seeds.push({
+        x: (Math.random() - 0.5) * r * 0.75,
+        y: (Math.random() - 0.5) * r * 0.75,
+        a: Math.random() * Math.PI,
+      });
+    }
+  }
+
+  fruits.push({
+    x, y: H + r + 10,
+    vx, vy, r,
+    def: isBomb ? null : def,
+    isBomb,
+    rot: Math.random() * Math.PI * 2, spin,
+    sliced: false,
+    seeds,
+    halves: null,
+    missable: !isBomb,       // bombs don't cost lives when missed
+    spawnTime: now,
+  });
+}
+
+// ── TOUCH / MOUSE ────────────────────────────────────────────────
+let slicing = false, px = 0, py = 0;
+
+function onDown(x, y) {
+  if (!running) return;
+  slicing = true; px = x; py = y;
+  trail.length = 0;
+}
+function onMove(x, y) {
+  if (!running || !slicing) return;
+  trail.push({ x, y, t: 1 });
+  if (trail.length > 20) trail.shift();
+  checkSlice(px, py, x, y);
+  px = x; py = y;
+}
+function onUp() { slicing = false; }
+
+// Mouse
+canvas.addEventListener('mousedown',  e => onDown(e.clientX, e.clientY));
+canvas.addEventListener('mousemove',  e => { if (slicing) onMove(e.clientX, e.clientY); });
+window.addEventListener('mouseup',    onUp);
+
+// Touch — canvas level (document level already blocks propagation)
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (e.touches.length > 0) onDown(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length > 0) onMove(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+// FIX: touchend on both canvas AND window so it fires even if finger leaves canvas
+canvas.addEventListener('touchend',   e => { e.preventDefault(); onUp(); }, { passive: false });
+window.addEventListener('touchend',   onUp, { passive: true });
+window.addEventListener('touchcancel',onUp, { passive: true });
+
+// ── SLICE CHECK ───────────────────────────────────────────────────
+function lineHitsCircle(ax, ay, bx, by, cx, cy, r) {
+  const dx = bx - ax, dy = by - ay;
+  const fx = ax - cx, fy = ay - cy;
+  const a  = dx*dx + dy*dy;
+  if (a === 0) return false;
+  const b  = 2*(fx*dx + fy*dy);
+  const c  = fx*fx + fy*fy - r*r;
+  let   d  = b*b - 4*a*c;
+  if (d < 0) return false;
+  d = Math.sqrt(d);
+  const t1 = (-b - d) / (2*a);
+  const t2 = (-b + d) / (2*a);
+  return (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1);
+}
+
+function checkSlice(ax, ay, bx, by) {
+  // Minimum swipe distance to prevent accidental tap-slices
+  const dist = Math.hypot(bx - ax, by - ay);
+  if (dist < 8) return;
+
+  let hitAny = false;
+  for (const f of fruits) {
+    if (f.sliced) continue;
+    if (!lineHitsCircle(ax, ay, bx, by, f.x, f.y, f.r)) continue;
+
+    f.sliced = true; hitAny = true;
+
+    if (f.isBomb) {
+      burst(f.x, f.y, '#555', 18);
+      burst(f.x, f.y, '#f97316', 12);
+      bombFlashMs = 300;
+      combo = 0;
+      popup(f.x, f.y - f.r - 10, '💥 BOMB!', '#ff4444');
+      loseLife();
+    } else {
+      combo++;
+      comboMs = 1800;  // 1.8 second combo window
+
+      const pts = f.def.pts * Math.max(1, combo);
+      score += pts;
+      updateScore();
+
+      burst(f.x, f.y, f.def.color, 14);
+      juiceSplat(f.x, f.y, f.def.color);
+      popup(f.x, f.y - f.r - 10, '+' + pts, '#ffdd00');
+      if (combo >= 3) showStreak(combo);
+
+      // Split into halves
+      f.halves = [
+        { x: f.x, y: f.y, vx: f.vx - 2.5, vy: f.vy * 0.9, rot: f.rot, spin: f.spin - 0.08, side: -1, alpha: 1 },
+        { x: f.x, y: f.y, vx: f.vx + 2.5, vy: f.vy * 0.9, rot: f.rot, spin: f.spin + 0.08, side:  1, alpha: 1 },
+      ];
+    }
+  }
+}
+
+// ── LIFE / SCORE ──────────────────────────────────────────────────
+function loseLife() {
+  lives = Math.max(0, lives - 1);
+  document.getElementById('h' + lives).classList.add('lost');
+  if (lives <= 0) setTimeout(endGame, 400);
+}
+
+function updateScore() {
+  document.getElementById('sScore').textContent = score;
+  if (score > best) {
+    best = score;
+    localStorage.setItem('fn_best', best);
+    document.getElementById('sBest').textContent = best;
+  }
+}
+
+// ── PARTICLES ─────────────────────────────────────────────────────
+function burst(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 2 + Math.random() * 7;
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s - 1.5,
+      color, r: 3 + Math.random() * 5, alpha: 1 });
+  }
+}
+function juiceSplat(x, y, color) {
+  splats.push({ x, y, color, r: (18 + Math.random() * 28) * fruitScale, alpha: 0.6, life: 1 });
+}
+function popup(x, y, text, color) {
+  popups.push({ x, y, vy: -1.2, text, color, alpha: 1, life: 1 });
+}
+
+// ── STREAK BANNER ─────────────────────────────────────────────────
+let streakTimeout = null;
+function showStreak(n) {
+  const el = document.getElementById('streak');
+  el.textContent = n + 'x COMBO!';
+  el.style.opacity = '1';
+  el.style.transform = 'translate(-50%, -50%) scale(1.1)';
+  clearTimeout(streakTimeout);
+  streakTimeout = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translate(-50%, -50%) scale(0.9)';
+  }, 700);
+}
+
+// ── DRAWING ───────────────────────────────────────────────────────
+function drawBg() {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0a0300');
+  g.addColorStop(0.5, '#180700');
+  g.addColorStop(1, '#0a0300');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // Bamboo silhouettes
+  ctx.save();
+  ctx.globalAlpha = 0.055;
+  for (let i = 0; i < 9; i++) {
+    const bx = (W / 8) * i - 20;
+    const lw = 12 + (i % 3) * 5;
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = lw;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bx, H);
+    ctx.bezierCurveTo(bx + 18, H * 0.55, bx - 18, H * 0.28, bx + 8, -20);
+    ctx.stroke();
+    for (let j = 1; j < 7; j++) {
+      ctx.lineWidth = lw * 0.6;
+      ctx.beginPath();
+      ctx.moveTo(bx - lw * 0.7, H * j / 7);
+      ctx.lineTo(bx + lw * 0.7, H * j / 7);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawFruitWhole(f) {
+  ctx.save();
+  ctx.translate(f.x, f.y);
+  ctx.rotate(f.rot);
+
+  if (f.isBomb) {
+    drawBomb(f.r);
+  } else {
+    // Shadow
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.beginPath();
+    ctx.ellipse(f.r * 0.2, f.r * 0.35, f.r * 0.85, f.r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+    ctx.restore();
+
+    // Body
+    const g = ctx.createRadialGradient(-f.r*0.3, -f.r*0.35, f.r*0.05, 0, 0, f.r);
+    g.addColorStop(0, lighten(f.def.color, 65));
+    g.addColorStop(0.55, f.def.color);
+    g.addColorStop(1, darken(f.def.color, 45));
+    ctx.beginPath();
+    ctx.arc(0, 0, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // Gloss
+    const sh = ctx.createRadialGradient(-f.r*0.38, -f.r*0.42, 0, -f.r*0.2, -f.r*0.25, f.r * 0.55);
+    sh.addColorStop(0, 'rgba(255,255,255,0.55)');
+    sh.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.arc(0, 0, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = sh;
+    ctx.fill();
+
+    // Emoji
+    ctx.font = `${f.r * 1.55}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(f.def.emoji, 0, f.r * 0.05);
+  }
+  ctx.restore();
+}
+
+function drawBomb(r) {
+  // Body
+  const g = ctx.createRadialGradient(-r*0.3, -r*0.3, r*0.08, 0, 0, r);
+  g.addColorStop(0, '#666'); g.addColorStop(0.6, '#222'); g.addColorStop(1, '#000');
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+  ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Gloss
+  const sh = ctx.createRadialGradient(-r*0.3, -r*0.4, 0, -r*0.2, -r*0.3, r*0.5);
+  sh.addColorStop(0, 'rgba(255,255,255,0.28)');
+  sh.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+  ctx.fillStyle = sh; ctx.fill();
+
+  // Fuse
+  ctx.strokeStyle = '#92400e'; ctx.lineWidth = Math.max(2, r*0.1);
+  ctx.lineCap = 'round'; ctx.beginPath();
+  ctx.moveTo(r*0.15, -r*0.88);
+  ctx.bezierCurveTo(r*0.45, -r*1.25, r*0.75, -r*1.05, r*0.55, -r*1.48);
+  ctx.stroke();
+
+  // Spark
+  const now = performance.now();
+  const flicker = Math.sin(now / 80) * 0.5 + 0.5;
+  ctx.beginPath(); ctx.arc(r*0.55, -r*1.48, r*0.18, 0, Math.PI*2);
+  ctx.fillStyle = `rgba(255,${180+flicker*75},0,${0.7+flicker*0.3})`; ctx.fill();
+  ctx.beginPath(); ctx.arc(r*0.55, -r*1.48, r*0.32, 0, Math.PI*2);
+  ctx.fillStyle = `rgba(255,120,0,${0.25+flicker*0.2})`; ctx.fill();
+}
+
+function drawHalf(h, def, r) {
+  ctx.save();
+  ctx.translate(h.x, h.y);
+  ctx.rotate(h.rot);
+  ctx.globalAlpha = h.alpha;
+
+  ctx.beginPath();
+  ctx.rect(h.side < 0 ? -r*2 : 0, -r, r*2, r*2);
+  ctx.clip();
+
+  // Outer color
+  const g = ctx.createRadialGradient(-r*0.3, -r*0.35, r*0.05, 0, 0, r);
+  g.addColorStop(0, lighten(def.color, 65));
+  g.addColorStop(0.55, def.color);
+  g.addColorStop(1, darken(def.color, 45));
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+  ctx.fillStyle = g; ctx.fill();
+
+  // Inner flesh
+  ctx.beginPath();
+  ctx.rect(h.side < 0 ? -r*0.05 : -r*2, -r, r*2 + r*0.05, r*2);
+  ctx.fillStyle = def.inner; ctx.fill();
+
+  // Pre-computed seeds (FIX: no flicker)
+  if (def.seeds && h.seeds) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    for (const s of h.seeds) {
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y, Math.max(1, r*0.08), Math.max(1.5, r*0.14), s.a, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  // Slice edge
+  ctx.beginPath();
+  ctx.moveTo(0, -r); ctx.lineTo(0, r);
+  ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+  ctx.lineWidth = Math.max(1.5, r * 0.05); ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawTrail() {
+  if (trail.length < 2) return;
+  ctx.save();
+  for (let i = 1; i < trail.length; i++) {
+    const t = i / trail.length;
+    ctx.beginPath();
+    ctx.moveTo(trail[i-1].x, trail[i-1].y);
+    ctx.lineTo(trail[i].x,   trail[i].y);
+    ctx.strokeStyle = `rgba(255,255,255,${t * 0.88})`;
+    ctx.lineWidth   = t * 7;
+    ctx.lineCap     = 'round';
+    ctx.stroke();
+    // Blue shimmer
+    ctx.strokeStyle = `rgba(160,210,255,${t * 0.4})`;
+    ctx.lineWidth   = t * 3.5;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── COLOR HELPERS ─────────────────────────────────────────────────
+function hexToRgb(hex) {
+  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+}
+function lighten(hex, a) {
+  const [r,g,b] = hexToRgb(hex);
+  return `rgb(${Math.min(255,r+a)},${Math.min(255,g+a)},${Math.min(255,b+a)})`;
+}
+function darken(hex, a) {
+  const [r,g,b] = hexToRgb(hex);
+  return `rgb(${Math.max(0,r-a)},${Math.max(0,g-a)},${Math.max(0,b-a)})`;
+}
+
+// ── GAME LOOP (delta-time based) ──────────────────────────────────
+const GRAVITY = 0.0038; // pixels per ms² — consistent across frame rates
+
+function gameLoop(now) {
+  if (!running) return;
+  rafId = requestAnimationFrame(gameLoop);
+
+  // FIX: cap delta to 100ms to prevent huge jumps after tab focus
+  const dt  = Math.min(100, now - lastFrameTime);
+  lastFrameTime = now;
+  const dts = dt / 16.67; // normalise to 60fps equivalent
+
+  // ── SPAWN (real-time) ──────────────────────────────────────────
+  if (now - lastSpawnTime >= spawnIntervalMs) {
+    lastSpawnTime = now;
+    const multi = Math.random() < 0.22 ? 2 : 1;
+    for (let i = 0; i < multi; i++) {
+      setTimeout(() => { if (running) spawnFruit(now); }, i * 280);
+    }
+    // Difficulty ramp: spawn faster over time
+    spawnIntervalMs = Math.max(600, 1400 - diffLevel * 60);
+  }
+
+  // Increase difficulty every 8 seconds
+  if (now - lastSpawnTime < dt) { /* noop */ }
+  diffLevel = Math.min(12, Math.floor((now - (lastFrameTime - now)) / 8000));
+
+  // Combo timer
+  if (comboMs > 0) {
+    comboMs -= dt;
+    if (comboMs <= 0) { comboMs = 0; combo = 0; }
+  }
+
+  // Bomb flash timer
+  if (bombFlashMs > 0) bombFlashMs -= dt;
+
+  // ── DRAW ──────────────────────────────────────────────────────
+  drawBg();
+
+  // Bomb flash
+  if (bombFlashMs > 0) {
+    ctx.fillStyle = `rgba(255,30,0,${(bombFlashMs / 300) * 0.28})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Splats fade
+  for (let i = splats.length - 1; i >= 0; i--) {
+    const s = splats[i];
+    s.alpha -= 0.0015 * dts;
+    if (s.alpha <= 0) { splats.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = s.alpha * 0.45;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.color; ctx.fill();
+    ctx.restore();
+  }
+
+  // Fruits
+  const G_FRAME = GRAVITY * dt;
+  for (let i = fruits.length - 1; i >= 0; i--) {
+    const f = fruits[i];
+    f.vy  += G_FRAME;
+    f.x   += f.vx  * dts;
+    f.y   += f.vy  * dts;
+    f.rot += f.spin * dts;
+
+    if (f.halves) {
+      for (const h of f.halves) {
+        h.vy   += G_FRAME;
+        h.x    += h.vx  * dts;
+        h.y    += h.vy  * dts;
+        h.rot  += h.spin * dts;
+        h.alpha = Math.max(0, h.alpha - 0.006 * dts); // FIX: halves fade out
+        if (h.seeds === undefined) h.seeds = f.seeds;
+      }
+    }
+
+    // Off-screen cleanup
+    if (f.y > H + f.r + 60) {
+      if (!f.sliced && f.missable) {
+        // FIX: grace period — no penalty for first 3 seconds of game
+        const gameAge = now - (lastFrameTime - now + diffLevel * 8000);
+        if (gameAge > 3000 || diffLevel > 0) {
+          loseLife();
+          popup(f.x, H * 0.85, 'MISS!', '#ff6666');
+        }
+      }
+      fruits.splice(i, 1);
+      continue;
+    }
+
+    if (f.sliced && f.halves) {
+      for (const h of f.halves) drawHalf(h, f.def, f.r);
+    } else if (!f.sliced) {
+      drawFruitWhole(f);
+    }
+  }
+
+  // Particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x   += p.vx * dts; p.y += p.vy * dts;
+    p.vy  += 0.12 * dts;
+    p.alpha -= 0.022 * dts;
+    p.r    *= (1 - 0.015 * dts);
+    if (p.alpha <= 0 || p.r < 0.5) { particles.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = p.color; ctx.fill();
+    ctx.restore();
+  }
+
+  // Popups
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const p = popups[i];
+    p.y    += p.vy * dts;
+    p.life -= 0.018 * dts;
+    p.alpha = p.life;
+    if (p.life <= 0) { popups.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.font = `bold ${clamp(18, 26, W/20)}px Georgia`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 5;
+    ctx.fillText(p.text, p.x, p.y);
+    ctx.restore();
+  }
+
+  // Trail
+  for (let i = trail.length - 1; i >= 0; i--) {
+    trail[i].t -= 0.055 * dts;
+    if (trail[i].t <= 0) trail.splice(i, 1);
+  }
+  drawTrail();
+}
+
+function clamp(min, max, v) { return Math.min(max, Math.max(min, v)); }
+
+// ── START / END ────────────────────────────────────────────────────
+function startGame() {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  init();
+  running = true;
+  lastFrameTime = performance.now();
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+  running = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  document.getElementById('fScore').textContent = 'Score: ' + score;
+  document.getElementById('bgOver').style.display = 'block';
+  document.getElementById('ovOver').style.display = 'flex';
+}
+
+function hide(ids) { ids.forEach(id => document.getElementById(id).style.display = 'none'); }
+
+document.getElementById('btnStart').addEventListener('click', () => {
+  hide(['bgStart','ovStart']); startGame();
+});
+document.getElementById('btnOver').addEventListener('click', () => {
+  hide(['bgOver','ovOver']); startGame();
+});
+
+// Prevent button touches from registering as slices
+['btnStart','btnOver'].forEach(id => {
+  document.getElementById(id).addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+});
+
+// ── INITIAL RENDER ────────────────────────────────────────────────
+drawBg();
+</script>
+</body>
+</html>

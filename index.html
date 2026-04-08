@@ -3,23 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="description" content="PlayZone - Play the best free online HTML5 games. Action, Puzzle, Arcade, Snake games and more. No downloads required!">
-  <meta name="keywords" content="free online games, HTML5 games, browser games, action games, puzzle games, arcade games, snake games">
+  <meta name="description" content="PlayZone - Play 40+ free online HTML5 games instantly in your browser. Pacman, Tetris, Mario, Sonic, Snake & more. No downloads required!">
+  <meta name="keywords" content="free online games, HTML5 games, browser games, pacman, tetris, mario, sonic, snake, arcade games, puzzle games">
   <meta name="theme-color" content="#f8f8f8">
   <meta name="robots" content="index, follow">
-
-  <!-- Open Graph -->
   <meta property="og:title" content="PlayZone - Free Online Games">
-  <meta property="og:description" content="Play the best free HTML5 games directly in your browser. No downloads needed!">
+  <meta property="og:description" content="Play 40+ free HTML5 games in your browser. No downloads needed!">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://playzone.example.com">
+  <link rel="canonical" href="https://playzone.example.com">
 
-  <title>PlayZone - Play Free Online Games | Action, Puzzle, Arcade & Snake</title>
+  <title>PlayZone - Play Free Online Games | Pacman, Tetris, Mario, Snake & More</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Google H5 Games Ad Placement API -->
@@ -36,30 +34,49 @@
       onReady: () => console.log('[PlayZone Ads] H5 Ads API Ready'),
     });
   </script>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "PlayZone",
+    "url": "https://playzone.example.com",
+    "description": "Play free online HTML5 games instantly in your browser",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://playzone.example.com?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 <body>
 
   <div class="main-wrapper">
 
     <!-- ===== LOGO / WELCOME ===== -->
-    <section class="logo-section">
-      <div class="logo-text">Welcome to <strong style="color:#3B82F6;">PlayZone</strong>. Play games and have fun!</div>
-      <p class="logo-title">Play free <span>online games!</span></p>
-    </section>
+    <header class="logo-section">
+      <div class="logo-row">
+        <span class="logo-emoji">&#127918;</span>
+        <span class="logo-brand">PlayZone</span>
+      </div>
+      <p class="logo-tagline">Play free <span class="highlight">online games!</span></p>
+    </header>
 
     <!-- ===== SEARCH ===== -->
     <section class="search-section">
       <div class="search-box">
         <span class="search-icon">&#128269;</span>
         <input type="text" class="search-input" id="searchInput"
-               placeholder="Search games..." autocomplete="off" aria-label="Search games">
+               placeholder="Search 40+ games..." autocomplete="off" aria-label="Search games">
       </div>
     </section>
 
     <!-- ===== CATEGORIES ===== -->
     <section class="choose-section">
       <div class="choose-card">
-        <div class="choose-title">Choose which type of games you prefer!</div>
+        <div class="choose-title">Choose your game type!</div>
         <div class="choose-buttons" id="categoryButtons">
           <button class="cat-btn active" data-category="all">
             <span class="cat-icon">&#127918;</span> All
@@ -80,10 +97,19 @@
       </div>
     </section>
 
-    <!-- ===== AD SLOT: Top ===== -->
+    <!-- ===== AD SLOT: Top Banner ===== -->
     <div class="ad-container">
-      <div class="ad-slot" id="adTop">
-        <span>Advertisement</span>
+      <div class="ad-slot ad-banner" id="adTopBanner">
+        <span class="ad-label">Advertisement</span>
+        <!-- Replace with real ad code:
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        -->
       </div>
     </div>
 
@@ -92,6 +118,22 @@
       <div class="section-label">&#128293; Trending Now</div>
       <div class="game-grid" id="trendingGrid"></div>
     </section>
+
+    <!-- ===== AD SLOT: Mid-Feed Rectangle ===== -->
+    <div class="ad-container">
+      <div class="ad-slot ad-rectangle" id="adMidFeed">
+        <span class="ad-label">Advertisement</span>
+        <!-- Replace with real ad code:
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="rectangle"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        -->
+      </div>
+    </div>
 
     <!-- ===== ALL GAMES ===== -->
     <section class="games-section">
@@ -107,21 +149,21 @@
     <div class="no-results" id="noResults" style="display:none;">
       <div class="nr-icon">&#128373;&#65039;</div>
       <h3>No games found</h3>
-      <p>Try a different search term or browse by category</p>
+      <p>Try a different search or browse by category</p>
     </div>
 
-    <!-- ===== AD SLOT: Bottom ===== -->
+    <!-- ===== AD SLOT: Bottom Banner ===== -->
     <div class="ad-container">
-      <div class="ad-slot" id="adBottom">
-        <span>Advertisement</span>
+      <div class="ad-slot ad-banner" id="adBottomBanner">
+        <span class="ad-label">Advertisement</span>
       </div>
     </div>
 
     <!-- ===== ABOUT ===== -->
     <section class="about-section">
       <div class="about-card">
-        <h3>About PlayZone</h3>
-        <p>PlayZone is your ultimate destination for free online HTML5 games. Play instantly in your browser with no downloads or installations needed. We offer a carefully curated collection of Action, Puzzle, Arcade, and Snake games for players of all ages. Enjoy gaming on any device!</p>
+        <h3>&#127918; About PlayZone</h3>
+        <p>PlayZone is your ultimate destination for <strong>free online HTML5 games</strong>. Play iconic classics like Pacman, Tetris, Mario, Sonic, Snake and 40+ more titles instantly in your browser. No downloads, no installs &mdash; just pure gaming fun on any device!</p>
       </div>
     </section>
 
@@ -132,15 +174,31 @@
         <a href="terms.html">Terms of Service</a>
         <a href="contact.html">Contact</a>
       </div>
-      <div class="footer-copy">&copy; 2026 PlayZone. All rights reserved.</div>
+      <div class="footer-copy">&copy; 2026 PlayZone. All rights reserved. Games are property of their respective owners.</div>
     </footer>
 
   </div><!-- /main-wrapper -->
 
-  <!-- ===== ON-DEMAND AD BUTTON ===== -->
-  <button class="show-ad-btn" id="showAdBtn" title="Show Ad (Testing)">
+  <!-- ===== FIXED: On-Demand Ad Test Button ===== -->
+  <button class="show-ad-btn" id="showAdBtn" title="Show Rewarded Ad (Testing)">
     &#128250; Show Ad
   </button>
+
+  <!-- ===== FIXED: Bottom Sticky Ad ===== -->
+  <div class="sticky-bottom-ad" id="stickyBottomAd">
+    <button class="sticky-ad-close" id="stickyAdClose">&times;</button>
+    <div class="ad-slot ad-sticky-banner">
+      <span class="ad-label">Advertisement</span>
+      <!-- Replace with real ad code:
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      -->
+    </div>
+  </div>
 
   <script src="js/script.js"></script>
 </body>

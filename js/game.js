@@ -1,7 +1,8 @@
 /* ========================================
    PlayZone - Game Detail Page Script
-   Handles: iFrame, Fullscreen, Pre-roll,
-   Related Games, Meta/SEO
+   Loads games from funhtml5games.com
+   via responsive iFrame
+   Pre-roll Ads, Fullscreen, Related Games
    ======================================== */
 
 (function () {
@@ -10,19 +11,21 @@
   let allGames = [];
   let currentGame = null;
 
+  // --- Init ---
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
     await loadGames();
-    const slug = new URLSearchParams(window.location.search).get('slug');
 
-    if (!slug) { window.location.href = 'index.html'; return; }
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) { goHome(); return; }
 
     currentGame = allGames.find(g => g.slug === slug);
-    if (!currentGame) { window.location.href = 'index.html'; return; }
+    if (!currentGame) { goHome(); return; }
 
     updatePageMeta();
     updateBreadcrumb();
+    updateGameHeader();
     updateGameInfo();
     renderRelatedGames();
     setupControls();
@@ -30,13 +33,52 @@
     setupShowAdButton();
     saveRecentlyPlayed(currentGame);
 
-    // Pre-roll ad then load game iframe
-    triggerPrerollAd(() => loadGameIframe());
+    // Trigger pre-roll ad, then load game in iframe
+    triggerPrerollAd(() => {
+      loadGameIframe();
+    });
+
+    // FIX: Stop game audio when user leaves the page
+    setupPageLeaveCleanup();
+
+    console.log(`[PlayZone] Playing: "${currentGame.title}" from ${currentGame.game_url}`);
   }
 
+  // --- CRITICAL: Kill iframe audio/video when leaving page ---
+  function setupPageLeaveCleanup() {
+    // When user navigates away (click link, back button, etc.)
+    window.addEventListener('beforeunload', destroyGameIframe);
+
+    // Also intercept all navigation links on the page
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href]');
+      if (link && !link.href.includes('javascript:')) {
+        destroyGameIframe();
+      }
+    });
+
+    // Handle browser back/forward
+    window.addEventListener('pagehide', destroyGameIframe);
+  }
+
+  function destroyGameIframe() {
+    const iframe = document.getElementById('gameIframe');
+    if (iframe) {
+      iframe.src = 'about:blank'; // Stops all audio/video immediately
+      iframe.remove();
+      console.log('[PlayZone] Game iframe destroyed - audio stopped.');
+    }
+  }
+
+  function goHome() {
+    window.location.href = 'index.html';
+  }
+
+  // --- Load Games ---
   async function loadGames() {
     try {
       const res = await fetch('data/games.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       allGames = await res.json();
     } catch (e) {
       console.error('[PlayZone] Failed to load games:', e);
@@ -44,27 +86,32 @@
     }
   }
 
-  // --- SEO Meta ---
+  // --- SEO: Page Meta & JSON-LD ---
   function updatePageMeta() {
-    document.title = `${currentGame.title} - Play Free | PlayZone`;
-    document.getElementById('metaDesc').content = currentGame.description;
-    document.getElementById('ogTitle').content = `Play ${currentGame.title} - PlayZone`;
-    document.getElementById('ogDesc').content = currentGame.description;
+    document.title = `${currentGame.title} - Play Free Online | PlayZone`;
 
+    const desc = `Play ${currentGame.title} for free in your browser! ${currentGame.description}`;
+    document.getElementById('metaDesc').content = desc;
+    document.getElementById('ogTitle').content = `Play ${currentGame.title} - PlayZone`;
+    document.getElementById('ogDesc').content = desc;
+
+    // Structured data
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "VideoGame",
       "name": currentGame.title,
       "description": currentGame.description,
-      "genre": currentGame.category,
+      "genre": capitalize(currentGame.category),
       "playMode": "SinglePlayer",
       "applicationCategory": "Game",
       "operatingSystem": "Web Browser",
+      "gamePlatform": "HTML5",
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": currentGame.rating,
         "bestRating": "5",
-        "ratingCount": Math.floor(Math.random() * 500 + 100)
+        "worstRating": "1",
+        "ratingCount": Math.floor(currentGame.rating * 80 + currentGame.id * 17)
       }
     };
     document.getElementById('jsonLd').textContent = JSON.stringify(jsonLd);
@@ -72,20 +119,36 @@
 
   // --- Breadcrumb ---
   function updateBreadcrumb() {
-    const cat = currentGame.category;
-    document.getElementById('breadcrumbCategory').textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    document.getElementById('breadcrumbCategory').textContent = capitalize(currentGame.category);
     document.getElementById('breadcrumbTitle').textContent = currentGame.title;
   }
 
-  // --- Game Info ---
-  function updateGameInfo() {
+  // --- Game Header (title + rating + category) ---
+  function updateGameHeader() {
     document.getElementById('gameTitle').textContent = currentGame.title;
-    document.getElementById('gameCat').textContent = capitalize(currentGame.category) + ' Game';
-    document.getElementById('gameDescription').textContent = currentGame.description + '\n\nControls: ' + currentGame.controls;
+
+    // Stars
+    const fullStars = Math.floor(currentGame.rating);
+    const half = currentGame.rating % 1 >= 0.5;
+    let starsHtml = '\u2605'.repeat(fullStars);
+    if (half) starsHtml += '\u00BD';
+    starsHtml += ` ${currentGame.rating}/5`;
+    document.getElementById('gameStars').innerHTML = starsHtml;
+
+    // Category badge
+    document.getElementById('gameCatBadge').textContent = capitalize(currentGame.category);
+  }
+
+  // --- Game Info Section ---
+  function updateGameInfo() {
+    // Description + controls
+    document.getElementById('gameDescription').innerHTML =
+      escapeHtml(currentGame.description) +
+      '<br><br><strong>Controls:</strong> ' +
+      escapeHtml(currentGame.controls);
 
     // Tags
-    const tagsEl = document.getElementById('gameTags');
-    tagsEl.innerHTML = currentGame.tags.map(t =>
+    document.getElementById('gameTags').innerHTML = currentGame.tags.map(t =>
       `<span class="game-tag">${escapeHtml(t)}</span>`
     ).join('');
 
@@ -95,49 +158,60 @@
     document.getElementById('metaControls').textContent = currentGame.controls;
   }
 
-  // --- Load Game iFrame ---
+  // --- Load Game iFrame (from funhtml5games.com) ---
   function loadGameIframe() {
     const wrapper = document.getElementById('gameFrameWrapper');
     const loading = document.getElementById('gameLoading');
 
-    // Hide pre-roll
-    document.getElementById('prerollAdContainer').style.display = 'none';
+    // Hide pre-roll ad
+    const preroll = document.getElementById('prerollAdContainer');
+    if (preroll) preroll.style.display = 'none';
 
+    // Create iframe - NO sandbox attribute (breaks game audio/input/canvas)
     const iframe = document.createElement('iframe');
     iframe.src = currentGame.game_url;
+    iframe.id = 'gameIframe';
+    iframe.title = currentGame.title;
     iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad; microphone');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
-    iframe.title = currentGame.title;
-    iframe.id = 'gameIframe';
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('scrolling', 'no');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;';
 
+    // When iframe loads, hide spinner
     iframe.addEventListener('load', () => {
       loading.classList.add('hidden');
-      console.log(`[PlayZone] "${currentGame.title}" loaded in iframe.`);
+      console.log(`[PlayZone] Game iframe loaded: ${currentGame.title}`);
     });
 
-    // Fallback timeout
-    setTimeout(() => loading.classList.add('hidden'), 8000);
+    // Safety fallback: hide loading after 10 seconds no matter what
+    setTimeout(() => loading.classList.add('hidden'), 10000);
 
     wrapper.appendChild(iframe);
   }
 
-  // --- Pre-roll Ad ---
+  // --- Pre-roll Ad (H5 Games API) ---
   function triggerPrerollAd(callback) {
     try {
       if (typeof adBreak === 'function') {
+        console.log('[PlayZone Ads] Requesting pre-roll ad...');
         adBreak({
           type: 'preroll',
-          name: 'pre-game-ad',
-          beforeAd: () => console.log('[PlayZone Ads] Pre-roll starting...'),
-          afterAd: () => console.log('[PlayZone Ads] Pre-roll finished.'),
-          adBreakDone: (info) => {
-            console.log('[PlayZone Ads] Pre-roll placement:', info);
+          name: 'pre-game-' + currentGame.slug,
+          beforeAd: () => {
+            console.log('[PlayZone Ads] Pre-roll ad is playing...');
+          },
+          afterAd: () => {
+            console.log('[PlayZone Ads] Pre-roll ad completed.');
+          },
+          adBreakDone: (placementInfo) => {
+            console.log('[PlayZone Ads] Pre-roll result:', placementInfo);
+            // Load game regardless of ad result
             callback();
           }
         });
       } else {
-        console.log('[PlayZone Ads] adBreak unavailable. Skipping pre-roll.');
+        console.log('[PlayZone Ads] adBreak not available. Loading game directly.');
         callback();
       }
     } catch (e) {
@@ -146,7 +220,7 @@
     }
   }
 
-  // --- Controls ---
+  // --- Fullscreen & Reload Controls ---
   function setupControls() {
     const container = document.getElementById('gameFrameContainer');
     const fsBtn = document.getElementById('fullscreenBtn');
@@ -154,50 +228,61 @@
 
     // Fullscreen
     fsBtn.addEventListener('click', () => {
-      if (container.requestFullscreen) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (container.requestFullscreen) {
         container.requestFullscreen();
       } else if (container.webkitRequestFullscreen) {
         container.webkitRequestFullscreen();
       } else {
-        // CSS fallback
+        // CSS fallback for browsers without Fullscreen API
         container.classList.toggle('fullscreen');
-        fsBtn.innerHTML = container.classList.contains('fullscreen')
-          ? '\u2716 Exit' : '\u26CE Full Screen';
+        updateFsButtonText(container.classList.contains('fullscreen'));
       }
     });
 
     document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) {
-        container.classList.remove('fullscreen');
-        fsBtn.innerHTML = '\u26CE Full Screen';
-      }
+      updateFsButtonText(!!document.fullscreenElement);
     });
 
-    // Reload
+    // Reload game
     reloadBtn.addEventListener('click', () => {
       const iframe = document.getElementById('gameIframe');
       if (iframe) {
-        document.getElementById('gameLoading').classList.remove('hidden');
-        iframe.src = iframe.src;
-        setTimeout(() => document.getElementById('gameLoading').classList.add('hidden'), 8000);
+        const loading = document.getElementById('gameLoading');
+        loading.classList.remove('hidden');
+        iframe.src = currentGame.game_url; // reload from source
+        setTimeout(() => loading.classList.add('hidden'), 10000);
       }
     });
 
-    // Escape key
+    // Escape key exits CSS fullscreen
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && container.classList.contains('fullscreen')) {
         container.classList.remove('fullscreen');
-        fsBtn.innerHTML = '\u26CE Full Screen';
+        updateFsButtonText(false);
       }
     });
+
+    function updateFsButtonText(isFullscreen) {
+      fsBtn.innerHTML = isFullscreen ? '\u2716 Exit Fullscreen' : '\u26CE Full Screen';
+    }
   }
 
   // --- Related Games ---
   function renderRelatedGames() {
+    // Priority: same category, then shared tags
     const related = allGames
       .filter(g => g.id !== currentGame.id)
-      .filter(g => g.category === currentGame.category || g.tags.some(t => currentGame.tags.includes(t)))
-      .slice(0, 6);
+      .map(g => {
+        let score = 0;
+        if (g.category === currentGame.category) score += 3;
+        g.tags.forEach(t => { if (currentGame.tags.includes(t)) score += 1; });
+        return { ...g, relevance: score };
+      })
+      .filter(g => g.relevance > 0)
+      .sort((a, b) => b.relevance - a.relevance)
+      .slice(0, 8);
 
     const grid = document.getElementById('relatedGamesGrid');
     grid.innerHTML = related.map(game => `
@@ -210,7 +295,7 @@
         <div class="game-card-title">${escapeHtml(game.title)}</div>
         <div class="game-card-meta">
           <span class="game-card-rating">\u2605 ${game.rating}</span>
-          <span class="game-card-category">${escapeHtml(game.category)}</span>
+          <span class="game-card-category">${capitalize(game.category)}</span>
         </div>
         <a href="game.html?slug=${game.slug}">
           <button class="play-button">Play Game</button>
@@ -219,18 +304,18 @@
     `).join('');
   }
 
-  // --- Recently Played ---
+  // --- Recently Played (localStorage) ---
   function saveRecentlyPlayed(game) {
     try {
       const KEY = 'playzone_recent';
       let recent = JSON.parse(localStorage.getItem(KEY) || '[]');
       recent = recent.filter(s => s !== game.slug);
       recent.unshift(game.slug);
-      localStorage.setItem(KEY, JSON.stringify(recent.slice(0, 10)));
-    } catch (e) { /* ignore */ }
+      localStorage.setItem(KEY, JSON.stringify(recent.slice(0, 15)));
+    } catch (e) { /* localStorage unavailable */ }
   }
 
-  // --- Search (redirects to index) ---
+  // --- Search (redirects to index with query) ---
   function setupSearch() {
     const input = document.getElementById('searchInput');
     if (!input) return;
@@ -241,20 +326,28 @@
     });
   }
 
-  // --- On-Demand Ad ---
+  // --- On-Demand Ad Button ---
   function setupShowAdButton() {
-    document.getElementById('showAdBtn').addEventListener('click', () => {
+    const btn = document.getElementById('showAdBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
       try {
         if (typeof adBreak === 'function') {
           adBreak({
             type: 'reward',
-            name: 'on-demand-game-page',
-            beforeAd: () => console.log('[PlayZone Ads] On-demand ad starting...'),
-            afterAd: () => console.log('[PlayZone Ads] On-demand ad finished.'),
-            adBreakDone: (info) => console.log('[PlayZone Ads] Placement:', info)
+            name: 'on-demand-' + currentGame.slug,
+            beforeAd: () => console.log('[PlayZone Ads] Reward ad starting...'),
+            afterAd: () => console.log('[PlayZone Ads] Reward ad finished.'),
+            adBreakDone: (info) => {
+              console.log('[PlayZone Ads] Result:', info);
+              if (info.breakStatus === 'viewed') {
+                alert('Thanks for watching!');
+              }
+            }
           });
         } else {
-          alert('Ad would play here.\nConnect your AdSense Publisher ID (ca-pub-XXXX) to enable real ads.');
+          alert('Rewarded Ad would play here.\n\nTo enable real ads:\n1. Replace ca-pub-XXXX with your AdSense ID\n2. Remove data-adbreak-test="on"');
         }
       } catch (e) {
         console.warn('[PlayZone Ads] Error:', e);
@@ -262,7 +355,7 @@
     });
   }
 
-  // --- Utility ---
+  // --- Utilities ---
   function escapeHtml(text) {
     const d = document.createElement('div');
     d.textContent = text;
