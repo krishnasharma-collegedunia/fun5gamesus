@@ -3,167 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="theme-color" content="#f8f8f8">
+  <meta name="theme-color" content="#ffffff">
   <meta name="robots" content="index, follow">
   <meta name="description" content="" id="metaDesc">
   <meta property="og:title" content="" id="ogTitle">
   <meta property="og:description" content="" id="ogDesc">
   <meta property="og:type" content="website">
-
-  <title id="pageTitle">Loading Game... - PlayZone</title>
-
+  <title id="pageTitle">Loading Game...</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Google H5 Games Ad Placement API -->
-  <script async
-    data-adbreak-test="on"
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-    crossorigin="anonymous">
-  </script>
-  <script>
-    window.adsbygoogle = window.adsbygoogle || [];
-    const adConfig = adsbygoogle.push({
-      preloadAdBreaks: 'on',
-      sound: 'on',
-      onReady: () => console.log('[PlayZone Ads] H5 Ads API Ready'),
-    });
-  </script>
+  <!-- Google Ad Placeholder -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
-  <!-- JSON-LD (set by JS) -->
   <script type="application/ld+json" id="jsonLd">
-  {"@context":"https://schema.org","@type":"VideoGame","name":"","description":"","genre":"","playMode":"SinglePlayer","applicationCategory":"Game","operatingSystem":"Web Browser"}
+  {"@context":"https://schema.org","@type":"VideoGame","name":"","description":""}
   </script>
 </head>
 <body>
 
-  <div class="main-wrapper">
+  <div class="site-wrap">
     <div class="game-page">
 
-      <!-- Back Navigation -->
-      <div class="back-nav">
-        <a href="index.html" class="back-link">&#8592; <span>PlayZone</span></a>
-        <div class="breadcrumb-trail">
-          <span id="breadcrumbCategory">Games</span>
-          <span class="sep">&#8250;</span>
-          <span id="breadcrumbTitle" class="current">Loading...</span>
-        </div>
+      <!-- BACK NAV -->
+      <header class="game-topbar">
+        <a href="index.html" class="back-btn">&#8592; Games</a>
+        <span class="game-breadcrumb" id="breadcrumb">Loading...</span>
+      </header>
+
+      <!-- AD SLOT: Pre-game -->
+      <div class="ad-slot ad-pre">
+        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
-      <!-- ===== AD SLOT: Pre-roll Top ===== -->
-      <div class="ad-container" id="prerollAdContainer">
-        <div class="ad-slot ad-banner" id="adPreroll">
-          <span class="ad-label">Ad loading...</span>
-        </div>
-      </div>
-
-      <!-- ===== GAME iFrame ===== -->
+      <!-- GAME IFRAME -->
       <div class="game-frame-container" id="gameFrameContainer">
         <div class="game-frame-wrapper" id="gameFrameWrapper">
           <div class="game-loading" id="gameLoading">
             <div class="spinner"></div>
             <p>Loading game...</p>
           </div>
-          <!-- iFrame injected by JS after pre-roll ad -->
         </div>
       </div>
 
-      <!-- Game Title & Info -->
-      <div class="game-header">
+      <!-- GAME TITLE -->
+      <div class="game-info-bar">
         <h1 id="gameTitle">Loading...</h1>
-        <div class="game-rating-row">
-          <span class="game-stars" id="gameStars"></span>
-          <span class="game-cat-badge" id="gameCatBadge"></span>
+        <div class="game-meta">
+          <span class="stars" id="gameStars"></span>
+          <span class="cat-badge" id="gameBadge"></span>
         </div>
       </div>
 
-      <!-- Control Buttons -->
-      <div class="game-buttons">
-        <button class="game-btn fullscreen-btn" id="fullscreenBtn">&#9974; Full Screen</button>
-        <button class="game-btn reload-btn" id="reloadBtn">&#128260; Reload</button>
+      <!-- CONTROLS -->
+      <div class="game-controls">
+        <button class="ctrl-btn ctrl-fs" id="fullscreenBtn">⛶ Full Screen</button>
+        <button class="ctrl-btn ctrl-reload" id="reloadBtn">🔄 Reload</button>
       </div>
 
-      <!-- ===== AD SLOT: Below Game Controls ===== -->
-      <div class="ad-container">
-        <div class="ad-slot ad-rectangle" id="adBelowGame">
-          <span class="ad-label">Advertisement</span>
-        </div>
+      <!-- AD SLOT: Below controls -->
+      <div class="ad-slot ad-below">
+        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
-      <!-- Play More CTA -->
-      <div class="game-buttons">
-        <a href="index.html" class="game-btn play-more-btn">&#127918; Play More Games</a>
+      <!-- HOW TO PLAY -->
+      <div class="how-to-play">
+        <h3>📖 How to Play</h3>
+        <p id="gameDescription">Loading...</p>
+        <div class="tag-row" id="gameTags"></div>
       </div>
 
-      <!-- Game Description -->
-      <div class="game-desc-section">
-        <div class="game-desc-card">
-          <h3>&#128214; How to Play</h3>
-          <p id="gameDescription">Loading game information...</p>
-
-          <div class="game-tags" id="gameTags"></div>
-
-          <div class="game-meta-row" id="gameMetaRow">
-            <div class="meta-box">
-              <div class="meta-label">Category</div>
-              <div class="meta-value" id="metaCategory">-</div>
-            </div>
-            <div class="meta-box">
-              <div class="meta-label">Rating</div>
-              <div class="meta-value" id="metaRating">-</div>
-            </div>
-            <div class="meta-box">
-              <div class="meta-label">Controls</div>
-              <div class="meta-value" id="metaControls">-</div>
-            </div>
-            <div class="meta-box">
-              <div class="meta-label">Platform</div>
-              <div class="meta-value">HTML5 Browser</div>
-            </div>
-          </div>
-        </div>
+      <!-- AD SLOT: Mid-page -->
+      <div class="ad-slot ad-mid">
+        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
-      <!-- ===== AD SLOT: Mid-page Rectangle ===== -->
-      <div class="ad-container">
-        <div class="ad-slot ad-rectangle" id="adMidPage">
-          <span class="ad-label">Advertisement</span>
-        </div>
-      </div>
-
-      <!-- Related Games -->
-      <section class="related-section">
-        <div class="section-label">&#127919; You May Also Like</div>
-        <div class="game-grid" id="relatedGamesGrid"></div>
+      <!-- MORE GAMES -->
+      <section class="more-games">
+        <h3>🎯 You May Also Like</h3>
+        <div class="game-grid" id="relatedGrid"></div>
       </section>
 
-      <!-- ===== AD SLOT: Bottom of Related ===== -->
-      <div class="ad-container">
-        <div class="ad-slot ad-banner" id="adBottomRelated">
-          <span class="ad-label">Advertisement</span>
-        </div>
+      <!-- PLAY MORE -->
+      <div class="play-more-wrap">
+        <a href="index.html" class="play-more-btn">🎮 Play More Games</a>
       </div>
 
-    </div><!-- /game-page -->
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-links">
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="terms.html">Terms of Service</a>
-        <a href="contact.html">Contact</a>
+      <!-- AD SLOT: Bottom -->
+      <div class="ad-slot ad-bottom">
+        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
-      <div class="footer-copy">&copy; 2026 PlayZone. All rights reserved.</div>
+
+    </div>
+
+    <footer class="site-footer">
+      <a href="privacy.html">Privacy Policy</a>
+      <span class="dot">·</span>
+      <a href="terms.html">Terms</a>
+      <span class="dot">·</span>
+      <a href="contact.html">Contact</a>
+      <p class="copy">&copy; 2026 Fun5Games. All rights reserved.</p>
     </footer>
-
-  </div><!-- /main-wrapper -->
-
-  <!-- On-Demand Ad Button -->
-  <button class="show-ad-btn" id="showAdBtn" title="Show Rewarded Ad (Testing)">
-    &#128250; Show Ad
-  </button>
+  </div>
 
   <script src="js/game.js"></script>
 </body>

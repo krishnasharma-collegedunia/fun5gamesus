@@ -2,184 +2,114 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Memory Flip</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
-html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;height:100%;width:100%;background:#1a0933;font-family:'Arial',sans-serif}
-body{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#1a0933}
+body{display:flex;flex-direction:column;align-items:center;font-family:Arial,sans-serif}
 .head{width:100%;max-width:520px;padding:14px 6px 8px;display:flex;justify-content:space-between;gap:8px}
-.sbox{background:rgba(0,0,0,0.5);border:2px solid rgba(255,100,255,0.5);border-radius:12px;padding:6px 10px;text-align:center;min-width:66px;flex:1;backdrop-filter:blur(4px)}
-.slbl{color:rgba(255,150,255,0.85);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}
-.sval{color:#fff;font-size:clamp(18px,5vw,24px);font-weight:bold;line-height:1.1;text-shadow:0 0 10px rgba(255,100,255,0.7)}
-.boardwrap{flex:1;width:100%;max-width:520px;display:flex;align-items:center;justify-content:center;padding:10px}
-.grid{display:grid;gap:8px;width:100%;max-width:460px;aspect-ratio:1}
-.card{position:relative;cursor:pointer;border-radius:10px;transform-style:preserve-3d;transition:transform 0.5s;touch-action:manipulation}
+.sb{background:rgba(0,0,0,.5);border:2px solid rgba(255,100,255,.5);border-radius:12px;padding:6px 10px;text-align:center;min-width:66px;flex:1}
+.sl{color:rgba(255,150,255,.85);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}
+.sv{color:#fff;font-size:clamp(18px,5vw,24px);font-weight:bold;line-height:1.1;text-shadow:0 0 10px rgba(255,100,255,.7)}
+.bw{flex:1;width:100%;max-width:520px;display:flex;align-items:center;justify-content:center;padding:10px}
+.grid{display:grid;gap:8px;width:100%;max-width:460px}
+.card{position:relative;cursor:pointer;border-radius:10px;transform-style:preserve-3d;transition:transform .5s;touch-action:manipulation;aspect-ratio:1}
 .card.flipped{transform:rotateY(180deg)}
-.card.matched{transform:rotateY(180deg);opacity:0.55}
-.face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:10px;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-size:clamp(26px,7vw,44px);box-shadow:0 4px 12px rgba(0,0,0,0.5)}
-.back{background:linear-gradient(135deg,#ff00ff,#7700cc);color:#fff;border:2px solid rgba(255,255,255,0.4)}
-.back::before{content:'?';font-size:clamp(28px,7vw,44px);font-weight:900;color:#fff;text-shadow:0 0 10px rgba(255,255,255,0.8)}
-.front{background:linear-gradient(135deg,#fff,#e0e0ff);transform:rotateY(180deg);color:#222}
-.ovbg{position:fixed;inset:0;background:rgba(10,5,30,0.92);z-index:19;backdrop-filter:blur(6px)}
-.ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:20;padding:28px;text-align:center}
-.ov.hidden{display:none}
-.ov h1{font-size:clamp(44px,12vw,80px);color:#ff66ff;text-shadow:0 0 40px rgba(255,100,255,0.8),4px 4px 0 #000;letter-spacing:3px;line-height:0.95;font-weight:900}
-.sub{color:rgba(255,150,255,0.85);font-size:clamp(11px,3vw,14px);letter-spacing:3px}
-.fscore{font-size:clamp(22px,6vw,36px);color:#ff99ff;font-weight:bold;letter-spacing:1px;text-shadow:2px 2px 0 #000}
-.best{color:#fff;font-size:clamp(14px,3.5vw,18px)}
-.btn{background:linear-gradient(180deg,#ff66ff,#aa00cc);color:#fff;border:2px solid rgba(255,255,255,0.4);padding:15px 52px;font-size:clamp(17px,4.5vw,22px);font-weight:900;font-family:inherit;border-radius:50px;cursor:pointer;letter-spacing:3px;box-shadow:0 6px 28px rgba(200,0,255,0.6);touch-action:manipulation;-webkit-appearance:none}
-.btn:active{transform:scale(0.96)}
+.card.matched{transform:rotateY(180deg);opacity:.55}
+.face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:10px;-webkit-backface-visibility:hidden;backface-visibility:hidden;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.back{background:linear-gradient(135deg,#ff00ff,#7700cc);color:#fff;border:2px solid rgba(255,255,255,.4);font-size:clamp(28px,7vw,44px);font-weight:900}
+.front{background:linear-gradient(135deg,#fff,#e0e0ff);transform:rotateY(180deg);color:#222;font-size:clamp(26px,7vw,44px)}
+.ob{position:absolute;inset:0;background:rgba(10,5,30,.92);z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:20;padding:24px;text-align:center}
+.ov.hidden,.ob.hidden{display:none}
+.ov h1{font:900 clamp(44px,12vw,80px) Arial;color:#ff66ff;text-shadow:0 0 40px rgba(255,100,255,.8),4px 4px 0 #000;letter-spacing:3px;line-height:.95}
+.sub{color:rgba(255,150,255,.85);font-size:14px;letter-spacing:3px}
+.fs{font:bold clamp(22px,6vw,36px) Arial;color:#ff99ff;letter-spacing:1px;text-shadow:2px 2px 0 #000}
+.bst{color:#fff;font:clamp(14px,3.5vw,18px) Arial}
+.btn{background:linear-gradient(180deg,#ff66ff,#aa00cc);color:#fff;border:2px solid rgba(255,255,255,.4);padding:15px 50px;font:900 clamp(17px,4.5vw,22px) Arial;border-radius:50px;letter-spacing:3px;box-shadow:0 6px 28px rgba(200,0,255,.6);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.btn:active{transform:scale(.96)}
 .lvlsel{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.lvlbtn{background:rgba(255,255,255,0.1);color:#fff;border:2px solid rgba(255,100,255,0.5);padding:8px 16px;font-size:13px;font-weight:bold;font-family:inherit;border-radius:20px;cursor:pointer;letter-spacing:1px;touch-action:manipulation;-webkit-appearance:none}
-.lvlbtn.active{background:linear-gradient(180deg,#ff66ff,#aa00cc);border-color:#fff}
+.lb{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,100,255,.5);padding:8px 16px;font-size:13px;font-weight:bold;font-family:inherit;border-radius:20px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none}
+.lb.active{background:linear-gradient(180deg,#ff66ff,#aa00cc);border-color:#fff}
 </style>
 </head>
 <body>
 <div class="head">
-  <div class="sbox"><div class="slbl">Moves</div><div class="sval" id="sMoves">0</div></div>
-  <div class="sbox"><div class="slbl">Pairs</div><div class="sval" id="sPairs">0/0</div></div>
-  <div class="sbox"><div class="slbl">Time</div><div class="sval" id="sTime">0s</div></div>
+<div class="sb"><div class="sl">Moves</div><div class="sv" id="sm">0</div></div>
+<div class="sb"><div class="sl">Pairs</div><div class="sv" id="sp">0/0</div></div>
+<div class="sb"><div class="sl">Time</div><div class="sv" id="st">0s</div></div>
 </div>
-<div class="boardwrap"><div class="grid" id="grid"></div></div>
-
-<div class="ovbg" id="bgStart"></div>
-<div class="ov" id="ovStart">
-  <h1>MEMORY<br>FLIP</h1>
-  <div class="sub">MATCH ALL PAIRS</div>
-  <div class="lvlsel">
-    <button class="lvlbtn active" data-lvl="4">EASY 4x4</button>
-    <button class="lvlbtn" data-lvl="6">HARD 6x6</button>
-  </div>
-  <button class="btn" id="btnStart">▶ PLAY</button>
-</div>
-
-<div class="ovbg hidden" id="bgOver"></div>
-<div class="ov hidden" id="ovOver">
-  <h1 id="overH">YOU<br>WIN!</h1>
-  <div class="fscore" id="fStats">Moves: 0 · Time: 0s</div>
-  <div class="best" id="fBest">Best: —</div>
-  <button class="btn" id="btnRetry">PLAY AGAIN</button>
-</div>
-
+<div class="bw"><div class="grid" id="grid"></div></div>
+<div class="ob" id="ob1"></div>
+<div class="ov" id="ov1"><h1>MEMORY<br>FLIP</h1><div class="sub">MATCH ALL PAIRS</div><div class="lvlsel"><button class="lb active" data-lvl="4" ontouchstart="">EASY 4x4</button><button class="lb" data-lvl="6" ontouchstart="">HARD 6x6</button></div><button class="btn" id="b1" ontouchstart="">▶ PLAY</button></div>
+<div class="ob hidden" id="ob2"></div>
+<div class="ov hidden" id="ov2"><h1>YOU<br>WIN!</h1><div class="fs" id="fSt">Moves: 0</div><div class="bst" id="fBt">Best: —</div><button class="btn" id="b2" ontouchstart="">PLAY AGAIN</button></div>
 <script>
-'use strict';
-document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
-document.addEventListener('touchstart',e=>{
-  if(e.touches[0].clientX<30||e.touches[0].clientX>window.innerWidth-30)e.preventDefault();
-},{passive:false});
-history.pushState(null,'',location.href);
-window.addEventListener('popstate',()=>history.pushState(null,'',location.href));
+(function(){'use strict';
+var gridE=document.getElementById('grid');
+var smE=document.getElementById('sm'),spE=document.getElementById('sp'),stE=document.getElementById('st');
+var fSt=document.getElementById('fSt'),fBt=document.getElementById('fBt');
+var ov1=document.getElementById('ov1'),ob1=document.getElementById('ob1');
+var ov2=document.getElementById('ov2'),ob2=document.getElementById('ob2');
+var EMOJIS=['★','♥','♦','♣','♠','✿','❄','☀','☂','♪','☯','✈','⚓','⚡','❀','☘','♛','♞'];
+var size=4,cards,flipped,matched,moves,startT,timerId,locked,running=false;
 
-const grid=document.getElementById('grid');
-const sMoves=document.getElementById('sMoves'),sPairs=document.getElementById('sPairs'),sTime=document.getElementById('sTime');
-const fStats=document.getElementById('fStats'),fBest=document.getElementById('fBest'),overH=document.getElementById('overH');
-const ovStart=document.getElementById('ovStart'),bgStart=document.getElementById('bgStart');
-const ovOver=document.getElementById('ovOver'),bgOver=document.getElementById('bgOver');
+document.querySelectorAll('.lb').forEach(function(b){
+b.addEventListener('click',function(){
+document.querySelectorAll('.lb').forEach(function(x){x.classList.remove('active')});
+b.classList.add('active');size=parseInt(b.dataset.lvl)})});
 
-const EMOJIS=['★','♥','♦','♣','♠','✿','❄','☀','☂','♪','☯','✈','⚓','⚡','❀','☘','♛','♞'];
-let size=4,cards,flipped,matched,moves,startT,timerId,locked,running=false;
+function go(){
+ov1.classList.add('hidden');ob1.classList.add('hidden');
+ov2.classList.add('hidden');ob2.classList.add('hidden');
+build();running=true;startT=Date.now();clearInterval(timerId);
+timerId=setInterval(function(){if(!running)return;stE.textContent=Math.floor((Date.now()-startT)/1000)+'s'},250)}
 
-document.querySelectorAll('.lvlbtn').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.lvlbtn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    size=parseInt(b.dataset.lvl);
-  });
-});
-
-function start(){
-  ovStart.classList.add('hidden');bgStart.classList.add('hidden');
-  ovOver.classList.add('hidden');bgOver.classList.add('hidden');
-  build();
-  running=true;
-  startT=Date.now();
-  clearInterval(timerId);
-  timerId=setInterval(updateTime,250);
-}
-function updateTime(){
-  if(!running)return;
-  const s=Math.floor((Date.now()-startT)/1000);
-  sTime.textContent=s+'s';
-}
 function build(){
-  const total=size*size;
-  const pairs=total/2;
-  const pool=EMOJIS.slice(0,pairs);
-  const deck=[...pool,...pool].sort(()=>Math.random()-0.5);
-  grid.innerHTML='';
-  grid.style.gridTemplateColumns='repeat('+size+',1fr)';
-  cards=[];flipped=[];matched=0;moves=0;locked=false;
-  sMoves.textContent=0;
-  sPairs.textContent='0/'+pairs;
-  sTime.textContent='0s';
-  deck.forEach((emoji,i)=>{
-    const c=document.createElement('div');
-    c.className='card';
-    c.innerHTML='<div class="face back"></div><div class="face front">'+emoji+'</div>';
-    c.addEventListener('click',()=>flip(i));
-    c.addEventListener('touchstart',e=>{e.preventDefault();flip(i);},{passive:false});
-    grid.appendChild(c);
-    cards.push({el:c,emoji,matched:false,shown:false});
-  });
-}
-function flip(i){
-  if(locked)return;
-  const card=cards[i];
-  if(card.shown||card.matched)return;
-  card.el.classList.add('flipped');
-  card.shown=true;
-  flipped.push(i);
-  if(flipped.length===2){
-    moves++;
-    sMoves.textContent=moves;
-    const[a,b]=flipped;
-    if(cards[a].emoji===cards[b].emoji){
-      cards[a].matched=true;cards[b].matched=true;
-      cards[a].el.classList.add('matched');
-      cards[b].el.classList.add('matched');
-      matched++;
-      const pairs=(size*size)/2;
-      sPairs.textContent=matched+'/'+pairs;
-      flipped=[];
-      if(matched===pairs)win();
-    }else{
-      locked=true;
-      setTimeout(()=>{
-        cards[a].el.classList.remove('flipped');
-        cards[b].el.classList.remove('flipped');
-        cards[a].shown=false;cards[b].shown=false;
-        flipped=[];locked=false;
-      },700);
-    }
-  }
-}
-function win(){
-  running=false;
-  clearInterval(timerId);
-  const secs=Math.floor((Date.now()-startT)/1000);
-  const key='memflip_best_'+size;
-  let bestStr='—';
-  try{
-    const prev=JSON.parse(localStorage.getItem(key)||'null');
-    if(!prev||moves<prev.moves||(moves===prev.moves&&secs<prev.time)){
-      localStorage.setItem(key,JSON.stringify({moves,time:secs}));
-      bestStr=moves+' moves · '+secs+'s (NEW!)';
-    }else{
-      bestStr=prev.moves+' moves · '+prev.time+'s';
-    }
-  }catch(e){}
-  overH.innerHTML='YOU<br>WIN!';
-  fStats.textContent='Moves: '+moves+' · Time: '+secs+'s';
-  fBest.textContent='Best: '+bestStr;
-  setTimeout(()=>{
-    ovOver.classList.remove('hidden');bgOver.classList.remove('hidden');
-  },500);
-}
+var total=size*size,pairs=total/2,pool=EMOJIS.slice(0,pairs);
+var deck=pool.concat(pool);
+for(var i=deck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=deck[i];deck[i]=deck[j];deck[j]=t}
+gridE.innerHTML='';gridE.style.gridTemplateColumns='repeat('+size+',1fr)';
+cards=[];flipped=[];matched=0;moves=0;locked=false;
+smE.textContent=0;spE.textContent='0/'+pairs;stE.textContent='0s';
+for(var i=0;i<deck.length;i++){
+var c=document.createElement('div');c.className='card';
+c.innerHTML='<div class="face back">?</div><div class="face front">'+deck[i]+'</div>';
+(function(idx){c.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();flip(idx)})})(i);
+gridE.appendChild(c);
+cards.push({el:c,emoji:deck[i],matched:false,shown:false})}}
 
-document.getElementById('btnStart').addEventListener('click',start);
-document.getElementById('btnRetry').addEventListener('click',start);
+function flip(i){
+if(locked||!running)return;var card=cards[i];if(card.shown||card.matched)return;
+card.el.classList.add('flipped');card.shown=true;flipped.push(i);
+if(flipped.length===2){moves++;smE.textContent=moves;
+var a=flipped[0],b=flipped[1];
+if(cards[a].emoji===cards[b].emoji){
+cards[a].matched=true;cards[b].matched=true;
+cards[a].el.classList.add('matched');cards[b].el.classList.add('matched');
+matched++;var pairs=(size*size)/2;spE.textContent=matched+'/'+pairs;
+flipped=[];if(matched===pairs)win()}
+else{locked=true;setTimeout(function(){
+cards[a].el.classList.remove('flipped');cards[b].el.classList.remove('flipped');
+cards[a].shown=false;cards[b].shown=false;flipped=[];locked=false},700)}}}
+
+function win(){
+running=false;clearInterval(timerId);
+var secs=Math.floor((Date.now()-startT)/1000),key='mf_b_'+size,bestStr='—';
+try{var prev=JSON.parse(localStorage.getItem(key)||'null');
+if(!prev||moves<prev.m||(moves===prev.m&&secs<prev.t)){
+localStorage.setItem(key,JSON.stringify({m:moves,t:secs}));bestStr=moves+' moves · '+secs+'s (NEW!)'}
+else bestStr=prev.m+' moves · '+prev.t+'s'}catch(e){}
+fSt.textContent='Moves: '+moves+' · Time: '+secs+'s';fBt.textContent='Best: '+bestStr;
+setTimeout(function(){ov2.classList.remove('hidden');ob2.classList.remove('hidden')},500)}
+
+document.getElementById('b1').addEventListener('click',function(e){e.stopPropagation();go()});
+document.getElementById('b2').addEventListener('click',function(e){e.stopPropagation();go()});
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+})();
 </script>
 </body>
 </html>
