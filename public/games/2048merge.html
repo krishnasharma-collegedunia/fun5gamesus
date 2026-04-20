@@ -56,6 +56,7 @@ function layoutCells(){
 var rect=board.getBoundingClientRect();if(!rect.width)return;
 var pad=10,gap=10,sz=(rect.width-pad*2-gap*(SZ-1))/SZ;
 var cells=board.querySelectorAll('.cell'),idx=0;
+if(cells.length<SZ*SZ)return;
 for(var r=0;r<SZ;r++)for(var c=0;c<SZ;c++){var el=cells[idx++];el.style.width=sz+'px';el.style.height=sz+'px';el.style.left=(pad+c*(sz+gap))+'px';el.style.top=(pad+r*(sz+gap))+'px'}
 return sz}
 
