@@ -91,7 +91,7 @@
     var loading = document.getElementById('gameLoading');
 
     var iframe = document.createElement('iframe');
-    iframe.src = currentGame.game_url;
+    iframe.src = currentGame.game_url + '?v=' + Date.now();
     iframe.id = 'gameIframe';
     iframe.title = currentGame.title;
     iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad');
