@@ -68,6 +68,7 @@ function addTile(){var empty=[];for(var r=0;r<SZ;r++)for(var c=0;c<SZ;c++)if(gri
 if(!empty.length)return false;var p=empty[Math.floor(Math.random()*empty.length)];grid[p[0]][p[1]]=Math.random()<.9?2:4;return true}
 
 function render(){
+if(!grid||!grid.length)return;
 var old=board.querySelectorAll('.tile');for(var i=0;i<old.length;i++)old[i].remove();
 var rect=board.getBoundingClientRect();if(!rect.width)return;
 var pad=10,gap=10,sz=(rect.width-pad*2-gap*(SZ-1))/SZ;
@@ -87,7 +88,7 @@ function rotate(g){var n=[];for(var r=0;r<SZ;r++){n.push([]);for(var c=0;c<SZ;c+
 function eq(a,b){for(var r=0;r<SZ;r++)for(var c=0;c<SZ;c++)if(a[r][c]!==b[r][c])return false;return true}
 
 function move(dir){
-if(gameOver)return;var prev=grid.map(function(r){return r.slice()});
+if(gameOver||!grid||!grid.length)return;var prev=grid.map(function(r){return r.slice()});
 var rots=dir;for(var i=0;i<rots;i++)grid=rotate(grid);
 for(var r=0;r<SZ;r++)grid[r]=slideRow(grid[r]);
 for(var i=0;i<(4-rots)%4;i++)grid=rotate(grid);
