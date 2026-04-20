@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Block Drop</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#0a0a1a}
+body{display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',Arial,sans-serif}
+canvas{display:block}
+.ob{position:absolute;inset:0;background:rgba(0,0,0,.75);z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:20;padding:24px;text-align:center}
+.ob.hidden,.ov.hidden{display:none}
+.ov h1{font-size:clamp(36px,10vw,64px);font-weight:900;color:#fff;text-shadow:0 0 30px rgba(0,200,255,.6);letter-spacing:2px;line-height:1}
+.ov .sub{font-size:clamp(14px,4vw,20px);color:#8af;font-weight:600}
+.ov .stat{font-size:clamp(18px,5vw,28px);color:#fff;font-weight:700}
+.btn{background:linear-gradient(180deg,#00c6ff,#0072ff);color:#fff;border:none;padding:16px 50px;font:800 clamp(16px,4.5vw,22px)/1 inherit;border-radius:10px;letter-spacing:2px;box-shadow:0 4px 20px rgba(0,100,255,.4);cursor:pointer;touch-action:manipulation;-webkit-appearance:none}
+.btn:active{transform:scale(.95)}
+.controls{position:absolute;bottom:8px;left:0;width:100%;display:flex;justify-content:center;gap:6px;z-index:10;padding:0 8px}
+.cbtn{width:clamp(52px,14vw,68px);height:clamp(44px,12vw,56px);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.7);font-size:clamp(18px,5vw,26px);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-appearance:none}
+.cbtn:active{background:rgba(255,255,255,.2)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div class="controls" id="ctrls">
+<button class="cbtn" id="bl" ontouchstart="">&#9664;</button>
+<button class="cbtn" id="bd" ontouchstart="">&#9660;</button>
+<button class="cbtn" id="br" ontouchstart="">&#9654;</button>
+<button class="cbtn" id="brot" ontouchstart="">&#8635;</button>
+<button class="cbtn" id="bhard" ontouchstart="">&#9604;</button>
+</div>
+<div class="ob hidden" id="ob"></div>
+<div class="ov hidden" id="ov">
+<h1 id="ovt">BLOCK<br>DROP</h1>
+<div class="sub" id="ovs">Tap to stack. Clear lines. Don't top out!</div>
+<div class="stat hidden" id="ovsc"></div>
+<button class="btn" id="ovb" ontouchstart="">PLAY</button>
+</div>
+<script>
+(function(){'use strict';
+
+var COLS=10,ROWS=20,BLOCK=0;
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var ob=document.getElementById('ob'),ov=document.getElementById('ov');
+var ovt=document.getElementById('ovt'),ovs=document.getElementById('ovs');
+var ovsc=document.getElementById('ovsc'),ovb=document.getElementById('ovb');
+
+/* Tetrominoes: [rotations][rows][cols] */
+var SHAPES=[
+/* I */[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+/* O */[[1,1],[1,1]],
+/* T */[[0,1,0],[1,1,1],[0,0,0]],
+/* S */[[0,1,1],[1,1,0],[0,0,0]],
+/* Z */[[1,1,0],[0,1,1],[0,0,0]],
+/* J */[[1,0,0],[1,1,1],[0,0,0]],
+/* L */[[0,0,1],[1,1,1],[0,0,0]]
+];
+var COLORS=['#00f0f0','#f0f000','#a000f0','#00f000','#f00000','#0000f0','#f0a000'];
+var GHOST_COLORS=['rgba(0,240,240,.18)','rgba(240,240,0,.18)','rgba(160,0,240,.18)','rgba(0,240,0,.18)','rgba(240,0,0,.18)','rgba(0,0,240,.18)','rgba(240,160,0,.18)'];
+
+var grid,score,lines,level,gameOver,paused,piece,nextPiece,dropTimer,dropInterval,lastDrop,animFrame;
+var best=0;
+try{best=parseInt(localStorage.getItem('bd_b'))||0;}catch(e){}
+
+function resize(){
+var pad=10,ctrlH=70;
+var maxW=window.innerWidth-pad*2;
+var maxH=window.innerHeight-pad*2-ctrlH;
+BLOCK=Math.floor(Math.min(maxW/COLS,maxH/ROWS));
+if(BLOCK<16)BLOCK=16;
+cv.width=COLS*BLOCK;
+cv.height=ROWS*BLOCK;
+cv.style.marginBottom=ctrlH+'px';
+}
+
+function newGrid(){
+grid=[];
+for(var r=0;r<ROWS;r++){grid.push([]);for(var c=0;c<COLS;c++)grid[r].push(0);}
+}
+
+function randomPiece(){
+var t=Math.floor(Math.random()*7);
+var shape=SHAPES[t].map(function(row){return row.slice();});
+return{type:t,shape:shape,x:Math.floor((COLS-shape[0].length)/2),y:0};
+}
+
+function rotate(shape){
+var rows=shape.length,cols=shape[0].length;
+var n=[];
+for(var c=0;c<cols;c++){n.push([]);for(var r=rows-1;r>=0;r--)n[c].push(shape[r][c]);}
+return n;
+}
+
+function collides(shape,px,py){
+for(var r=0;r<shape.length;r++)for(var c=0;c<shape[r].length;c++){
+if(!shape[r][c])continue;
+var nx=px+c,ny=py+r;
+if(nx<0||nx>=COLS||ny>=ROWS)return true;
+if(ny>=0&&grid[ny][nx])return true;
+}
+return false;
+}
+
+function lock(){
+var shape=piece.shape;
+for(var r=0;r<shape.length;r++)for(var c=0;c<shape[r].length;c++){
+if(!shape[r][c])continue;
+var ny=piece.y+r;
+if(ny<0){gameOver=true;return;}
+grid[ny][piece.x+c]=piece.type+1;
+}
+clearLines();
+piece=nextPiece;
+nextPiece=randomPiece();
+if(collides(piece.shape,piece.x,piece.y)){gameOver=true;}
+}
+
+function clearLines(){
+var cleared=0;
+for(var r=ROWS-1;r>=0;r--){
+var full=true;
+for(var c=0;c<COLS;c++){if(!grid[r][c]){full=false;break;}}
+if(full){
+grid.splice(r,1);
+grid.unshift([]);
+for(var c2=0;c2<COLS;c2++)grid[0].push(0);
+cleared++;r++;
+}
+}
+if(cleared>0){
+var pts=[0,100,300,500,800];
+score+=pts[cleared]*level;
+lines+=cleared;
+level=Math.floor(lines/10)+1;
+dropInterval=Math.max(50,1000-((level-1)*80));
+}
+}
+
+function ghostY(){
+var gy=piece.y;
+while(!collides(piece.shape,piece.x,gy+1))gy++;
+return gy;
+}
+
+function draw(){
+ctx.fillStyle='#0a0a1a';
+ctx.fillRect(0,0,cv.width,cv.height);
+
+/* grid lines */
+ctx.strokeStyle='rgba(255,255,255,.04)';
+ctx.lineWidth=1;
+for(var r=0;r<=ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*BLOCK);ctx.lineTo(cv.width,r*BLOCK);ctx.stroke();}
+for(var c=0;c<=COLS;c++){ctx.beginPath();ctx.moveTo(c*BLOCK,0);ctx.lineTo(c*BLOCK,cv.height);ctx.stroke();}
+
+/* locked blocks */
+for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+if(!grid[r][c])continue;
+drawBlock(c,r,COLORS[grid[r][c]-1]);
+}
+
+if(!piece||gameOver)return;
+
+/* ghost */
+var gy=ghostY();
+var sh=piece.shape;
+for(var r=0;r<sh.length;r++)for(var c=0;c<sh[r].length;c++){
+if(!sh[r][c])continue;
+var bx=piece.x+c,by=gy+r;
+if(by>=0){
+ctx.fillStyle=GHOST_COLORS[piece.type];
+ctx.fillRect(bx*BLOCK+1,by*BLOCK+1,BLOCK-2,BLOCK-2);
+ctx.strokeStyle='rgba(255,255,255,.12)';
+ctx.lineWidth=1;
+ctx.strokeRect(bx*BLOCK+1,by*BLOCK+1,BLOCK-2,BLOCK-2);
+}
+}
+
+/* active piece */
+for(var r=0;r<sh.length;r++)for(var c=0;c<sh[r].length;c++){
+if(!sh[r][c])continue;
+var bx=piece.x+c,by=piece.y+r;
+if(by>=0)drawBlock(bx,by,COLORS[piece.type]);
+}
+
+/* HUD */
+ctx.fillStyle='rgba(0,0,0,.5)';
+ctx.fillRect(0,0,cv.width,26);
+ctx.font='bold '+Math.max(12,BLOCK*.5)+'px "Segoe UI",Arial,sans-serif';
+ctx.fillStyle='#fff';
+ctx.textAlign='left';
+ctx.fillText('Score: '+score,6,18);
+ctx.textAlign='center';
+ctx.fillText('Lv '+level,cv.width/2,18);
+ctx.textAlign='right';
+ctx.fillText('Lines: '+lines,cv.width-6,18);
+
+/* next piece preview */
+var np=nextPiece.shape;
+var npx=cv.width-5-np[0].length*(BLOCK*.4);
+var npy=30;
+ctx.fillStyle='rgba(0,0,0,.4)';
+var pw=np[0].length*(BLOCK*.4)+6,ph=np.length*(BLOCK*.4)+6;
+ctx.fillRect(npx-3,npy-3,pw,ph);
+ctx.font='bold 9px Arial';
+ctx.fillStyle='#888';
+ctx.textAlign='right';
+ctx.fillText('NEXT',cv.width-6,npy-6);
+for(var r=0;r<np.length;r++)for(var c=0;c<np[r].length;c++){
+if(!np[r][c])continue;
+var bs=BLOCK*.4;
+ctx.fillStyle=COLORS[nextPiece.type];
+ctx.fillRect(npx+c*bs,npy+r*bs,bs-1,bs-1);
+}
+}
+
+function drawBlock(x,y,color){
+var bx=x*BLOCK,by=y*BLOCK,bs=BLOCK;
+ctx.fillStyle=color;
+ctx.fillRect(bx+1,by+1,bs-2,bs-2);
+/* highlight */
+ctx.fillStyle='rgba(255,255,255,.25)';
+ctx.fillRect(bx+1,by+1,bs-2,3);
+ctx.fillRect(bx+1,by+1,3,bs-2);
+/* shadow */
+ctx.fillStyle='rgba(0,0,0,.2)';
+ctx.fillRect(bx+1,by+bs-4,bs-2,3);
+ctx.fillRect(bx+bs-4,by+1,3,bs-2);
+}
+
+function moveLeft(){if(!collides(piece.shape,piece.x-1,piece.y))piece.x--;}
+function moveRight(){if(!collides(piece.shape,piece.x+1,piece.y))piece.x++;}
+function moveDown(){
+if(!collides(piece.shape,piece.x,piece.y+1)){piece.y++;return true;}
+lock();return false;
+}
+function hardDrop(){
+while(!collides(piece.shape,piece.x,piece.y+1)){piece.y++;score+=2;}
+lock();
+}
+function rotatePiece(){
+var newShape=rotate(piece.shape);
+/* wall kick: try 0, -1, +1, -2, +2 */
+var kicks=[0,-1,1,-2,2];
+for(var i=0;i<kicks.length;i++){
+if(!collides(newShape,piece.x+kicks[i],piece.y)){
+piece.shape=newShape;
+piece.x+=kicks[i];
+return;
+}
+}
+}
+
+function gameLoop(ts){
+if(gameOver){endGame();return;}
+if(paused){animFrame=requestAnimationFrame(gameLoop);return;}
+if(!lastDrop)lastDrop=ts;
+if(ts-lastDrop>dropInterval){
+moveDown();
+lastDrop=ts;
+}
+draw();
+animFrame=requestAnimationFrame(gameLoop);
+}
+
+function startGame(){
+newGrid();
+score=0;lines=0;level=1;gameOver=false;paused=false;
+dropInterval=1000;lastDrop=0;
+piece=randomPiece();
+nextPiece=randomPiece();
+ob.classList.add('hidden');
+ov.classList.add('hidden');
+ovsc.classList.add('hidden');
+if(animFrame)cancelAnimationFrame(animFrame);
+animFrame=requestAnimationFrame(gameLoop);
+}
+
+function endGame(){
+if(score>best){best=score;try{localStorage.setItem('bd_b',best);}catch(e){}}
+ovt.innerHTML='GAME<br>OVER';
+ovs.textContent='';
+ovsc.classList.remove('hidden');
+ovsc.innerHTML='Score: '+score+'<br>Lines: '+lines+'<br>Level: '+level+'<br><span style="color:#8af;font-size:.7em">Best: '+best+'</span>';
+ovb.textContent='TRY AGAIN';
+ob.classList.remove('hidden');
+ov.classList.remove('hidden');
+}
+
+function showStart(){
+ovt.innerHTML='BLOCK<br>DROP';
+ovs.textContent='Tap to stack. Clear lines. Don\'t top out!';
+ovsc.classList.add('hidden');
+ovb.textContent='PLAY';
+ob.classList.remove('hidden');
+ov.classList.remove('hidden');
+}
+
+/* ---- Controls ---- */
+/* Keyboard */
+window.addEventListener('keydown',function(e){
+if(gameOver||paused||!piece)return;
+if(e.key==='ArrowLeft'){e.preventDefault();moveLeft();}
+else if(e.key==='ArrowRight'){e.preventDefault();moveRight();}
+else if(e.key==='ArrowDown'){e.preventDefault();moveDown();}
+else if(e.key==='ArrowUp'||e.key===' '){e.preventDefault();rotatePiece();}
+else if(e.key==='z'||e.key==='Z'){e.preventDefault();rotatePiece();}
+else if(e.key==='x'||e.key==='X'||e.key==='Enter'){e.preventDefault();hardDrop();}
+});
+
+/* On-screen buttons */
+var bl=document.getElementById('bl'),br=document.getElementById('br');
+var bd=document.getElementById('bd'),brot=document.getElementById('brot');
+var bhard=document.getElementById('bhard');
+
+function btnHandler(action){
+return function(e){e.preventDefault();e.stopPropagation();if(!gameOver&&piece)action();};
+}
+bl.addEventListener('pointerdown',btnHandler(moveLeft));
+br.addEventListener('pointerdown',btnHandler(moveRight));
+bd.addEventListener('pointerdown',btnHandler(moveDown));
+brot.addEventListener('pointerdown',btnHandler(rotatePiece));
+bhard.addEventListener('pointerdown',btnHandler(hardDrop));
+
+/* Swipe on canvas */
+var tsx=0,tsy=0,tst=0;
+cv.addEventListener('pointerdown',function(e){
+tsx=e.clientX;tsy=e.clientY;tst=Date.now();e.preventDefault();
+});
+cv.addEventListener('pointerup',function(e){
+if(gameOver||!piece)return;
+var dx=e.clientX-tsx,dy=e.clientY-tsy;
+var dt=Date.now()-tst;
+var dist=Math.sqrt(dx*dx+dy*dy);
+/* tap = rotate */
+if(dist<15&&dt<300){rotatePiece();return;}
+/* swipe */
+if(Math.abs(dx)>Math.abs(dy)){
+if(Math.abs(dx)>30){if(dx>0)moveRight();else moveLeft();}
+}else{
+if(dy>30)hardDrop();
+}
+});
+
+/* Auto-repeat for hold buttons */
+var repeatTimer=null,repeatDelay=150;
+function setupRepeat(btn,action){
+var tid=null;
+btn.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+if(gameOver||!piece)return;
+action();
+clearInterval(tid);
+tid=setInterval(function(){if(!gameOver&&piece)action();},repeatDelay);
+});
+var stop=function(){clearInterval(tid);};
+btn.addEventListener('pointerup',stop);
+btn.addEventListener('pointerleave',stop);
+btn.addEventListener('pointercancel',stop);
+}
+setupRepeat(bl,moveLeft);
+setupRepeat(br,moveRight);
+setupRepeat(bd,moveDown);
+
+ovb.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();startGame();});
+
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+window.addEventListener('resize',function(){resize();draw();});
+
+resize();
+showStart();
+draw();
+
+})();
+</script>
+</body>
+</html>

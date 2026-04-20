@@ -155,16 +155,16 @@
   },
   {
     "id": 12,
-    "title": "Word Guess",
-    "slug": "wordguess",
+    "title": "Block Drop",
+    "slug": "blockdrop",
     "category": "puzzle",
-    "thumbnail": "assets/thumbnails/wordguess.svg",
-    "game_url": "public/games/wordguess.html",
-    "description": "Guess the 5-letter word in 6 tries! Green means correct, yellow means wrong spot. A daily word challenge that tests your vocabulary.",
+    "thumbnail": "assets/thumbnails/blockdrop.svg",
+    "game_url": "public/games/blockdrop.html",
+    "description": "Classic block-stacking puzzle! Arrange falling tetrominoes to clear lines. Speed increases as you level up. How long can you survive?",
     "featured": true,
     "trending": true,
-    "tags": ["puzzle", "word", "trivia", "original"],
-    "controls": "Type letters on the keyboard. Press Enter to submit, Backspace to delete.",
-    "rating": 4.8
+    "tags": ["puzzle", "classic", "arcade", "original"],
+    "controls": "Arrow keys or swipe to move. Tap or Up arrow to rotate. Swipe down for hard drop.",
+    "rating": 4.9
   }
 ]

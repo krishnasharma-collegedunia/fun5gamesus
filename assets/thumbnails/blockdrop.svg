@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#0a0a1a"/>
+<!-- grid lines -->
+<g stroke="rgba(255,255,255,0.06)" stroke-width="1">
+<line x1="130" y1="20" x2="130" y2="240"/>
+<line x1="155" y1="20" x2="155" y2="240"/>
+<line x1="180" y1="20" x2="180" y2="240"/>
+<line x1="205" y1="20" x2="205" y2="240"/>
+<line x1="230" y1="20" x2="230" y2="240"/>
+<line x1="255" y1="20" x2="255" y2="240"/>
+<line x1="280" y1="20" x2="280" y2="240"/>
+</g>
+<!-- Locked blocks at bottom -->
+<g>
+<!-- row bottom -->
+<rect x="130" y="215" width="24" height="24" rx="2" fill="#f00" opacity="0.9"/>
+<rect x="155" y="215" width="24" height="24" rx="2" fill="#f00" opacity="0.9"/>
+<rect x="205" y="215" width="24" height="24" rx="2" fill="#0000f0" opacity="0.9"/>
+<rect x="230" y="215" width="24" height="24" rx="2" fill="#0000f0" opacity="0.9"/>
+<rect x="255" y="215" width="24" height="24" rx="2" fill="#0000f0" opacity="0.9"/>
+<!-- row 2 -->
+<rect x="155" y="190" width="24" height="24" rx="2" fill="#f0a000" opacity="0.9"/>
+<rect x="180" y="190" width="24" height="24" rx="2" fill="#f0a000" opacity="0.9"/>
+<rect x="205" y="190" width="24" height="24" rx="2" fill="#f0a000" opacity="0.9"/>
+<rect x="130" y="190" width="24" height="24" rx="2" fill="#00f000" opacity="0.9"/>
+<!-- row 3 -->
+<rect x="130" y="165" width="24" height="24" rx="2" fill="#00f000" opacity="0.9"/>
+<rect x="155" y="165" width="24" height="24" rx="2" fill="#00f000" opacity="0.9"/>
+</g>
+<!-- Falling T-piece -->
+<g>
+<rect x="180" y="90" width="24" height="24" rx="2" fill="#a000f0"/>
+<rect x="155" y="115" width="24" height="24" rx="2" fill="#a000f0"/>
+<rect x="180" y="115" width="24" height="24" rx="2" fill="#a000f0"/>
+<rect x="205" y="115" width="24" height="24" rx="2" fill="#a000f0"/>
+</g>
+<!-- I-piece on right as "next" -->
+<rect x="310" y="30" width="60" height="18" rx="3" fill="rgba(255,255,255,0.1)"/>
+<text x="340" y="26" font-family="Arial" font-size="10" fill="#888" text-anchor="middle">NEXT</text>
+<rect x="316" y="35" width="12" height="12" rx="1" fill="#00f0f0"/>
+<rect x="328" y="35" width="12" height="12" rx="1" fill="#00f0f0"/>
+<rect x="340" y="35" width="12" height="12" rx="1" fill="#00f0f0"/>
+<rect x="352" y="35" width="12" height="12" rx="1" fill="#00f0f0"/>
+<!-- Title -->
+<text x="200" y="275" font-family="Arial Black, sans-serif" font-size="34" font-weight="900" fill="#00c6ff" text-anchor="middle" style="text-shadow:0 0 10px rgba(0,200,255,0.5)">BLOCK DROP</text>
+</svg>
