@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Color Sort</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#1a1a2e}
+body{display:flex;flex-direction:column;align-items:center;font-family:Arial,sans-serif;background:linear-gradient(180deg,#1a1a2e 0%,#2d1b69 100%);min-height:100%}
+canvas{display:block}
+.head{width:100%;padding:10px 16px 6px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.sb{background:rgba(0,0,0,.45);border:2px solid rgba(140,100,255,.5);border-radius:12px;padding:6px 14px;text-align:center;min-width:64px}
+.sl{color:rgba(180,150,255,.85);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}
+.sv{color:#fff;font-size:clamp(16px,4.5vw,22px);font-weight:bold;line-height:1.2;text-shadow:0 0 10px rgba(140,100,255,.7)}
+.ubtn{background:rgba(0,0,0,.45);border:2px solid rgba(140,100,255,.5);border-radius:12px;padding:8px 16px;color:#fff;font:bold clamp(13px,3.5vw,16px) Arial,sans-serif;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-shadow:0 0 8px rgba(140,100,255,.5)}
+.ubtn:active{transform:scale(.94);background:rgba(100,60,200,.4)}
+.cw{flex:1;width:100%;display:flex;align-items:center;justify-content:center}
+.ob{position:absolute;inset:0;background:rgba(10,8,30,.92);z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:20;padding:24px;text-align:center}
+.ov.hidden,.ob.hidden{display:none}
+.ov h1{font:900 clamp(40px,11vw,72px) Arial,sans-serif;background:linear-gradient(180deg,#b366ff,#ff66b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(3px 3px 0 #000);letter-spacing:3px;line-height:1}
+.sub{color:rgba(180,150,255,.85);font-size:14px;letter-spacing:3px}
+.btn{background:linear-gradient(180deg,#9b59ff,#6c2bd9);color:#fff;border:2px solid rgba(255,255,255,.35);padding:16px 54px;font:900 clamp(17px,4.5vw,22px) Arial,sans-serif;border-radius:50px;letter-spacing:3px;box-shadow:0 6px 28px rgba(120,50,255,.55);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.wt{font:bold clamp(20px,5.5vw,32px) Arial,sans-serif;color:#e0c0ff;text-shadow:2px 2px 0 #000;letter-spacing:1px}
+.ws{color:rgba(200,180,255,.8);font-size:clamp(13px,3.2vw,16px)}
+</style>
+</head>
+<body>
+<div class="head">
+<div class="sb"><div class="sl">Level</div><div class="sv" id="hLvl">1</div></div>
+<button class="ubtn" id="hUndo" ontouchstart="">&#8630; Undo</button>
+</div>
+<div class="cw"><canvas id="gc"></canvas></div>
+<div class="ob" id="ob1"></div>
+<div class="ov" id="ov1">
+<h1>COLOR<br>SORT</h1>
+<div class="sub">SORT THE COLORS</div>
+<button class="btn" id="bPlay" ontouchstart="">&#9654; PLAY</button>
+</div>
+<div class="ob hidden" id="ob2"></div>
+<div class="ov hidden" id="ov2">
+<h1>LEVEL<br>DONE!</h1>
+<div class="wt" id="wTxt">Level 1 Complete</div>
+<div class="ws">All colors sorted!</div>
+<button class="btn" id="bNext" ontouchstart="">NEXT LEVEL</button>
+</div>
+<script>
+(function(){'use strict';
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+
+var canvas=document.getElementById('gc');
+var ctx=canvas.getContext('2d');
+var hLvl=document.getElementById('hLvl');
+var hUndo=document.getElementById('hUndo');
+var ob1=document.getElementById('ob1'),ov1=document.getElementById('ov1');
+var ob2=document.getElementById('ob2'),ov2=document.getElementById('ov2');
+var wTxt=document.getElementById('wTxt');
+var bPlay=document.getElementById('bPlay'),bNext=document.getElementById('bNext');
+
+var COLORS=['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#e91e90','#00bcd4'];
+var MAX_SEG=4;
+var tubes=[];
+var selected=-1;
+var level=1;
+var undoStack=[];
+var animating=false;
+var animId=null;
+var gameStarted=false;
+var W=0,H=0;
+var tubeW=0,tubeH=0,segH=0;
+var numColors=4;
+var numTubes=6;
+var dpr=1;
+
+/* --- roundRect polyfill --- */
+if(!CanvasRenderingContext2D.prototype.roundRect){
+CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,radii){
+var r=typeof radii==='number'?radii:radii[0];
+if(r>w/2)r=w/2;if(r>h/2)r=h/2;
+this.moveTo(x+r,y);
+this.arcTo(x+w,y,x+w,y+h,r);
+this.arcTo(x+w,y+h,x,y+h,r);
+this.arcTo(x,y+h,x,y,r);
+this.arcTo(x,y,x+w,y,r);
+this.closePath();
+};
+}
+
+/* --- persistence --- */
+function loadLevel(){
+var s=localStorage.getItem('cs_lvl');
+if(s){level=parseInt(s)||1;}
+}
+function saveLevel(){
+localStorage.setItem('cs_lvl',''+level);
+}
+
+/* --- level config --- */
+function getLevelConfig(lv){
+var nc=Math.min(3+lv,8);
+return{numColors:nc,numTubes:nc+2};
+}
+
+/* --- shuffle helper --- */
+function shuffle(arr){
+for(var i=arr.length-1;i>0;i--){
+var j=Math.floor(Math.random()*(i+1));
+var t=arr[i];arr[i]=arr[j];arr[j]=t;
+}
+}
+
+/* --- generate a solvable puzzle --- */
+function generatePuzzle(){
+var cfg=getLevelConfig(level);
+numColors=cfg.numColors;
+numTubes=cfg.numTubes;
+
+var attempts=0;
+while(attempts<200){
+attempts++;
+var pool=[];
+for(var c=0;c<numColors;c++){
+for(var s=0;s<MAX_SEG;s++) pool.push(c);
+}
+shuffle(pool);
+
+var tb=[];
+for(var i=0;i<numColors;i++){
+tb.push(pool.slice(i*MAX_SEG,(i+1)*MAX_SEG));
+}
+/* add empty tubes */
+for(var i=0;i<2;i++) tb.push([]);
+
+/* reject trivially solved (any tube already mono-filled) */
+var hasMono=false;
+for(var i=0;i<numColors;i++){
+var a=true;
+for(var j=1;j<tb[i].length;j++){if(tb[i][j]!==tb[i][0]){a=false;break;}}
+if(a){hasMono=true;break;}
+}
+if(!hasMono) return tb;
+}
+/* fallback: return last attempt */
+return tb;
+}
+
+/* --- init level --- */
+function initLevel(){
+tubes=generatePuzzle();
+undoStack=[];
+selected=-1;
+animating=false;
+if(animId){cancelAnimationFrame(animId);animId=null;}
+hLvl.textContent=level;
+calcLayout();
+draw();
+}
+
+/* --- layout --- */
+var rowLayout=[];
+
+function buildRowLayout(){
+/* distribute tubes evenly across rows */
+rowLayout=[];
+if(numTubes<=5){
+rowLayout=[numTubes];
+}else if(numTubes<=8){
+/* split evenly: e.g. 6->3+3, 7->4+3, 8->4+4 */
+var top=Math.ceil(numTubes/2);
+rowLayout=[top,numTubes-top];
+}else{
+/* 9->5+4, 10->5+5 */
+var top=Math.ceil(numTubes/2);
+rowLayout=[top,numTubes-top];
+}
+}
+
+function calcLayout(){
+var cw=canvas.parentElement.clientWidth;
+var ch=canvas.parentElement.clientHeight;
+dpr=window.devicePixelRatio||1;
+W=cw;H=ch;
+canvas.width=Math.round(cw*dpr);
+canvas.height=Math.round(ch*dpr);
+canvas.style.width=cw+'px';
+canvas.style.height=ch+'px';
+ctx.setTransform(dpr,0,0,dpr,0,0);
+
+if(!gameStarted||tubes.length===0) return;
+
+buildRowLayout();
+var maxInRow=0;
+for(var i=0;i<rowLayout.length;i++){
+if(rowLayout[i]>maxInRow) maxInRow=rowLayout[i];
+}
+var rows=rowLayout.length;
+
+tubeW=Math.min(Math.floor((W-24)/(maxInRow+0.4)),50);
+var maxH=Math.floor((H-30-(rows-1)*36)/rows);
+tubeH=Math.min(maxH,200);
+segH=Math.floor((tubeH-tubeW*0.5-4)/MAX_SEG);
+if(segH<16)segH=16;
+tubeH=segH*MAX_SEG+Math.floor(tubeW*0.5)+4;
+}
+
+function getTubePos(idx){
+/* figure out which row and column this tube is in */
+var row=0,col=idx;
+var count=0;
+for(var r=0;r<rowLayout.length;r++){
+if(idx<count+rowLayout[r]){
+row=r;
+col=idx-count;
+break;
+}
+count+=rowLayout[r];
+}
+var inRow=rowLayout[row];
+var rows=rowLayout.length;
+var gap=Math.floor((W-inRow*tubeW)/(inRow+1));
+if(gap<8)gap=8;
+var sx=Math.floor((W-inRow*tubeW-(inRow-1)*gap)/2);
+var totalH=rows*tubeH+(rows-1)*36;
+var sy=Math.floor((H-totalH)/2);
+if(sy<8)sy=8;
+var x=sx+col*(tubeW+gap);
+var y=sy+row*(tubeH+36);
+return{x:x,y:y};
+}
+
+/* --- drawing --- */
+function drawRoundedTube(x,y,w,h,sel){
+var r=w/2;
+ctx.save();
+if(sel){
+ctx.shadowColor='rgba(160,120,255,0.85)';
+ctx.shadowBlur=20;
+}
+ctx.beginPath();
+ctx.moveTo(x,y);
+ctx.lineTo(x,y+h-r);
+ctx.arc(x+r,y+h-r,r,Math.PI,0,true);
+ctx.lineTo(x+w,y);
+ctx.strokeStyle=sel?'rgba(180,140,255,0.95)':'rgba(255,255,255,0.3)';
+ctx.lineWidth=sel?2.5:1.5;
+ctx.stroke();
+ctx.restore();
+
+/* glass fill */
+ctx.save();
+ctx.beginPath();
+ctx.moveTo(x+1,y);
+ctx.lineTo(x+1,y+h-r);
+ctx.arc(x+r,y+h-r,r-1,Math.PI,0,true);
+ctx.lineTo(x+w-1,y);
+ctx.closePath();
+ctx.fillStyle='rgba(255,255,255,0.05)';
+ctx.fill();
+ctx.restore();
+
+/* glass shine */
+ctx.save();
+ctx.beginPath();
+ctx.rect(x+3,y+4,4,h-r-8);
+ctx.fillStyle='rgba(255,255,255,0.07)';
+ctx.fill();
+ctx.restore();
+}
+
+function drawSegment(x,tubeY,tubeHt,segIndex,colorIdx,isBottom){
+var r=tubeW/2;
+var segY=tubeY+tubeHt-Math.floor(r)-4-(segIndex+1)*segH;
+var col=COLORS[colorIdx];
+
+ctx.save();
+ctx.beginPath();
+if(isBottom){
+/* bottom segment clips into the rounded area */
+var botY=segY+segH;
+ctx.moveTo(x+2,segY);
+ctx.lineTo(x+2,botY);
+/* extend down to the arc */
+var extendTo=tubeY+tubeHt-r;
+if(botY<extendTo) ctx.lineTo(x+2,extendTo);
+ctx.arc(x+r,tubeY+tubeHt-r,r-2,Math.PI,0,true);
+if(botY<extendTo) ctx.lineTo(x+tubeW-2,botY);
+ctx.lineTo(x+tubeW-2,segY);
+ctx.closePath();
+}else{
+ctx.rect(x+2,segY,tubeW-4,segH);
+}
+ctx.fillStyle=col;
+ctx.fill();
+
+/* liquid shine */
+ctx.fillStyle='rgba(255,255,255,0.18)';
+ctx.fillRect(x+4,segY+1,5,segH-2);
+/* darker edge */
+ctx.fillStyle='rgba(0,0,0,0.08)';
+ctx.fillRect(x+tubeW-7,segY+1,4,segH-2);
+ctx.restore();
+}
+
+function drawLiftedSegments(x,y,segs){
+for(var i=0;i<segs.length;i++){
+var sy=y-i*(segH+2);
+ctx.save();
+ctx.beginPath();
+ctx.roundRect(x+1,sy,tubeW-2,segH,5);
+ctx.fillStyle=COLORS[segs[i]];
+ctx.fill();
+ctx.fillStyle='rgba(255,255,255,0.18)';
+ctx.fillRect(x+4,sy+1,5,segH-2);
+ctx.restore();
+}
+}
+
+function topConsecutive(tb){
+/* returns array of top consecutive same-color indices (color values) */
+if(tb.length===0) return[];
+var c=tb[tb.length-1];
+var res=[];
+for(var i=tb.length-1;i>=0;i--){
+if(tb[i]===c) res.push(tb[i]);
+else break;
+}
+return res;
+}
+
+function drawTubeAt(idx,skipTop){
+var pos=getTubePos(idx);
+var x=pos.x,y=pos.y;
+var tb=tubes[idx];
+var isSel=(idx===selected);
+
+drawRoundedTube(x,y,tubeW,tubeH,isSel);
+
+var liftCount=0;
+if(skipTop&&tb.length>0){
+liftCount=topConsecutive(tb).length;
+}
+
+for(var s=0;s<tb.length-liftCount;s++){
+drawSegment(x,y,tubeH,s,tb[s],s===0);
+}
+
+if(skipTop&&liftCount>0){
+var lifted=[];
+for(var i=tb.length-liftCount;i<tb.length;i++){
+lifted.push(tb[i]);
+}
+var ly=y-segH-10;
+drawLiftedSegments(x,ly,lifted);
+}
+}
+
+function draw(){
+ctx.clearRect(0,0,W,H);
+if(!gameStarted||tubes.length===0) return;
+for(var i=0;i<tubes.length;i++){
+drawTubeAt(i,i===selected);
+}
+}
+
+/* --- game logic --- */
+function topColor(tb){
+if(tb.length===0) return-1;
+return tb[tb.length-1];
+}
+
+function topCount(tb){
+if(tb.length===0) return 0;
+var c=tb[tb.length-1];
+var n=0;
+for(var i=tb.length-1;i>=0;i--){
+if(tb[i]===c) n++;
+else break;
+}
+return n;
+}
+
+function canPour(from,to){
+if(from===to) return false;
+var f=tubes[from],t=tubes[to];
+if(f.length===0) return false;
+var fc=topColor(f);
+var moveN=topCount(f);
+if(t.length===0){
+/* don't pour a full mono-tube into empty (pointless) */
+if(f.length===moveN) return false;
+return true;
+}
+if(topColor(t)!==fc) return false;
+var space=MAX_SEG-t.length;
+return space>0;
+}
+
+function undo(){
+if(undoStack.length===0||animating) return;
+var snap=undoStack.pop();
+var f=tubes[snap.from],t=tubes[snap.to];
+for(var i=0;i<snap.moved.length;i++){
+t.pop();
+f.push(snap.moved[i]);
+}
+selected=-1;
+draw();
+}
+
+function checkWin(){
+for(var i=0;i<tubes.length;i++){
+var tb=tubes[i];
+if(tb.length===0) continue;
+if(tb.length!==MAX_SEG) return false;
+for(var j=1;j<tb.length;j++){
+if(tb[j]!==tb[0]) return false;
+}
+}
+return true;
+}
+
+function showWin(){
+wTxt.textContent='Level '+level+' Complete';
+ob2.classList.remove('hidden');
+ov2.classList.remove('hidden');
+}
+
+/* --- pour animation --- */
+function animatePour(from,to){
+animating=true;
+var f=tubes[from],t=tubes[to];
+var fc=topColor(f);
+var moveN=topCount(f);
+var space=t.length===0?MAX_SEG:(MAX_SEG-t.length);
+var n=Math.min(moveN,space);
+
+/* remove segments from source */
+var segs=[];
+for(var i=0;i<n;i++) segs.push(f.pop());
+
+var posF=getTubePos(from);
+var posT=getTubePos(to);
+
+/* keyframes: lift up, arc across, drop down */
+var phase=0,tick=0;
+var dur1=10,dur2=14,dur3=10;
+
+/* start position: above source tube */
+var sx=posF.x,sy=posF.y-segH*segs.length-14;
+/* arc top */
+var arcY=Math.min(posF.y,posT.y)-segH*segs.length-40;
+/* end position: inside destination tube */
+var ex=posT.x;
+var destSlots=t.length+segs.length;
+var r=tubeW/2;
+var ey=posT.y+tubeH-Math.floor(r)-4-destSlots*segH;
+
+function ease(p){return p*p*(3-2*p);}
+
+function step(){
+ctx.clearRect(0,0,W,H);
+for(var i=0;i<tubes.length;i++){
+drawTubeAt(i,false);
+}
+
+var cx,cy,p;
+
+if(phase===0){
+/* lift up from tube */
+tick++;
+p=ease(Math.min(tick/dur1,1));
+cx=sx;
+cy=posF.y+(sy-posF.y)*p;
+drawLiftedSegments(cx,cy,segs);
+if(tick>=dur1){phase=1;tick=0;}
+animId=requestAnimationFrame(step);
+}else if(phase===1){
+/* arc across */
+tick++;
+p=ease(Math.min(tick/dur2,1));
+cx=sx+(ex-sx)*p;
+cy=sy+(arcY-sy)*Math.sin(p*Math.PI)*0.6+sy*(1-p)+((p<0.5)?sy:ey)*p;
+/* smoother: just lerp x, parabola y */
+var midY=arcY;
+if(p<=0.5){
+var pp=p*2;
+cy=sy+(midY-sy)*pp;
+}else{
+var pp=(p-0.5)*2;
+cy=midY+(ey-midY)*pp;
+}
+drawLiftedSegments(cx,cy,segs);
+if(tick>=dur2){phase=2;tick=0;}
+animId=requestAnimationFrame(step);
+}else if(phase===2){
+/* drop into tube */
+tick++;
+p=ease(Math.min(tick/dur3,1));
+cx=ex;
+var dropStart=posT.y-segH*segs.length-14;
+cy=dropStart+(ey-dropStart)*p;
+drawLiftedSegments(cx,cy,segs);
+if(tick>=dur3){
+/* commit the move */
+for(var i=segs.length-1;i>=0;i--) t.push(segs[i]);
+undoStack.push({from:from,to:to,moved:segs.slice()});
+animating=false;
+selected=-1;
+draw();
+if(checkWin()) setTimeout(showWin,400);
+return;
+}
+animId=requestAnimationFrame(step);
+}
+}
+animId=requestAnimationFrame(step);
+}
+
+/* --- input --- */
+function hitTest(px,py){
+for(var i=0;i<tubes.length;i++){
+var pos=getTubePos(i);
+if(px>=pos.x-8&&px<=pos.x+tubeW+8&&py>=pos.y-segH*2-16&&py<=pos.y+tubeH+8){
+return i;
+}
+}
+return-1;
+}
+
+function handleTap(px,py){
+if(animating) return;
+var idx=hitTest(px,py);
+if(idx<0){selected=-1;draw();return;}
+
+if(selected<0){
+if(tubes[idx].length>0){selected=idx;draw();}
+}else{
+if(idx===selected){selected=-1;draw();return;}
+if(canPour(selected,idx)){
+var from=selected;
+selected=-1;
+animatePour(from,idx);
+}else{
+selected=tubes[idx].length>0?idx:-1;
+draw();
+}
+}
+}
+
+canvas.addEventListener('pointerdown',function(e){
+e.preventDefault();
+e.stopPropagation();
+var rect=canvas.getBoundingClientRect();
+handleTap(e.clientX-rect.left,e.clientY-rect.top);
+});
+
+hUndo.addEventListener('pointerdown',function(e){
+e.stopPropagation();
+undo();
+});
+
+bPlay.addEventListener('pointerdown',function(e){
+e.stopPropagation();
+ob1.classList.add('hidden');
+ov1.classList.add('hidden');
+gameStarted=true;
+loadLevel();
+initLevel();
+});
+
+bNext.addEventListener('pointerdown',function(e){
+e.stopPropagation();
+ob2.classList.add('hidden');
+ov2.classList.add('hidden');
+level++;
+saveLevel();
+initLevel();
+});
+
+window.addEventListener('resize',function(){
+calcLayout();
+draw();
+});
+
+/* initial sizing (canvas visible behind overlay) */
+loadLevel();
+calcLayout();
+
+})();
+</script>
+</body>
+</html>

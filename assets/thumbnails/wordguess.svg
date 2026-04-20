@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#121213"/>
+<!-- tile grid -->
+<g font-family="Arial Black, sans-serif" font-weight="900" text-anchor="middle" dominant-baseline="central">
+<!-- row 1 - CRANE -->
+<rect x="100" y="25" width="38" height="38" rx="3" fill="#538d4e"/><text x="119" y="45" font-size="20" fill="#fff">C</text>
+<rect x="143" y="25" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="162" y="45" font-size="20" fill="#fff">R</text>
+<rect x="186" y="25" width="38" height="38" rx="3" fill="#b59f3b"/><text x="205" y="45" font-size="20" fill="#fff">A</text>
+<rect x="229" y="25" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="248" y="45" font-size="20" fill="#fff">N</text>
+<rect x="272" y="25" width="38" height="38" rx="3" fill="#538d4e"/><text x="291" y="45" font-size="20" fill="#fff">E</text>
+<!-- row 2 - PLUMB -->
+<rect x="100" y="70" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="119" y="90" font-size="20" fill="#fff">P</text>
+<rect x="143" y="70" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="162" y="90" font-size="20" fill="#fff">L</text>
+<rect x="186" y="70" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="205" y="90" font-size="20" fill="#fff">U</text>
+<rect x="229" y="70" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="248" y="90" font-size="20" fill="#fff">M</text>
+<rect x="272" y="70" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="291" y="90" font-size="20" fill="#fff">B</text>
+<!-- row 3 - CHASE -->
+<rect x="100" y="115" width="38" height="38" rx="3" fill="#538d4e"/><text x="119" y="135" font-size="20" fill="#fff">C</text>
+<rect x="143" y="115" width="38" height="38" rx="3" fill="#b59f3b"/><text x="162" y="135" font-size="20" fill="#fff">H</text>
+<rect x="186" y="115" width="38" height="38" rx="3" fill="#538d4e"/><text x="205" y="135" font-size="20" fill="#fff">A</text>
+<rect x="229" y="115" width="38" height="38" rx="3" fill="#3a3a3c"/><text x="248" y="135" font-size="20" fill="#fff">S</text>
+<rect x="272" y="115" width="38" height="38" rx="3" fill="#538d4e"/><text x="291" y="135" font-size="20" fill="#fff">E</text>
+<!-- row 4 - empty -->
+<rect x="100" y="160" width="38" height="38" rx="3" fill="#3a3a3c" opacity="0.5"/>
+<rect x="143" y="160" width="38" height="38" rx="3" fill="#3a3a3c" opacity="0.5"/>
+<rect x="186" y="160" width="38" height="38" rx="3" fill="#3a3a3c" opacity="0.5"/>
+<rect x="229" y="160" width="38" height="38" rx="3" fill="#3a3a3c" opacity="0.5"/>
+<rect x="272" y="160" width="38" height="38" rx="3" fill="#3a3a3c" opacity="0.5"/>
+</g>
+<!-- keyboard hint row -->
+<g font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle">
+<rect x="80" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="92" y="234" font-size="12" fill="#fff">Q</text>
+<rect x="108" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="120" y="234" font-size="12" fill="#fff">W</text>
+<rect x="136" y="215" width="24" height="30" rx="3" fill="#538d4e"/><text x="148" y="234" font-size="12" fill="#fff">E</text>
+<rect x="164" y="215" width="24" height="30" rx="3" fill="#3a3a3c"/><text x="176" y="234" font-size="12" fill="#fff">R</text>
+<rect x="192" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="204" y="234" font-size="12" fill="#fff">T</text>
+<rect x="220" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="232" y="234" font-size="12" fill="#fff">Y</text>
+<rect x="248" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="260" y="234" font-size="12" fill="#fff">U</text>
+<rect x="276" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="288" y="234" font-size="12" fill="#fff">I</text>
+<rect x="304" y="215" width="24" height="30" rx="3" fill="#818384"/><text x="316" y="234" font-size="12" fill="#fff">O</text>
+</g>
+<!-- title -->
+<text x="200" y="280" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#538d4e" text-anchor="middle">WORD GUESS</text>
+</svg>

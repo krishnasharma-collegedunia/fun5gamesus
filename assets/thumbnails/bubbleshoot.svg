@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#0a0a2e"/>
+<!-- hex grid bubbles -->
+<g>
+<!-- row 1 -->
+<circle cx="120" cy="40" r="22" fill="#e74c3c"/><circle cx="120" cy="40" r="8" fill="#ff7675" opacity="0.5"/>
+<circle cx="166" cy="40" r="22" fill="#3498db"/><circle cx="166" cy="40" r="8" fill="#74b9ff" opacity="0.5"/>
+<circle cx="212" cy="40" r="22" fill="#2ecc71"/><circle cx="212" cy="40" r="8" fill="#55efc4" opacity="0.5"/>
+<circle cx="258" cy="40" r="22" fill="#f39c12"/><circle cx="258" cy="40" r="8" fill="#ffeaa7" opacity="0.5"/>
+<circle cx="304" cy="40" r="22" fill="#9b59b6"/><circle cx="304" cy="40" r="8" fill="#a29bfe" opacity="0.5"/>
+<!-- row 2 offset -->
+<circle cx="143" cy="80" r="22" fill="#2ecc71"/><circle cx="143" cy="80" r="8" fill="#55efc4" opacity="0.5"/>
+<circle cx="189" cy="80" r="22" fill="#e74c3c"/><circle cx="189" cy="80" r="8" fill="#ff7675" opacity="0.5"/>
+<circle cx="235" cy="80" r="22" fill="#9b59b6"/><circle cx="235" cy="80" r="8" fill="#a29bfe" opacity="0.5"/>
+<circle cx="281" cy="80" r="22" fill="#3498db"/><circle cx="281" cy="80" r="8" fill="#74b9ff" opacity="0.5"/>
+<!-- row 3 -->
+<circle cx="120" cy="120" r="22" fill="#f39c12"/><circle cx="120" cy="120" r="8" fill="#ffeaa7" opacity="0.5"/>
+<circle cx="166" cy="120" r="22" fill="#9b59b6"/><circle cx="166" cy="120" r="8" fill="#a29bfe" opacity="0.5"/>
+<circle cx="212" cy="120" r="22" fill="#3498db"/><circle cx="212" cy="120" r="8" fill="#74b9ff" opacity="0.5"/>
+<circle cx="258" cy="120" r="22" fill="#e74c3c"/><circle cx="258" cy="120" r="8" fill="#ff7675" opacity="0.5"/>
+<circle cx="304" cy="120" r="22" fill="#2ecc71"/><circle cx="304" cy="120" r="8" fill="#55efc4" opacity="0.5"/>
+</g>
+<!-- aim line -->
+<line x1="200" y1="250" x2="166" y2="120" stroke="#fff" stroke-width="2" stroke-dasharray="6,4" opacity="0.6"/>
+<!-- shooter bubble -->
+<circle cx="200" cy="250" r="22" fill="#e74c3c"/><circle cx="200" cy="250" r="8" fill="#ff7675" opacity="0.5"/>
+<!-- shooter base -->
+<polygon points="180,270 200,260 220,270" fill="#555"/>
+<!-- title -->
+<text x="200" y="295" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#f1c40f" text-anchor="middle">BUBBLE SHOOTER</text>
+</svg>

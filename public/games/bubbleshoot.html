@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Bubble Shooter</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#0a1628}
+body{display:flex;align-items:center;justify-content:center}
+canvas{display:block;touch-action:none}
+.hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;pointer-events:none;z-index:10}
+.hb{background:rgba(0,0,0,.55);border:2px solid rgba(60,140,255,.5);border-radius:12px;padding:6px 12px;text-align:center;min-width:66px}
+.hl{color:rgba(80,170,255,.85);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:bold;font-family:Arial,sans-serif}
+.hv{color:#fff;font-size:22px;font-weight:bold;line-height:1.1;text-shadow:0 0 10px rgba(60,140,255,.7);font-family:Arial,sans-serif}
+.ob{position:absolute;inset:0;background:rgba(6,12,30,.93);z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:20;padding:24px;text-align:center}
+.ov.hidden,.ob.hidden{display:none}
+.ov h1{font:900 clamp(32px,9vw,60px) Arial,sans-serif;color:#44bbff;text-shadow:0 0 40px rgba(60,180,255,.8),0 0 80px rgba(60,180,255,.4),3px 3px 0 #000;letter-spacing:2px;line-height:1}
+.sub{color:rgba(80,180,255,.7);font:13px Arial,sans-serif;letter-spacing:3px}
+.fs{font:bold clamp(26px,7vw,42px) Arial,sans-serif;color:#44bbff;letter-spacing:2px;text-shadow:2px 2px 0 #000}
+.bst{color:#fff;font:clamp(14px,3.5vw,18px) Arial,sans-serif}
+.btn{background:linear-gradient(180deg,#44bbff,#1166aa);color:#fff;border:2px solid rgba(255,255,255,.35);padding:15px 50px;font:900 clamp(17px,4.5vw,22px) Arial,sans-serif;border-radius:50px;letter-spacing:3px;box-shadow:0 6px 28px rgba(40,140,255,.5);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.hn{color:rgba(80,180,255,.4);font:12px Arial,sans-serif;letter-spacing:2px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+<div class="hb"><div class="hl">Score</div><div class="hv" id="sc">0</div></div>
+<div class="hb"><div class="hl">Best</div><div class="hv" id="bt">0</div></div>
+</div>
+<div class="ob" id="ob1"></div>
+<div class="ov" id="ov1"><h1>BUBBLE<br>SHOOTER</h1><div class="sub">AIM &amp; SHOOT</div><button class="btn" id="b1" ontouchstart="">&#9654; PLAY</button><div class="hn">Match 3 to pop</div></div>
+<div class="ob hidden" id="ob2"></div>
+<div class="ov hidden" id="ov2"><h1 style="color:#ff5566;text-shadow:0 0 40px rgba(255,60,80,.8),3px 3px 0 #000">GAME<br>OVER</h1><div class="fs" id="fS">0</div><div class="bst" id="fB">Best: 0</div><button class="btn" id="b2" ontouchstart="">PLAY AGAIN</button></div>
+<script>
+(function(){'use strict';
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+
+var C=document.getElementById('c'),X=C.getContext('2d'),W,H;
+var scE=document.getElementById('sc'),btE=document.getElementById('bt');
+var fSE=document.getElementById('fS'),fBE=document.getElementById('fB');
+var ov1=document.getElementById('ov1'),ob1=document.getElementById('ob1');
+var ov2=document.getElementById('ov2'),ob2=document.getElementById('ob2');
+
+var COLORS=['#ee3344','#3388ff','#33cc55','#ffcc22','#aa44ee','#ff8822'];
+var RAD=14;
+var DIAM=RAD*2;
+var ROWH=DIAM*0.866;
+var grid=[];
+var COLS,MAXROWS,GRID_TOP,GRID_LEFT;
+var shooter,nextColor,aimAngle,aiming,shooting;
+var flyBubble,flyVx,flyVy;
+var FLY_SPEED=14;
+var particles,fallers;
+var score,best,run,last,shotCount,gameOver;
+var dangerLine;
+var SHOTS_PER_ROW=8;
+
+try{best=parseInt(localStorage.getItem('bsh_b'))||0}catch(e){best=0}
+btE.textContent=best;
+
+function sz(){
+W=C.width=window.innerWidth;
+H=C.height=window.innerHeight;
+COLS=Math.floor((W-4)/(DIAM));
+if(COLS<6)COLS=6;
+if(COLS>14)COLS=14;
+GRID_LEFT=(W-(COLS-1)*DIAM)/2;
+GRID_TOP=65;
+MAXROWS=Math.floor((H-200)/ROWH)+2;
+if(MAXROWS<12)MAXROWS=12;
+if(MAXROWS>22)MAXROWS=22;
+dangerLine=H-140;
+}
+
+function hide(e){e.classList.add('hidden')}
+function show(e){e.classList.remove('hidden')}
+
+function rndColor(){return Math.floor(Math.random()*6)}
+
+function getGridX(r,c){
+var offset=(r%2===1)?RAD:0;
+return GRID_LEFT+c*DIAM+offset;
+}
+function getGridY(r){
+return GRID_TOP+r*ROWH;
+}
+function getColCount(r){
+return(r%2===1)?COLS-1:COLS;
+}
+
+function initGrid(){
+grid=[];
+var startRows=5;
+var r,c,row,cc;
+for(r=0;r<MAXROWS;r++){
+row=[];
+cc=getColCount(r);
+for(c=0;c<cc;c++){
+if(r<startRows){
+row.push({color:rndColor()});
+}else{
+row.push(null);
+}
+}
+grid.push(row);
+}
+}
+
+function getActiveColors(){
+var used={};
+var r,c;
+for(r=0;r<grid.length;r++){
+for(c=0;c<grid[r].length;c++){
+if(grid[r][c])used[grid[r][c].color]=true;
+}
+}
+var arr=[];
+for(var k in used)arr.push(parseInt(k));
+return arr.length>0?arr:[0,1,2,3,4,5];
+}
+
+function rndActiveColor(){
+var ac=getActiveColors();
+return ac[Math.floor(Math.random()*ac.length)];
+}
+
+function rst(){
+sz();
+initGrid();
+particles=[];
+fallers=[];
+score=0;
+shotCount=0;
+gameOver=false;
+shooting=false;
+aiming=false;
+aimAngle=-Math.PI/2;
+flyBubble=null;
+shooter={color:rndActiveColor()};
+nextColor=rndActiveColor();
+scE.textContent='0';
+}
+
+function go(){
+rst();
+hide(ov1);hide(ob1);hide(ov2);hide(ob2);
+run=true;
+last=performance.now();
+requestAnimationFrame(loop);
+}
+
+function endGame(){
+run=false;
+gameOver=true;
+if(score>best){best=score;try{localStorage.setItem('bsh_b',best)}catch(e){}}
+btE.textContent=best;
+fSE.textContent=score;
+fBE.textContent='Best: '+best;
+show(ob2);show(ov2);
+}
+
+document.getElementById('b1').addEventListener('click',function(e){e.stopPropagation();go()});
+document.getElementById('b2').addEventListener('click',function(e){e.stopPropagation();go()});
+
+/* --- INPUT --- */
+var ptrDown=false;
+
+C.addEventListener('pointerdown',function(e){
+if(!run||gameOver||shooting)return;
+e.preventDefault();
+ptrDown=true;
+aiming=true;
+updateAim(e.clientX,e.clientY);
+});
+C.addEventListener('pointermove',function(e){
+if(!ptrDown||!aiming)return;
+e.preventDefault();
+updateAim(e.clientX,e.clientY);
+});
+C.addEventListener('pointerup',function(e){
+if(!ptrDown)return;
+e.preventDefault();
+ptrDown=false;
+if(aiming&&!shooting&&!gameOver&&run){
+shootBubble();
+}
+aiming=false;
+});
+C.addEventListener('pointercancel',function(){
+ptrDown=false;
+aiming=false;
+});
+
+function updateAim(mx,my){
+var sx=W/2,sy=H-100;
+var dx=mx-sx,dy=my-sy;
+var a=Math.atan2(dy,dx);
+if(a>-0.12)a=-0.12;
+if(a<-Math.PI+0.12)a=-Math.PI+0.12;
+aimAngle=a;
+}
+
+function shootBubble(){
+if(shooting||gameOver)return;
+flyVx=Math.cos(aimAngle)*FLY_SPEED;
+flyVy=Math.sin(aimAngle)*FLY_SPEED;
+flyBubble={x:W/2,y:H-100,color:shooter.color};
+shooting=true;
+}
+
+/* --- GRID LOGIC --- */
+function getNeighbors(r,c){
+var n=[];
+var even=(r%2===0);
+var dirs;
+if(even){
+dirs=[[-1,-1],[-1,0],[0,-1],[0,1],[1,-1],[1,0]];
+}else{
+dirs=[[-1,0],[-1,1],[0,-1],[0,1],[1,0],[1,1]];
+}
+var i,nr,nc;
+for(i=0;i<dirs.length;i++){
+nr=r+dirs[i][0];
+nc=c+dirs[i][1];
+if(nr>=0&&nr<grid.length&&nc>=0&&nc<getColCount(nr)){
+n.push({r:nr,c:nc});
+}
+}
+return n;
+}
+
+function findCluster(r,c,color){
+var visited={};
+var cluster=[];
+var stack=[{r:r,c:c}];
+var cur,key,nb,i,nk;
+while(stack.length>0){
+cur=stack.pop();
+key=cur.r+'_'+cur.c;
+if(visited[key])continue;
+visited[key]=true;
+if(!grid[cur.r]||!grid[cur.r][cur.c])continue;
+if(grid[cur.r][cur.c].color!==color)continue;
+cluster.push(cur);
+nb=getNeighbors(cur.r,cur.c);
+for(i=0;i<nb.length;i++){
+nk=nb[i].r+'_'+nb[i].c;
+if(!visited[nk])stack.push(nb[i]);
+}
+}
+return cluster;
+}
+
+function findFloating(){
+var connected={};
+var stack=[];
+var c,cur,key,nb,i,nk,r;
+for(c=0;c<getColCount(0);c++){
+if(grid[0]&&grid[0][c]){
+stack.push({r:0,c:c});
+}
+}
+while(stack.length>0){
+cur=stack.pop();
+key=cur.r+'_'+cur.c;
+if(connected[key])continue;
+connected[key]=true;
+nb=getNeighbors(cur.r,cur.c);
+for(i=0;i<nb.length;i++){
+nk=nb[i].r+'_'+nb[i].c;
+if(!connected[nk]&&grid[nb[i].r]&&grid[nb[i].r][nb[i].c]){
+stack.push(nb[i]);
+}
+}
+}
+var floating=[];
+for(r=0;r<grid.length;r++){
+for(c=0;c<grid[r].length;c++){
+if(grid[r][c]){
+key=r+'_'+c;
+if(!connected[key])floating.push({r:r,c:c});
+}
+}
+}
+return floating;
+}
+
+function nearestGridPos(bx,by){
+var bestR=-1,bestC=-1,bestD=999999;
+var r,c,cc,gx,gy,dd;
+for(r=0;r<grid.length;r++){
+cc=getColCount(r);
+for(c=0;c<cc;c++){
+if(grid[r][c])continue;
+gx=getGridX(r,c);
+gy=getGridY(r);
+dd=(bx-gx)*(bx-gx)+(by-gy)*(by-gy);
+if(dd<bestD){
+bestD=dd;bestR=r;bestC=c;
+}
+}
+}
+return{r:bestR,c:bestC,d:Math.sqrt(bestD)};
+}
+
+function spawnPop(x,y,col,count){
+var i,a,sp;
+for(i=0;i<count;i++){
+a=Math.random()*Math.PI*2;
+sp=Math.random()*5+2;
+particles.push({
+x:x,y:y,
+vx:Math.cos(a)*sp,
+vy:Math.sin(a)*sp-2,
+life:1,
+color:col,
+sz:Math.random()*4+2
+});
+}
+}
+
+function popCluster(cluster){
+var i,cr,cc,gx,gy,col;
+for(i=0;i<cluster.length;i++){
+cr=cluster[i].r;cc=cluster[i].c;
+gx=getGridX(cr,cc);
+gy=getGridY(cr,cc);
+col=COLORS[grid[cr][cc].color];
+spawnPop(gx,gy,col,10);
+grid[cr][cc]=null;
+}
+score+=cluster.length*10;
+}
+
+function dropFloating(floating){
+var i,fr,fc,gx,gy,col;
+for(i=0;i<floating.length;i++){
+fr=floating[i].r;fc=floating[i].c;
+gx=getGridX(fr,fc);
+gy=getGridY(fr,fc);
+col=COLORS[grid[fr][fc].color];
+fallers.push({x:gx,y:gy,vy:0,color:col,sz:RAD});
+spawnPop(gx,gy,col,5);
+grid[fr][fc]=null;
+}
+score+=floating.length*20;
+}
+
+function addRow(){
+var cc0=getColCount(0);
+var newIsEven=(cc0===COLS-1);
+var newCount=newIsEven?COLS:COLS-1;
+var newRow=[];
+var i;
+for(i=0;i<newCount;i++){
+newRow.push({color:rndActiveColor()});
+}
+grid.unshift(newRow);
+if(grid.length>MAXROWS)grid.pop();
+}
+
+function checkGameOver(){
+var r,c,gy;
+for(r=0;r<grid.length;r++){
+for(c=0;c<grid[r].length;c++){
+if(grid[r][c]){
+gy=getGridY(r);
+if(gy>=dangerLine){
+endGame();
+return true;
+}
+}
+}
+}
+return false;
+}
+
+function hitsGrid(bx,by){
+var r,c,gx,gy,dx,dy,dist;
+for(r=0;r<grid.length;r++){
+for(c=0;c<grid[r].length;c++){
+if(!grid[r][c])continue;
+gx=getGridX(r,c);
+gy=getGridY(r);
+dx=bx-gx;dy=by-gy;
+dist=dx*dx+dy*dy;
+if(dist<(DIAM-2)*(DIAM-2)){
+return true;
+}
+}
+}
+return false;
+}
+
+function placeBubble(){
+if(!flyBubble)return;
+var pos=nearestGridPos(flyBubble.x,flyBubble.y);
+if(pos.r<0){
+shooting=false;
+flyBubble=null;
+advanceShooter();
+return;
+}
+grid[pos.r][pos.c]={color:flyBubble.color};
+var cluster=findCluster(pos.r,pos.c,flyBubble.color);
+if(cluster.length>=3){
+popCluster(cluster);
+var floating=findFloating();
+if(floating.length>0)dropFloating(floating);
+}
+shooting=false;
+flyBubble=null;
+advanceShooter();
+scE.textContent=score;
+}
+
+function advanceShooter(){
+shooter.color=nextColor;
+nextColor=rndActiveColor();
+shotCount++;
+if(shotCount%SHOTS_PER_ROW===0){
+addRow();
+if(checkGameOver())return;
+}
+}
+
+/* --- UPDATE --- */
+function update(){
+if(!run)return;
+var i,p,f;
+if(flyBubble){
+flyBubble.x+=flyVx;
+flyBubble.y+=flyVy;
+if(flyBubble.x-RAD<=0){flyBubble.x=RAD;flyVx=Math.abs(flyVx);}
+if(flyBubble.x+RAD>=W){flyBubble.x=W-RAD;flyVx=-Math.abs(flyVx);}
+if(flyBubble.y-RAD<=GRID_TOP||hitsGrid(flyBubble.x,flyBubble.y)){
+placeBubble();
+}
+if(flyBubble&&flyBubble.y<-100){
+placeBubble();
+}
+}
+for(i=particles.length-1;i>=0;i--){
+p=particles[i];
+p.x+=p.vx;
+p.y+=p.vy;
+p.vy+=0.18;
+p.life-=0.028;
+if(p.life<=0)particles.splice(i,1);
+}
+for(i=fallers.length-1;i>=0;i--){
+f=fallers[i];
+f.vy+=0.6;
+f.y+=f.vy;
+f.sz*=0.99;
+if(f.y>H+60)fallers.splice(i,1);
+}
+}
+
+/* --- DRAWING --- */
+function hexToRgb(hex){
+return{
+r:parseInt(hex.slice(1,3),16),
+g:parseInt(hex.slice(3,5),16),
+b:parseInt(hex.slice(5,7),16)
+};
+}
+
+function drawBubble(x,y,colorIdx,radius){
+var col=COLORS[colorIdx];
+var rd=radius||RAD;
+var rgb=hexToRgb(col);
+var dr=Math.max(0,Math.floor(rgb.r*0.6));
+var dg=Math.max(0,Math.floor(rgb.g*0.6));
+var db=Math.max(0,Math.floor(rgb.b*0.6));
+var darkCol='rgb('+dr+','+dg+','+db+')';
+
+X.beginPath();
+X.arc(x,y,rd,0,Math.PI*2);
+var grad=X.createRadialGradient(x-rd*0.3,y-rd*0.35,rd*0.05,x,y,rd);
+grad.addColorStop(0,'rgba(255,255,255,0.55)');
+grad.addColorStop(0.35,col);
+grad.addColorStop(1,darkCol);
+X.fillStyle=grad;
+X.fill();
+X.lineWidth=0.8;
+X.strokeStyle='rgba(0,0,0,0.15)';
+X.stroke();
+
+X.beginPath();
+X.arc(x-rd*0.22,y-rd*0.22,rd*0.22,0,Math.PI*2);
+X.fillStyle='rgba(255,255,255,0.3)';
+X.fill();
+}
+
+function drawBubbleRaw(x,y,col,rd){
+var rgb=hexToRgb(col);
+var dr=Math.max(0,Math.floor(rgb.r*0.6));
+var dg=Math.max(0,Math.floor(rgb.g*0.6));
+var db=Math.max(0,Math.floor(rgb.b*0.6));
+var darkCol='rgb('+dr+','+dg+','+db+')';
+X.beginPath();
+X.arc(x,y,rd,0,Math.PI*2);
+var grad=X.createRadialGradient(x-rd*0.3,y-rd*0.35,rd*0.05,x,y,rd);
+grad.addColorStop(0,'rgba(255,255,255,0.4)');
+grad.addColorStop(0.35,col);
+grad.addColorStop(1,darkCol);
+X.fillStyle=grad;
+X.fill();
+}
+
+function drawBackground(){
+var grad=X.createLinearGradient(0,0,0,H);
+grad.addColorStop(0,'#0a1628');
+grad.addColorStop(0.5,'#0d1f3c');
+grad.addColorStop(1,'#081020');
+X.fillStyle=grad;
+X.fillRect(0,0,W,H);
+}
+
+function drawGrid(){
+var r,c,gx,gy;
+for(r=0;r<grid.length;r++){
+for(c=0;c<grid[r].length;c++){
+if(!grid[r][c])continue;
+gx=getGridX(r,c);
+gy=getGridY(r);
+if(gy<-10||gy>H+30)continue;
+drawBubble(gx,gy,grid[r][c].color);
+}
+}
+}
+
+function drawAimLine(){
+if(!aiming||shooting)return;
+var sx=W/2,sy=H-100;
+var dx=Math.cos(aimAngle);
+var dy=Math.sin(aimAngle);
+X.save();
+X.strokeStyle='rgba(255,255,255,0.45)';
+X.lineWidth=2;
+X.setLineDash([5,7]);
+
+var ax=sx,ay=sy;
+var segStartX=sx,segStartY=sy;
+var step=2;
+var maxSteps=500;
+var i;
+
+X.beginPath();
+X.moveTo(ax,ay);
+
+for(i=0;i<maxSteps;i++){
+ax+=dx*step;
+ay+=dy*step;
+if(ax-RAD<0){
+ax=RAD;
+dx=-dx;
+X.lineTo(ax,ay);
+}
+if(ax+RAD>W){
+ax=W-RAD;
+dx=-dx;
+X.lineTo(ax,ay);
+}
+if(ay<=GRID_TOP+RAD){
+X.lineTo(ax,ay);
+break;
+}
+var hitBub=false;
+for(var r=0;r<grid.length;r++){
+for(var c=0;c<grid[r].length;c++){
+if(!grid[r][c])continue;
+var gx=getGridX(r,c);
+var gy=getGridY(r);
+var ddx=ax-gx,ddy=ay-gy;
+if(ddx*ddx+ddy*ddy<(DIAM-2)*(DIAM-2)){
+hitBub=true;
+break;
+}
+}
+if(hitBub)break;
+}
+if(hitBub){
+X.lineTo(ax,ay);
+break;
+}
+}
+X.stroke();
+X.setLineDash([]);
+
+X.beginPath();
+X.arc(ax,ay,RAD,0,Math.PI*2);
+X.strokeStyle='rgba(255,255,255,0.2)';
+X.lineWidth=1.5;
+X.stroke();
+
+X.restore();
+}
+
+function drawShooter(){
+if(shooting)return;
+var sx=W/2,sy=H-100;
+drawBubble(sx,sy,shooter.color);
+X.save();
+X.strokeStyle='rgba(255,255,255,0.25)';
+X.lineWidth=2;
+X.beginPath();
+X.arc(sx,sy,RAD+5,0,Math.PI*2);
+X.stroke();
+X.restore();
+}
+
+function drawNext(){
+var nx=W/2+55,ny=H-50;
+X.save();
+X.fillStyle='rgba(255,255,255,0.35)';
+X.font='10px Arial,sans-serif';
+X.textAlign='center';
+X.fillText('NEXT',nx,ny-16);
+X.restore();
+drawBubble(nx,ny,nextColor,9);
+}
+
+function drawFlying(){
+if(!flyBubble)return;
+drawBubble(flyBubble.x,flyBubble.y,flyBubble.color);
+}
+
+function drawParticles(){
+var i,p;
+for(i=0;i<particles.length;i++){
+p=particles[i];
+X.save();
+X.globalAlpha=p.life;
+X.fillStyle=p.color;
+X.beginPath();
+X.arc(p.x,p.y,p.sz*p.life,0,Math.PI*2);
+X.fill();
+X.restore();
+}
+}
+
+function drawFallers(){
+var i,f;
+for(i=0;i<fallers.length;i++){
+f=fallers[i];
+X.save();
+X.globalAlpha=0.75;
+drawBubbleRaw(f.x,f.y,f.color,f.sz);
+X.restore();
+}
+}
+
+function drawDangerLine(){
+X.save();
+X.setLineDash([8,8]);
+X.strokeStyle='rgba(255,60,60,0.3)';
+X.lineWidth=1.5;
+X.beginPath();
+X.moveTo(0,dangerLine);
+X.lineTo(W,dangerLine);
+X.stroke();
+X.setLineDash([]);
+X.restore();
+}
+
+function drawShotInfo(){
+var left=SHOTS_PER_ROW-(shotCount%SHOTS_PER_ROW);
+X.save();
+X.fillStyle='rgba(255,255,255,0.28)';
+X.font='11px Arial,sans-serif';
+X.textAlign='center';
+X.fillText(left+' shots until new row',W/2,H-18);
+X.restore();
+}
+
+function drawShooterBase(){
+X.save();
+X.fillStyle='rgba(255,255,255,0.04)';
+X.beginPath();
+X.arc(W/2,H-100,40,0,Math.PI*2);
+X.fill();
+X.strokeStyle='rgba(100,160,255,0.15)';
+X.lineWidth=1.5;
+X.beginPath();
+X.arc(W/2,H-100,42,0,Math.PI*2);
+X.stroke();
+X.restore();
+}
+
+function draw(){
+drawBackground();
+drawDangerLine();
+drawGrid();
+drawShooterBase();
+drawAimLine();
+drawFlying();
+drawShooter();
+drawNext();
+drawParticles();
+drawFallers();
+drawShotInfo();
+}
+
+function loop(now){
+if(!run)return;
+var dt=(now-last)/16.67;
+if(dt>3)dt=3;
+last=now;
+update();
+draw();
+requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize',function(){
+sz();
+});
+
+sz();
+btE.textContent=best;
+
+})();
+</script>
+</body>
+</html>
