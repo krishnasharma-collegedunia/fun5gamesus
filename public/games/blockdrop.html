@@ -149,6 +149,7 @@ return gy;
 function draw(){
 ctx.fillStyle='#0a0a1a';
 ctx.fillRect(0,0,cv.width,cv.height);
+if(!grid)return;
 
 /* grid lines */
 ctx.strokeStyle='rgba(255,255,255,.04)';
