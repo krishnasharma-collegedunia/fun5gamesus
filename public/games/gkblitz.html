@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1a3a">
+<title>GK Blitz</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#1a1a3a;background:linear-gradient(160deg,#1a1a3a 0%,#2a1a4a 55%,#3a1a5a 100%);font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;color:#fff}
+body{display:flex;flex-direction:column;align-items:center;height:100dvh;position:relative}
+.wrap{width:100%;max-width:560px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 14px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.scr.hidden{display:none}
+.title{font-size:clamp(40px,11vw,68px);font-weight:900;letter-spacing:4px;text-align:center;background:linear-gradient(180deg,#ffd700 0%,#ff9e00 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(255,200,50,.2);line-height:1;margin-top:12px}
+.tag{font-size:clamp(11px,3vw,14px);text-align:center;color:rgba(255,255,255,.7);margin-top:6px;letter-spacing:1px}
+.ad-slot{border:2px dashed rgba(255,255,255,.25);color:rgba(255,255,255,.5);text-align:center;padding:12px;font-size:11px;letter-spacing:2px;border-radius:8px;margin:14px 4px;text-transform:uppercase;background:rgba(255,255,255,.03)}
+.sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,215,100,.8);margin:14px 4px 8px;font-weight:bold}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 4px}
+.opt-btn{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);color:#fff;padding:12px 8px;font-size:13px;font-weight:bold;font-family:inherit;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-transform:uppercase;transition:all .15s}
+.opt-btn.active{background:linear-gradient(180deg,#ffd700,#ff9e00);color:#1a1a3a;border-color:#fff;box-shadow:0 4px 18px rgba(255,180,0,.5)}
+.mode-row{display:flex;gap:8px;padding:0 4px;margin-top:6px}
+.mode-btn{flex:1;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);color:#fff;padding:12px;font-size:12px;font-weight:bold;font-family:inherit;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-align:center}
+.mode-btn.active{background:linear-gradient(180deg,#22c55e,#16a34a);color:#fff;border-color:#fff;box-shadow:0 4px 18px rgba(34,197,94,.5)}
+.mode-desc{font-size:11px;color:rgba(255,255,255,.5);padding:0 4px;margin-top:4px;text-align:center}
+.play-btn{display:block;margin:18px auto 8px;background:linear-gradient(180deg,#ff6b9d,#c2185b);color:#fff;border:3px solid rgba(255,255,255,.4);padding:16px 54px;font:900 clamp(18px,5vw,24px) inherit;border-radius:50px;letter-spacing:4px;box-shadow:0 8px 28px rgba(255,50,120,.5);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.play-btn:active{transform:scale(.96)}
+.best-line{text-align:center;font-size:12px;color:rgba(255,215,100,.9);margin-top:6px;letter-spacing:1px}
+.howto-box{margin:12px 4px 8px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(0,0,0,.2);overflow:hidden}
+.howto-head{padding:10px 14px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(255,215,100,.9);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.howto-body{padding:0 14px 12px;font-size:12px;line-height:1.7;color:rgba(255,255,255,.75);display:none}
+.howto-body.open{display:block}
+.howto-body ul{list-style:none;padding:0}
+.howto-body li{padding:2px 0}
+.howto-body li:before{content:"• ";color:#ffd700;margin-right:4px}
+
+/* Quiz screen */
+.q-head{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 10px;gap:8px}
+.q-info{display:flex;gap:6px;align-items:center}
+.q-counter{font-size:13px;font-weight:bold;color:#ffd700;letter-spacing:1px}
+.q-cat{font-size:10px;padding:4px 8px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#fff}
+.q-score{font-size:14px;font-weight:900;color:#fff;background:linear-gradient(180deg,#ffd700,#ff9e00);color:#1a1a3a;padding:4px 12px;border-radius:10px;letter-spacing:1px}
+.timer-bar{position:relative;height:8px;background:rgba(255,255,255,.15);border-radius:4px;margin:4px 4px 14px;overflow:hidden}
+.timer-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#22c55e,#ffd700,#ef4444);border-radius:4px;transition:width .2s linear}
+.qtime{text-align:center;font-size:12px;font-weight:bold;color:rgba(255,255,255,.75);margin:-8px 0 6px;letter-spacing:1px}
+.q-text{font-size:clamp(16px,4.4vw,22px);font-weight:bold;line-height:1.35;color:#fff;text-align:center;padding:18px 10px;background:rgba(0,0,0,.25);border-radius:14px;margin:6px 4px 14px;min-height:120px;display:flex;align-items:center;justify-content:center}
+.q-opts{display:flex;flex-direction:column;gap:10px;padding:0 4px}
+.q-opt{position:relative;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);color:#fff;padding:14px 14px 14px 44px;font-size:clamp(13px,3.6vw,16px);font-weight:600;font-family:inherit;border-radius:12px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;text-align:left;line-height:1.3;transition:background .12s,border-color .12s,transform .12s}
+.q-opt .letter{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:6px;background:rgba(255,215,100,.25);color:#ffd700;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;letter-spacing:0}
+.q-opt:active{transform:scale(.98)}
+.q-opt.correct{background:linear-gradient(180deg,rgba(34,197,94,.85),rgba(22,163,74,.85));border-color:#22c55e;color:#fff}
+.q-opt.correct .letter{background:#fff;color:#16a34a}
+.q-opt.wrong{background:linear-gradient(180deg,rgba(239,68,68,.85),rgba(185,28,28,.85));border-color:#ef4444;color:#fff}
+.q-opt.wrong .letter{background:#fff;color:#b91c1c}
+.q-opt.disabled{pointer-events:none;opacity:.7}
+.skip-row{display:flex;justify-content:center;margin-top:14px;padding:0 4px}
+.skip-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.8);padding:10px 30px;font-size:12px;font-weight:bold;font-family:inherit;border-radius:22px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:2px;text-transform:uppercase}
+.skip-btn:active{transform:scale(.96)}
+.feedback-pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);font-size:46px;font-weight:900;pointer-events:none;z-index:30;transition:transform .25s cubic-bezier(.5,1.6,.6,1);text-shadow:0 0 24px rgba(0,0,0,.6)}
+.feedback-pop.show{transform:translate(-50%,-50%) scale(1)}
+.feedback-pop.ok{color:#22c55e}
+.feedback-pop.no{color:#ef4444}
+.exp-box{margin:12px 4px 0;padding:12px 14px;background:rgba(255,215,100,.1);border:1px solid rgba(255,215,100,.3);border-radius:10px;font-size:13px;line-height:1.45;color:rgba(255,255,255,.9);display:none}
+.exp-box.show{display:block}
+.next-btn{display:block;margin:14px auto 6px;background:linear-gradient(180deg,#ffd700,#ff9e00);color:#1a1a3a;border:2px solid rgba(255,255,255,.4);padding:12px 40px;font:900 15px inherit;border-radius:30px;letter-spacing:3px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;display:none}
+.next-btn.show{display:block}
+.next-btn:active{transform:scale(.96)}
+.prog-bar{position:relative;height:6px;background:rgba(255,255,255,.15);border-radius:3px;margin:4px 4px 10px;overflow:hidden}
+.prog-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ffd700,#ff6b9d);border-radius:3px;transition:width .3s}
+
+/* End screen */
+.end-title{font-size:clamp(36px,9vw,56px);font-weight:900;letter-spacing:3px;text-align:center;background:linear-gradient(180deg,#ffd700 0%,#ff9e00 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:6px;line-height:1}
+.end-score{font-size:clamp(56px,15vw,90px);font-weight:900;color:#fff;text-align:center;line-height:1;margin:14px 0 4px;text-shadow:0 0 30px rgba(255,215,100,.5)}
+.end-lbl{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,215,100,.9);text-align:center;font-weight:bold}
+.end-stats{display:flex;gap:10px;padding:0 4px;margin-top:14px}
+.end-stat{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 6px;text-align:center}
+.es-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,215,100,.8);font-weight:bold}
+.es-val{font-size:clamp(18px,5vw,24px);font-weight:900;color:#fff;margin-top:2px}
+.cat-break{padding:0 4px;margin-top:14px}
+.cat-break-head{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,215,100,.9);margin-bottom:6px;font-weight:bold}
+.cat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(0,0,0,.2);border-radius:6px;margin-bottom:4px;font-size:13px}
+.cat-name{color:rgba(255,255,255,.85);font-weight:bold}
+.cat-score{color:#ffd700;font-weight:900}
+.end-best{text-align:center;font-size:13px;color:rgba(255,215,100,.9);margin-top:10px;letter-spacing:1px}
+.end-btns{display:flex;gap:8px;padding:0 4px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.e-btn{flex:1;min-width:130px;background:linear-gradient(180deg,#ff6b9d,#c2185b);color:#fff;border:2px solid rgba(255,255,255,.4);padding:13px 14px;font:900 13px inherit;border-radius:24px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.e-btn.alt{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+.e-btn:active{transform:scale(.96)}
+.share-btn{display:block;margin:10px auto 0;background:rgba(255,215,100,.15);border:1px solid rgba(255,215,100,.4);color:#ffd700;padding:10px 26px;font:bold 12px inherit;border-radius:22px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.share-btn.copied{background:rgba(34,197,94,.3);border-color:#22c55e;color:#fff}
+
+/* Category badge colors */
+.cat-history{background:rgba(239,68,68,.3);border-color:rgba(239,68,68,.6)}
+.cat-geography{background:rgba(34,197,94,.3);border-color:rgba(34,197,94,.6)}
+.cat-polity{background:rgba(59,130,246,.3);border-color:rgba(59,130,246,.6)}
+.cat-economy{background:rgba(168,85,247,.3);border-color:rgba(168,85,247,.6)}
+.cat-science{background:rgba(6,182,212,.3);border-color:rgba(6,182,212,.6)}
+.cat-culture{background:rgba(249,115,22,.3);border-color:rgba(249,115,22,.6)}
+
+.flash-ok{animation:flashOk .5s ease}
+.flash-no{animation:flashNo .5s ease}
+@keyframes flashOk{0%{background:rgba(34,197,94,.4)}100%{background:transparent}}
+@keyframes flashNo{0%{background:rgba(239,68,68,.4)}100%{background:transparent}}
+.flash-layer{position:absolute;inset:0;pointer-events:none;z-index:15}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="scr" id="s_start">
+<div class="title">GK BLITZ</div>
+<div class="tag">Test your General Knowledge for competitive exams</div>
+<div class="ad-slot">Advertisement</div>
+
+<div class="sec-label">Choose Category</div>
+<div class="opts-grid" id="cat_grid"></div>
+
+<div class="sec-label">Choose Mode</div>
+<div class="mode-row">
+<button class="mode-btn active" data-mode="blitz" ontouchstart="">BLITZ</button>
+<button class="mode-btn" data-mode="practice" ontouchstart="">PRACTICE</button>
+</div>
+<div class="mode-desc" id="mode_desc">60s rapid-fire · 10s per question · max score wins</div>
+
+<button class="play-btn" id="btn_play" ontouchstart="">▶ PLAY</button>
+<div class="best-line" id="best_line">Best: 0</div>
+
+<div class="howto-box">
+<div class="howto-head" id="howto_head"><span>How to Play</span><span id="howto_arrow">▼</span></div>
+<div class="howto-body" id="howto_body">
+<ul>
+<li>Pick a category and mode</li>
+<li>BLITZ: 60s, rapid-fire, 10s per question</li>
+<li>PRACTICE: Untimed, see explanations</li>
+<li>Correct answer = +1 point</li>
+<li>Wrong answer = no penalty (just skip)</li>
+<li>Beat your best score!</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="scr hidden" id="s_quiz">
+<div class="q-head">
+<div class="q-info">
+<div class="q-counter" id="q_counter">Q1</div>
+<div class="q-cat" id="q_cat">General</div>
+</div>
+<div class="q-score">Score: <span id="q_score">0</span></div>
+</div>
+<div class="timer-bar"><div class="timer-fill" id="timer_fill"></div></div>
+<div class="qtime" id="q_time">60s</div>
+<div class="q-text" id="q_text">Loading...</div>
+<div class="q-opts" id="q_opts"></div>
+<div class="exp-box" id="exp_box"></div>
+<div class="skip-row"><button class="skip-btn" id="btn_skip" ontouchstart="">Skip</button></div>
+<button class="next-btn" id="btn_next" ontouchstart="">NEXT ▶</button>
+<div class="prog-bar" id="prac_prog_wrap" style="display:none"><div class="prog-fill" id="prac_prog"></div></div>
+<div class="feedback-pop" id="fb_pop"></div>
+</div>
+
+<div class="scr hidden" id="s_end">
+<div class="end-title" id="end_title">DONE!</div>
+<div class="end-score" id="end_score">0</div>
+<div class="end-lbl">Final Score</div>
+<div class="end-stats">
+<div class="end-stat"><div class="es-lbl">Correct</div><div class="es-val" id="es_correct">0</div></div>
+<div class="end-stat"><div class="es-lbl">Accuracy</div><div class="es-val" id="es_acc">0%</div></div>
+<div class="end-stat"><div class="es-lbl">Attempted</div><div class="es-val" id="es_att">0</div></div>
+</div>
+<div class="cat-break" id="cat_break"></div>
+<div class="end-best" id="end_best">Best: 0</div>
+<div class="ad-slot">Advertisement</div>
+<div class="end-btns">
+<button class="e-btn" id="btn_again" ontouchstart="">PLAY AGAIN</button>
+<button class="e-btn alt" id="btn_change" ontouchstart="">CHANGE CATEGORY</button>
+</div>
+<button class="share-btn" id="btn_share" ontouchstart="">📋 COPY SCORE</button>
+</div>
+
+</div>
+
+<script>
+(function(){'use strict';
+
+/* ===================== QUESTION DATABASE ===================== */
+var QUESTIONS=[
+/* ---------- INDIAN HISTORY (45) ---------- */
+{q:"Who was the first President of India?",opts:["Dr. Rajendra Prasad","Jawaharlal Nehru","Sardar Vallabhbhai Patel","Dr. B.R. Ambedkar"],ans:0,cat:"History",exp:"Dr. Rajendra Prasad served as the first President of India from 1950 to 1962."},
+{q:"Who founded the Mughal Empire in India?",opts:["Akbar","Babur","Humayun","Aurangzeb"],ans:1,cat:"History",exp:"Babur founded the Mughal Empire after winning the First Battle of Panipat in 1526."},
+{q:"In which year was the First Battle of Panipat fought?",opts:["1498","1526","1556","1605"],ans:1,cat:"History",exp:"The First Battle of Panipat was fought on 21 April 1526 between Babur and Ibrahim Lodi."},
+{q:"Who was the first Governor-General of independent India?",opts:["Lord Mountbatten","C. Rajagopalachari","Warren Hastings","Lord Dalhousie"],ans:0,cat:"History",exp:"Lord Mountbatten served as the first Governor-General of independent India in 1947-48."},
+{q:"Who was the first and last Indian Governor-General of independent India?",opts:["Jawaharlal Nehru","C. Rajagopalachari","Rajendra Prasad","Sardar Patel"],ans:1,cat:"History",exp:"C. Rajagopalachari (Rajaji) served as India's only Indian Governor-General from 1948 to 1950."},
+{q:"The Dandi March was led by Mahatma Gandhi in which year?",opts:["1920","1928","1930","1942"],ans:2,cat:"History",exp:"The Dandi March (Salt Satyagraha) began on 12 March 1930 from Sabarmati Ashram."},
+{q:"Who gave the slogan 'Do or Die'?",opts:["Bhagat Singh","Mahatma Gandhi","Subhas Chandra Bose","Lala Lajpat Rai"],ans:1,cat:"History",exp:"Mahatma Gandhi gave the 'Do or Die' call during the Quit India Movement in 1942."},
+{q:"Who gave the slogan 'Give me blood and I will give you freedom'?",opts:["Bhagat Singh","Subhas Chandra Bose","Chandrashekhar Azad","Bal Gangadhar Tilak"],ans:1,cat:"History",exp:"Netaji Subhas Chandra Bose gave this slogan while addressing the Indian National Army."},
+{q:"The Indian National Congress was founded in which year?",opts:["1885","1875","1905","1920"],ans:0,cat:"History",exp:"The INC was founded on 28 December 1885 by A.O. Hume in Bombay."},
+{q:"Who was the founder of the Indian National Congress?",opts:["W.C. Bonnerjee","A.O. Hume","Dadabhai Naoroji","Surendranath Banerjee"],ans:1,cat:"History",exp:"Allan Octavian Hume, a retired British civil servant, founded the INC in 1885."},
+{q:"Who was the first woman President of the Indian National Congress?",opts:["Sarojini Naidu","Annie Besant","Indira Gandhi","Vijaya Lakshmi Pandit"],ans:1,cat:"History",exp:"Annie Besant became the first woman President of the INC in 1917 at the Calcutta session."},
+{q:"The Jallianwala Bagh massacre took place in which year?",opts:["1905","1919","1929","1942"],ans:1,cat:"History",exp:"The Jallianwala Bagh massacre occurred on 13 April 1919 in Amritsar."},
+{q:"Who was the Viceroy of India during the Jallianwala Bagh massacre?",opts:["Lord Curzon","Lord Chelmsford","Lord Irwin","Lord Minto"],ans:1,cat:"History",exp:"Lord Chelmsford was the Viceroy of India from 1916 to 1921."},
+{q:"The Battle of Plassey was fought in the year:",opts:["1757","1764","1773","1784"],ans:0,cat:"History",exp:"The Battle of Plassey was fought on 23 June 1757 between Robert Clive and Siraj-ud-Daulah."},
+{q:"The Battle of Buxar was fought in:",opts:["1757","1764","1770","1782"],ans:1,cat:"History",exp:"The Battle of Buxar took place on 22 October 1764."},
+{q:"Who founded the Maurya Empire?",opts:["Ashoka","Chandragupta Maurya","Bindusara","Bimbisara"],ans:1,cat:"History",exp:"Chandragupta Maurya founded the Maurya Empire around 322 BCE."},
+{q:"Ashoka's inscriptions are mainly written in which script?",opts:["Sanskrit","Brahmi","Devanagari","Pali"],ans:1,cat:"History",exp:"Most of Ashoka's edicts were written in Brahmi script."},
+{q:"Which Mughal emperor built the Taj Mahal?",opts:["Akbar","Jahangir","Shah Jahan","Aurangzeb"],ans:2,cat:"History",exp:"Shah Jahan built the Taj Mahal in memory of his wife Mumtaz Mahal between 1632-1653."},
+{q:"Which ruler was known as 'Napoleon of India'?",opts:["Chandragupta Maurya","Samudragupta","Ashoka","Harshavardhana"],ans:1,cat:"History",exp:"Samudragupta was called the 'Napoleon of India' by historian V.A. Smith for his conquests."},
+{q:"The Harappan Civilization is also known as:",opts:["Vedic Civilization","Indus Valley Civilization","Mauryan Civilization","Gupta Civilization"],ans:1,cat:"History",exp:"The Harappan Civilization flourished along the Indus River around 3300-1300 BCE."},
+{q:"The Rigveda was composed in which language?",opts:["Pali","Sanskrit","Prakrit","Tamil"],ans:1,cat:"History",exp:"The Rigveda, the oldest Veda, was composed in Vedic Sanskrit."},
+{q:"Who was the first Governor-General of Bengal under British rule?",opts:["Robert Clive","Warren Hastings","Lord Cornwallis","Lord Wellesley"],ans:1,cat:"History",exp:"Warren Hastings became the first Governor-General of Bengal in 1773."},
+{q:"The Permanent Settlement of Bengal was introduced by:",opts:["Warren Hastings","Lord Cornwallis","Lord Dalhousie","Lord Wellesley"],ans:1,cat:"History",exp:"Lord Cornwallis introduced the Permanent Settlement in 1793."},
+{q:"Who introduced the Doctrine of Lapse?",opts:["Lord Dalhousie","Lord Curzon","Lord Wellesley","Lord Hastings"],ans:0,cat:"History",exp:"Lord Dalhousie introduced the Doctrine of Lapse as an annexation policy."},
+{q:"The Revolt of 1857 started from which place?",opts:["Delhi","Meerut","Kanpur","Lucknow"],ans:1,cat:"History",exp:"The Revolt of 1857 began on 10 May 1857 in Meerut by sepoys of the Bengal Army."},
+{q:"Who was the last Mughal Emperor of India?",opts:["Akbar II","Bahadur Shah Zafar","Shah Alam II","Aurangzeb"],ans:1,cat:"History",exp:"Bahadur Shah Zafar was the last Mughal Emperor, exiled to Rangoon after 1857."},
+{q:"Simon Commission came to India in:",opts:["1919","1927","1929","1935"],ans:1,cat:"History",exp:"The Simon Commission arrived in India in 1928 (appointed in 1927) and was boycotted."},
+{q:"Who presided over the first session of the Indian National Congress?",opts:["Dadabhai Naoroji","W.C. Bonnerjee","A.O. Hume","Badruddin Tyabji"],ans:1,cat:"History",exp:"W.C. Bonnerjee presided over the first INC session in Bombay in December 1885."},
+{q:"The non-cooperation movement was launched in:",opts:["1915","1920","1930","1942"],ans:1,cat:"History",exp:"Mahatma Gandhi launched the Non-Cooperation Movement in August 1920."},
+{q:"The Quit India Movement was launched in the year:",opts:["1930","1935","1942","1945"],ans:2,cat:"History",exp:"The Quit India Movement was launched by Gandhi on 8 August 1942 in Bombay."},
+{q:"Who was the founder of the Arya Samaj?",opts:["Raja Ram Mohan Roy","Swami Dayanand Saraswati","Swami Vivekananda","Keshab Chandra Sen"],ans:1,cat:"History",exp:"Swami Dayanand Saraswati founded the Arya Samaj in 1875 in Bombay."},
+{q:"Brahmo Samaj was founded by:",opts:["Swami Vivekananda","Raja Ram Mohan Roy","Dayanand Saraswati","Ishwar Chandra Vidyasagar"],ans:1,cat:"History",exp:"Raja Ram Mohan Roy founded the Brahmo Samaj in 1828 in Calcutta."},
+{q:"Who abolished the practice of Sati?",opts:["Lord Cornwallis","Lord William Bentinck","Lord Dalhousie","Warren Hastings"],ans:1,cat:"History",exp:"Lord William Bentinck abolished Sati through Regulation XVII in 1829."},
+{q:"The Third Battle of Panipat (1761) was fought between:",opts:["Mughals and Marathas","Marathas and Ahmad Shah Abdali","British and French","Marathas and British"],ans:1,cat:"History",exp:"The Third Battle of Panipat was fought between the Marathas and Ahmad Shah Abdali (Durrani)."},
+{q:"Who was known as the 'Iron Man of India'?",opts:["Jawaharlal Nehru","Sardar Vallabhbhai Patel","Subhas Chandra Bose","Lal Bahadur Shastri"],ans:1,cat:"History",exp:"Sardar Vallabhbhai Patel earned the title 'Iron Man of India' for unifying the princely states."},
+{q:"Who founded the city of Fatehpur Sikri?",opts:["Babur","Humayun","Akbar","Shah Jahan"],ans:2,cat:"History",exp:"Akbar built Fatehpur Sikri near Agra in 1571 and made it his capital."},
+{q:"The Khilafat Movement was launched by:",opts:["Mahatma Gandhi","Ali Brothers","Jinnah","Maulana Azad"],ans:1,cat:"History",exp:"The Khilafat Movement (1919-1924) was launched by the Ali brothers – Maulana Mohammad Ali and Shaukat Ali."},
+{q:"Who wrote the book 'Discovery of India'?",opts:["Mahatma Gandhi","Jawaharlal Nehru","B.R. Ambedkar","Subhas Chandra Bose"],ans:1,cat:"History",exp:"Jawaharlal Nehru wrote 'The Discovery of India' in Ahmednagar Fort prison in 1944."},
+{q:"Who led the Chittagong Armoury Raid in 1930?",opts:["Bhagat Singh","Surya Sen","Chandrashekhar Azad","Ram Prasad Bismil"],ans:1,cat:"History",exp:"Surya Sen (Masterda) led the Chittagong Armoury Raid on 18 April 1930."},
+{q:"Who founded the 'Azad Hind Fauj' (INA)?",opts:["Subhas Chandra Bose","Rash Behari Bose","Mohan Singh","V.D. Savarkar"],ans:1,cat:"History",exp:"Captain Mohan Singh founded the first INA in 1942; Rash Behari Bose and later Subhas Chandra Bose reorganized it."},
+{q:"Who wrote 'Vande Mataram'?",opts:["Rabindranath Tagore","Bankim Chandra Chatterjee","Sarat Chandra Chatterjee","Aurobindo Ghosh"],ans:1,cat:"History",exp:"Bankim Chandra Chattopadhyay wrote 'Vande Mataram' in his novel Anandamath (1882)."},
+{q:"The book 'Arthashastra' was written by:",opts:["Kalidasa","Kautilya","Panini","Aryabhata"],ans:1,cat:"History",exp:"Kautilya (Chanakya) wrote the Arthashastra, a treatise on statecraft and economics."},
+{q:"Who was the first Muslim ruler of Delhi?",opts:["Muhammad Ghori","Qutub-ud-din Aibak","Iltutmish","Alauddin Khilji"],ans:1,cat:"History",exp:"Qutub-ud-din Aibak founded the Delhi Sultanate (Slave Dynasty) in 1206."},
+{q:"Who started the construction of the Qutub Minar in Delhi?",opts:["Qutub-ud-din Aibak","Iltutmish","Alauddin Khilji","Muhammad Ghori"],ans:0,cat:"History",exp:"Qutub-ud-din Aibak started the Qutub Minar in 1193; it was later completed by Iltutmish."},
+{q:"Who was the Prime Minister of India during the 1971 Indo-Pak war?",opts:["Jawaharlal Nehru","Lal Bahadur Shastri","Indira Gandhi","Morarji Desai"],ans:2,cat:"History",exp:"Indira Gandhi was PM during the 1971 war which led to the creation of Bangladesh."},
+
+/* ---------- INDIAN GEOGRAPHY (45) ---------- */
+{q:"Which is the longest river in India (length within India)?",opts:["Brahmaputra","Godavari","Ganga","Yamuna"],ans:2,cat:"Geography",exp:"The Ganga is the longest river flowing within India at about 2525 km."},
+{q:"The longest river of Peninsular India is:",opts:["Krishna","Godavari","Narmada","Kaveri"],ans:1,cat:"Geography",exp:"The Godavari is the longest peninsular river, about 1465 km long."},
+{q:"Which is the highest mountain peak in India?",opts:["Mount Everest","K2","Kanchenjunga","Nanda Devi"],ans:2,cat:"Geography",exp:"Kanchenjunga (8586 m) is the highest peak entirely within India (Sikkim border)."},
+{q:"The Tropic of Cancer passes through how many Indian states?",opts:["6","7","8","9"],ans:2,cat:"Geography",exp:"The Tropic of Cancer passes through 8 Indian states."},
+{q:"Which state has the longest coastline in India?",opts:["Tamil Nadu","Kerala","Gujarat","Andhra Pradesh"],ans:2,cat:"Geography",exp:"Gujarat has the longest coastline in India, about 1600 km."},
+{q:"The capital of Arunachal Pradesh is:",opts:["Itanagar","Kohima","Imphal","Dispur"],ans:0,cat:"Geography",exp:"Itanagar is the capital of Arunachal Pradesh."},
+{q:"Which river is known as the 'Sorrow of Bihar'?",opts:["Ganga","Kosi","Gandak","Son"],ans:1,cat:"Geography",exp:"The Kosi River is known as the 'Sorrow of Bihar' due to recurrent flooding."},
+{q:"Which is the largest state of India by area?",opts:["Madhya Pradesh","Maharashtra","Rajasthan","Uttar Pradesh"],ans:2,cat:"Geography",exp:"Rajasthan is the largest state by area in India (3,42,239 sq km)."},
+{q:"Which is the smallest state of India by area?",opts:["Sikkim","Goa","Tripura","Manipur"],ans:1,cat:"Geography",exp:"Goa is the smallest Indian state by area (3702 sq km)."},
+{q:"Jog Falls is located on which river?",opts:["Kaveri","Sharavati","Krishna","Narmada"],ans:1,cat:"Geography",exp:"Jog Falls in Karnataka is formed by the Sharavati River."},
+{q:"The Himalayas are classified as:",opts:["Fold mountains","Block mountains","Volcanic mountains","Residual mountains"],ans:0,cat:"Geography",exp:"The Himalayas are young fold mountains formed by collision of Indian and Eurasian plates."},
+{q:"Which is the deepest landlocked port in India?",opts:["Mumbai","Kochi","Vishakhapatnam","Chennai"],ans:2,cat:"Geography",exp:"Vishakhapatnam is the deepest landlocked port of India."},
+{q:"The 'Western Ghats' are also known as:",opts:["Sahyadri","Aravalli","Vindhya","Satpura"],ans:0,cat:"Geography",exp:"The Western Ghats are also called the Sahyadri mountain range."},
+{q:"The Wular Lake is located in which state?",opts:["Himachal Pradesh","Uttarakhand","Jammu & Kashmir","Sikkim"],ans:2,cat:"Geography",exp:"Wular Lake, India's largest freshwater lake, is located in Jammu & Kashmir."},
+{q:"Which Indian state shares borders with Bhutan, Nepal, and China?",opts:["Arunachal Pradesh","Sikkim","West Bengal","Uttarakhand"],ans:1,cat:"Geography",exp:"Sikkim shares borders with Bhutan, Nepal, and China."},
+{q:"Thar Desert is mostly located in which state?",opts:["Gujarat","Rajasthan","Haryana","Punjab"],ans:1,cat:"Geography",exp:"Most of the Thar Desert lies in Rajasthan."},
+{q:"Which is the largest freshwater lake in India?",opts:["Chilika","Wular","Loktak","Dal"],ans:1,cat:"Geography",exp:"Wular Lake in J&K is the largest freshwater lake in India."},
+{q:"Chilika Lake is located in which state?",opts:["Andhra Pradesh","Odisha","Tamil Nadu","Kerala"],ans:1,cat:"Geography",exp:"Chilika Lake, Asia's largest brackish-water lagoon, is in Odisha."},
+{q:"Which river flows through the 'Marble Rocks' at Bhedaghat?",opts:["Narmada","Tapi","Mahanadi","Son"],ans:0,cat:"Geography",exp:"The Narmada River flows through the Marble Rocks in Bhedaghat, Jabalpur."},
+{q:"The Sundarbans delta is formed by which rivers?",opts:["Ganga and Brahmaputra","Krishna and Godavari","Narmada and Tapi","Mahanadi and Kaveri"],ans:0,cat:"Geography",exp:"The Sundarbans delta is formed by the Ganga, Brahmaputra, and Meghna rivers."},
+{q:"The Andaman and Nicobar Islands are located in:",opts:["Arabian Sea","Bay of Bengal","Indian Ocean","Lakshadweep Sea"],ans:1,cat:"Geography",exp:"Andaman and Nicobar Islands are in the Bay of Bengal."},
+{q:"Lakshadweep Islands are located in:",opts:["Arabian Sea","Bay of Bengal","Indian Ocean","Coral Sea"],ans:0,cat:"Geography",exp:"Lakshadweep is an island group in the Arabian Sea."},
+{q:"Which state is known as 'God's Own Country'?",opts:["Karnataka","Tamil Nadu","Kerala","Goa"],ans:2,cat:"Geography",exp:"Kerala's tourism tagline is 'God's Own Country'."},
+{q:"The highest waterfall in India is:",opts:["Jog Falls","Kunchikal Falls","Dudhsagar Falls","Athirapally Falls"],ans:1,cat:"Geography",exp:"Kunchikal Falls in Karnataka (455 m) is the highest waterfall in India."},
+{q:"Which city is known as the 'Silicon Valley of India'?",opts:["Hyderabad","Pune","Bengaluru","Chennai"],ans:2,cat:"Geography",exp:"Bengaluru is known as the Silicon Valley of India due to its IT industry."},
+{q:"The 'Manchester of India' is:",opts:["Mumbai","Ahmedabad","Kanpur","Coimbatore"],ans:1,cat:"Geography",exp:"Ahmedabad is called the Manchester of India for its textile industry."},
+{q:"Kaziranga National Park is famous for:",opts:["Tigers","One-horned Rhinoceros","Asiatic Lions","Elephants"],ans:1,cat:"Geography",exp:"Kaziranga in Assam is famous for the one-horned rhinoceros."},
+{q:"Gir National Park is known for:",opts:["Tigers","Rhinoceros","Asiatic Lions","Leopards"],ans:2,cat:"Geography",exp:"Gir in Gujarat is the last home of the Asiatic Lion."},
+{q:"India's first and oldest national park is:",opts:["Kaziranga","Jim Corbett","Ranthambore","Bandhavgarh"],ans:1,cat:"Geography",exp:"Jim Corbett (established 1936) is India's oldest national park, in Uttarakhand."},
+{q:"Which is the largest saltwater lake in India?",opts:["Wular","Chilika","Sambhar","Pulicat"],ans:1,cat:"Geography",exp:"Chilika Lake in Odisha is the largest brackish/saltwater lake in India."},
+{q:"Sambhar Salt Lake is located in which state?",opts:["Gujarat","Rajasthan","Odisha","Maharashtra"],ans:1,cat:"Geography",exp:"Sambhar, India's largest inland salt lake, is in Rajasthan."},
+{q:"Which mountain range separates North and South India?",opts:["Himalayas","Aravalli","Vindhya","Nilgiri"],ans:2,cat:"Geography",exp:"The Vindhya range is traditionally considered to divide North and South India."},
+{q:"The Dudhwa National Park is located in:",opts:["Madhya Pradesh","Uttar Pradesh","Rajasthan","Uttarakhand"],ans:1,cat:"Geography",exp:"Dudhwa National Park is in Lakhimpur Kheri district of Uttar Pradesh."},
+{q:"Which river is called the 'Ganga of the South'?",opts:["Krishna","Kaveri","Godavari","Tungabhadra"],ans:2,cat:"Geography",exp:"The Godavari is called 'Dakshin Ganga' or the Ganga of the South."},
+{q:"The capital of Telangana is:",opts:["Hyderabad","Amaravati","Warangal","Visakhapatnam"],ans:0,cat:"Geography",exp:"Hyderabad is the capital of Telangana."},
+{q:"Which is the southernmost point of mainland India?",opts:["Kanyakumari","Indira Point","Point Calimere","Rameswaram"],ans:0,cat:"Geography",exp:"Kanyakumari (Cape Comorin) is the southernmost tip of the Indian mainland."},
+{q:"Indira Point, the southernmost point of India, is located in:",opts:["Tamil Nadu","Andaman Islands","Nicobar Islands","Lakshadweep"],ans:2,cat:"Geography",exp:"Indira Point is on Great Nicobar Island – the southernmost point of Indian territory."},
+{q:"The Palk Strait separates India from:",opts:["Bangladesh","Sri Lanka","Maldives","Myanmar"],ans:1,cat:"Geography",exp:"The Palk Strait separates India (Tamil Nadu) from Sri Lanka."},
+{q:"Which is the largest delta in the world?",opts:["Nile Delta","Mississippi Delta","Sundarbans Delta","Mekong Delta"],ans:2,cat:"Geography",exp:"The Sundarbans (Ganga-Brahmaputra) delta is the largest delta in the world."},
+{q:"Which Indian state is known as 'Land of Five Rivers'?",opts:["Haryana","Punjab","Himachal Pradesh","Kashmir"],ans:1,cat:"Geography",exp:"Punjab means 'Five Rivers' (Jhelum, Chenab, Ravi, Beas, Sutlej)."},
+{q:"The Himalayan mountain range is spread across how many countries?",opts:["3","4","5","6"],ans:2,cat:"Geography",exp:"The Himalayas span 5 countries: India, Nepal, Bhutan, China (Tibet), and Pakistan."},
+{q:"Which is the highest plateau in India?",opts:["Chota Nagpur","Deccan","Ladakh","Malwa"],ans:2,cat:"Geography",exp:"The Ladakh Plateau is the highest plateau in India, at around 5000 m."},
+{q:"Kanha National Park is located in which state?",opts:["Madhya Pradesh","Maharashtra","Karnataka","Rajasthan"],ans:0,cat:"Geography",exp:"Kanha National Park is in Madhya Pradesh, inspiration for Kipling's 'The Jungle Book'."},
+{q:"Loktak Lake, famous for floating phumdis, is in:",opts:["Assam","Meghalaya","Manipur","Nagaland"],ans:2,cat:"Geography",exp:"Loktak Lake in Manipur is famous for its floating phumdis (vegetation mats)."},
+{q:"Which is the westernmost point of India?",opts:["Kanyakumari","Sir Creek","Guhar Moti","Indira Col"],ans:2,cat:"Geography",exp:"Guhar Moti in Gujarat's Kutch district is India's westernmost point."},
+
+/* ---------- INDIAN POLITY (45) ---------- */
+{q:"Who is called the 'Father of the Indian Constitution'?",opts:["Mahatma Gandhi","Jawaharlal Nehru","Dr. B.R. Ambedkar","Sardar Patel"],ans:2,cat:"Polity",exp:"Dr. B.R. Ambedkar chaired the Drafting Committee and is called the Father of the Constitution."},
+{q:"The Indian Constitution was adopted on:",opts:["15 August 1947","26 January 1950","26 November 1949","2 October 1948"],ans:2,cat:"Polity",exp:"The Constitution was adopted on 26 November 1949 and came into force on 26 January 1950."},
+{q:"How many schedules are there in the Indian Constitution (currently)?",opts:["8","10","12","14"],ans:2,cat:"Polity",exp:"There are 12 Schedules in the Indian Constitution (originally 8)."},
+{q:"How many fundamental rights are guaranteed by the Indian Constitution currently?",opts:["5","6","7","8"],ans:1,cat:"Polity",exp:"There are currently 6 Fundamental Rights (Right to Property removed by 44th Amendment)."},
+{q:"Fundamental Duties were added to the Constitution by which amendment?",opts:["42nd","44th","52nd","73rd"],ans:0,cat:"Polity",exp:"The 42nd Amendment (1976) added Fundamental Duties in Article 51A."},
+{q:"The right to Constitutional Remedies is provided under which Article?",opts:["Article 14","Article 19","Article 21","Article 32"],ans:3,cat:"Polity",exp:"Article 32 provides the Right to Constitutional Remedies; Ambedkar called it the 'heart and soul' of the Constitution."},
+{q:"The Directive Principles of State Policy are mentioned in which part?",opts:["Part III","Part IV","Part IV-A","Part V"],ans:1,cat:"Polity",exp:"Directive Principles are in Part IV (Articles 36-51)."},
+{q:"Which article abolishes untouchability?",opts:["Article 14","Article 15","Article 17","Article 19"],ans:2,cat:"Polity",exp:"Article 17 abolishes untouchability and forbids its practice in any form."},
+{q:"The age required to contest for the office of President of India is:",opts:["25 years","30 years","35 years","40 years"],ans:2,cat:"Polity",exp:"Article 58 requires a minimum age of 35 years to be President."},
+{q:"The Rajya Sabha is also known as:",opts:["House of the People","Council of States","Upper House of People","Lok Sabha"],ans:1,cat:"Polity",exp:"Rajya Sabha is the 'Council of States' – the upper house of Parliament."},
+{q:"Maximum strength of the Lok Sabha as per Constitution is:",opts:["545","550","552","555"],ans:1,cat:"Polity",exp:"After the 104th Amendment, the Lok Sabha's maximum strength is 550 members."},
+{q:"Who is the ex-officio Chairman of the Rajya Sabha?",opts:["President","Vice-President","Prime Minister","Speaker"],ans:1,cat:"Polity",exp:"The Vice-President of India is the ex-officio Chairman of the Rajya Sabha."},
+{q:"Who appoints the Chief Justice of India?",opts:["Prime Minister","President","Parliament","Law Minister"],ans:1,cat:"Polity",exp:"The President appoints the Chief Justice of India under Article 124."},
+{q:"The Supreme Court of India is located in:",opts:["Mumbai","New Delhi","Kolkata","Chennai"],ans:1,cat:"Polity",exp:"The Supreme Court of India is located in New Delhi."},
+{q:"How many judges are there in the Supreme Court of India (including CJI)?",opts:["31","33","34","36"],ans:2,cat:"Polity",exp:"The Supreme Court has a sanctioned strength of 34 judges, including the Chief Justice."},
+{q:"The minimum age to be a member of the Rajya Sabha is:",opts:["25","30","35","40"],ans:1,cat:"Polity",exp:"The minimum age to be a Rajya Sabha member is 30 years (Article 84)."},
+{q:"The minimum age to be a member of Lok Sabha is:",opts:["18","21","25","30"],ans:2,cat:"Polity",exp:"Minimum age to be elected to Lok Sabha is 25 years."},
+{q:"Which article deals with the Right to Equality?",opts:["Article 14","Article 17","Article 19","Article 21"],ans:0,cat:"Polity",exp:"Article 14 guarantees equality before the law and equal protection of laws."},
+{q:"Article 21 of the Indian Constitution deals with:",opts:["Right to Equality","Right to Freedom of Speech","Protection of Life and Personal Liberty","Right to Education"],ans:2,cat:"Polity",exp:"Article 21 protects life and personal liberty – no person shall be deprived except by procedure established by law."},
+{q:"The term of office of the President of India is:",opts:["4 years","5 years","6 years","7 years"],ans:1,cat:"Polity",exp:"The President of India is elected for a term of 5 years."},
+{q:"The President of India is elected by:",opts:["Direct voting","Electoral college of MPs and MLAs","Only MPs","Only state legislatures"],ans:1,cat:"Polity",exp:"Elected indirectly by an electoral college of elected MPs and MLAs."},
+{q:"Who is known as the first law officer of India?",opts:["Chief Justice","Attorney General","Solicitor General","Law Minister"],ans:1,cat:"Polity",exp:"The Attorney General of India is the first law officer (Article 76)."},
+{q:"The words 'Socialist' and 'Secular' were added to the Preamble by which amendment?",opts:["42nd","44th","52nd","24th"],ans:0,cat:"Polity",exp:"The 42nd Amendment (1976) added 'Socialist', 'Secular', and 'Integrity' to the Preamble."},
+{q:"How many members are nominated by the President to Rajya Sabha?",opts:["10","12","15","14"],ans:1,cat:"Polity",exp:"The President nominates 12 members to the Rajya Sabha for expertise in literature, art, science, or social service."},
+{q:"The concept of a single citizenship in India was borrowed from:",opts:["USA","UK","USSR","Canada"],ans:1,cat:"Polity",exp:"Single citizenship was borrowed from the British (UK) Constitution."},
+{q:"The Parliamentary form of government in India was taken from:",opts:["USA","UK","Canada","Australia"],ans:1,cat:"Polity",exp:"India's parliamentary system is inspired by the British model."},
+{q:"The 'Directive Principles of State Policy' were borrowed from:",opts:["USA","Ireland","Canada","Australia"],ans:1,cat:"Polity",exp:"Directive Principles were borrowed from the Irish Constitution."},
+{q:"The Fundamental Rights were inspired by which country's constitution?",opts:["UK","USA","Canada","France"],ans:1,cat:"Polity",exp:"Fundamental Rights were borrowed from the US Constitution (Bill of Rights)."},
+{q:"The Preamble of the Indian Constitution was inspired by:",opts:["French Constitution","US Constitution","Irish Constitution","South African Constitution"],ans:1,cat:"Polity",exp:"The Preamble was inspired by the American Constitution."},
+{q:"Who takes the oath of office of the President of India?",opts:["Vice-President","Chief Justice of India","Speaker of Lok Sabha","Prime Minister"],ans:1,cat:"Polity",exp:"The Chief Justice of India administers the oath to the President (Article 60)."},
+{q:"Money Bill can be introduced in:",opts:["Rajya Sabha only","Lok Sabha only","Either House","Joint Sitting"],ans:1,cat:"Polity",exp:"Money Bills can only be introduced in the Lok Sabha (Article 110)."},
+{q:"Who presides over a joint sitting of Parliament?",opts:["President","Vice-President","Speaker of Lok Sabha","Prime Minister"],ans:2,cat:"Polity",exp:"The Speaker of Lok Sabha presides over joint sittings of Parliament."},
+{q:"Who was the first woman Prime Minister of India?",opts:["Sarojini Naidu","Indira Gandhi","Pratibha Patil","Sonia Gandhi"],ans:1,cat:"Polity",exp:"Indira Gandhi was India's first (and so far only) woman Prime Minister."},
+{q:"Who was the first woman President of India?",opts:["Indira Gandhi","Sushma Swaraj","Pratibha Patil","Droupadi Murmu"],ans:2,cat:"Polity",exp:"Pratibha Patil served as India's first woman President (2007-2012)."},
+{q:"The Planning Commission was replaced by:",opts:["Finance Commission","NITI Aayog","Election Commission","Economic Council"],ans:1,cat:"Polity",exp:"NITI Aayog replaced the Planning Commission on 1 January 2015."},
+{q:"Who is the Supreme Commander of the Indian Armed Forces?",opts:["Prime Minister","Defence Minister","President","Chief of Defence Staff"],ans:2,cat:"Polity",exp:"The President of India is the Supreme Commander of the Armed Forces."},
+{q:"How many languages are recognized in the Eighth Schedule of the Constitution?",opts:["18","20","22","24"],ans:2,cat:"Polity",exp:"22 languages are currently recognized in the Eighth Schedule."},
+{q:"Who was the first Chief Election Commissioner of India?",opts:["Sukumar Sen","T.N. Seshan","M.S. Gill","K.V.K. Sundaram"],ans:0,cat:"Polity",exp:"Sukumar Sen was the first CEC of India (1950-1958)."},
+{q:"The Panchayati Raj system is based on which article?",opts:["Article 32","Article 40","Article 46","Article 21"],ans:1,cat:"Polity",exp:"Article 40 (Directive Principle) calls for the organisation of village panchayats."},
+{q:"Panchayati Raj got constitutional status through which amendment?",opts:["42nd","44th","73rd","74th"],ans:2,cat:"Polity",exp:"The 73rd Constitutional Amendment (1992) gave constitutional status to Panchayati Raj."},
+{q:"Which article allows the President to proclaim National Emergency?",opts:["Article 352","Article 356","Article 360","Article 370"],ans:0,cat:"Polity",exp:"Article 352 empowers the President to proclaim a National Emergency."},
+{q:"The concept of 'Judicial Review' is borrowed from the constitution of:",opts:["UK","USA","Ireland","Canada"],ans:1,cat:"Polity",exp:"Judicial Review was borrowed from the US Constitution."},
+{q:"Which article abolishes titles?",opts:["Article 14","Article 15","Article 17","Article 18"],ans:3,cat:"Polity",exp:"Article 18 abolishes titles, except military and academic distinctions."},
+{q:"How many types of writs can the Supreme Court issue under Article 32?",opts:["3","4","5","6"],ans:2,cat:"Polity",exp:"There are 5 writs: Habeas Corpus, Mandamus, Prohibition, Certiorari, Quo Warranto."},
+{q:"Who was the first Speaker of the Lok Sabha?",opts:["G.V. Mavalankar","M. Ananthasayanam Ayyangar","Sardar Hukam Singh","N. Sanjiva Reddy"],ans:0,cat:"Polity",exp:"G.V. Mavalankar was the first Speaker of the Lok Sabha (1952-1956)."},
+
+/* ---------- INDIAN ECONOMY (42) ---------- */
+{q:"The Reserve Bank of India was established in:",opts:["1934","1935","1947","1949"],ans:1,cat:"Economy",exp:"The RBI was established on 1 April 1935 under the RBI Act, 1934."},
+{q:"The RBI was nationalized in:",opts:["1947","1948","1949","1950"],ans:2,cat:"Economy",exp:"The RBI was nationalized on 1 January 1949."},
+{q:"Who was the first Indian Governor of the Reserve Bank of India?",opts:["Osborne Smith","C.D. Deshmukh","Sir Benegal Rama Rau","K.G. Ambegaonkar"],ans:1,cat:"Economy",exp:"C.D. Deshmukh was the first Indian Governor of the RBI (1943-1949)."},
+{q:"The headquarters of the Reserve Bank of India is in:",opts:["New Delhi","Mumbai","Kolkata","Chennai"],ans:1,cat:"Economy",exp:"The RBI's headquarters is in Mumbai."},
+{q:"State Bank of India was formed in 1955 by nationalizing which bank?",opts:["Punjab National Bank","Imperial Bank of India","Bank of India","Central Bank of India"],ans:1,cat:"Economy",exp:"The Imperial Bank of India was nationalized in 1955 and renamed the State Bank of India."},
+{q:"How many banks were nationalized in India in 1969?",opts:["6","10","14","20"],ans:2,cat:"Economy",exp:"14 major commercial banks were nationalized on 19 July 1969 by Indira Gandhi."},
+{q:"The First Five-Year Plan of India focused on:",opts:["Industry","Agriculture","Services","Infrastructure"],ans:1,cat:"Economy",exp:"The First Five-Year Plan (1951-56) focused on agriculture, based on the Harrod-Domar model."},
+{q:"The Second Five-Year Plan was based on which model?",opts:["Harrod-Domar","Mahalanobis","Gadgil","Nehru"],ans:1,cat:"Economy",exp:"The Second FYP (1956-61) was based on P.C. Mahalanobis's model, focusing on heavy industries."},
+{q:"The economic reforms of 1991 were introduced during the Prime Ministership of:",opts:["Rajiv Gandhi","V.P. Singh","P.V. Narasimha Rao","Atal Bihari Vajpayee"],ans:2,cat:"Economy",exp:"P.V. Narasimha Rao was PM when the 1991 LPG reforms were launched by Finance Minister Manmohan Singh."},
+{q:"Who is known as the father of India's Green Revolution?",opts:["M.S. Swaminathan","Norman Borlaug","Verghese Kurien","R.S. Swaminathan"],ans:0,cat:"Economy",exp:"M.S. Swaminathan is called the Father of Green Revolution in India."},
+{q:"The 'White Revolution' in India is associated with:",opts:["Milk production","Fish","Poultry","Wheat"],ans:0,cat:"Economy",exp:"The White Revolution (Operation Flood, led by Verghese Kurien) made India a leading milk producer."},
+{q:"GST was implemented in India on:",opts:["1 April 2016","1 July 2017","1 January 2017","1 April 2018"],ans:1,cat:"Economy",exp:"Goods and Services Tax (GST) was implemented on 1 July 2017."},
+{q:"The Union Budget is presented by the:",opts:["President","Prime Minister","Finance Minister","Home Minister"],ans:2,cat:"Economy",exp:"The Finance Minister presents the Union Budget in Lok Sabha."},
+{q:"The first woman Finance Minister to present a full Union Budget was:",opts:["Sushma Swaraj","Nirmala Sitharaman","Indira Gandhi","Sumitra Mahajan"],ans:1,cat:"Economy",exp:"Nirmala Sitharaman was the first woman FM to present a full Union Budget in 2019 (Indira Gandhi presented one as PM)."},
+{q:"Bank rate is the rate at which:",opts:["Banks lend to each other","Banks lend to customers","RBI lends to commercial banks","Customers deposit money"],ans:2,cat:"Economy",exp:"Bank rate is the rate at which the RBI lends long-term funds to commercial banks."},
+{q:"CRR stands for:",opts:["Cash Reserve Ratio","Credit Reserve Rate","Current Reserve Ratio","Cash Repo Rate"],ans:0,cat:"Economy",exp:"CRR is the Cash Reserve Ratio – percentage of deposits banks must keep with RBI."},
+{q:"SLR stands for:",opts:["Statutory Liquidity Ratio","Savings Lending Ratio","Standard Loan Ratio","Statutory Lending Rate"],ans:0,cat:"Economy",exp:"SLR is the Statutory Liquidity Ratio – minimum share banks must keep in cash, gold, or approved securities."},
+{q:"Repo rate is the rate at which:",opts:["RBI lends to commercial banks (short-term)","Banks lend to customers","Customers lend to banks","Banks lend to each other"],ans:0,cat:"Economy",exp:"Repo rate is the rate at which RBI lends short-term funds to banks against government securities."},
+{q:"NITI Aayog was established on:",opts:["1 January 2014","1 January 2015","26 January 2015","15 August 2015"],ans:1,cat:"Economy",exp:"NITI Aayog was established on 1 January 2015."},
+{q:"The Indian rupee symbol (₹) was adopted in:",opts:["2008","2010","2012","2015"],ans:1,cat:"Economy",exp:"The rupee symbol designed by D. Udaya Kumar was officially adopted on 15 July 2010."},
+{q:"Which organization regulates the stock market in India?",opts:["RBI","SEBI","IRDAI","NABARD"],ans:1,cat:"Economy",exp:"SEBI (Securities and Exchange Board of India) regulates the stock market."},
+{q:"NABARD was established in:",opts:["1980","1982","1985","1990"],ans:1,cat:"Economy",exp:"NABARD was established on 12 July 1982."},
+{q:"IRDAI regulates which sector in India?",opts:["Banking","Insurance","Stock Markets","Telecom"],ans:1,cat:"Economy",exp:"IRDAI – Insurance Regulatory and Development Authority of India."},
+{q:"The full form of GDP is:",opts:["Gross Domestic Product","Gross Domestic Profit","General Domestic Product","Growth Domestic Profit"],ans:0,cat:"Economy",exp:"GDP – Gross Domestic Product – total value of goods and services produced domestically."},
+{q:"GNP differs from GDP in that it includes:",opts:["Only goods","Net income from abroad","Services only","Imports"],ans:1,cat:"Economy",exp:"GNP = GDP + net income earned by residents from abroad."},
+{q:"The 'Planning Commission' was established in:",opts:["1947","1950","1952","1955"],ans:1,cat:"Economy",exp:"The Planning Commission was set up on 15 March 1950."},
+{q:"India's first Five-Year Plan period was:",opts:["1947-52","1951-56","1952-57","1950-55"],ans:1,cat:"Economy",exp:"The First Five-Year Plan ran from 1951 to 1956."},
+{q:"How many commercial banks were nationalized in the second round (1980)?",opts:["4","6","8","10"],ans:1,cat:"Economy",exp:"6 more banks were nationalized in 1980."},
+{q:"Which institution is known as the 'lender of last resort' in India?",opts:["SBI","ICICI","RBI","NABARD"],ans:2,cat:"Economy",exp:"The RBI is the lender of last resort for commercial banks."},
+{q:"Which Act governs the RBI's functions?",opts:["RBI Act 1934","RBI Act 1949","Banking Regulation Act 1949","Companies Act 1956"],ans:0,cat:"Economy",exp:"The Reserve Bank of India Act, 1934 governs the functioning of RBI."},
+{q:"Minimum Support Price (MSP) is recommended by:",opts:["RBI","NITI Aayog","CACP","SEBI"],ans:2,cat:"Economy",exp:"The Commission for Agricultural Costs and Prices (CACP) recommends MSP."},
+{q:"The 'Operation Flood' programme was started by:",opts:["Verghese Kurien","M.S. Swaminathan","Vikram Sarabhai","Homi Bhabha"],ans:0,cat:"Economy",exp:"Verghese Kurien led Operation Flood (1970) – the world's largest dairy development programme."},
+{q:"Which sector contributes the most to India's GDP?",opts:["Agriculture","Industry","Services","Mining"],ans:2,cat:"Economy",exp:"The services sector contributes the largest share to India's GDP (over 50%)."},
+{q:"The Finance Commission of India is constituted every:",opts:["3 years","5 years","6 years","7 years"],ans:1,cat:"Economy",exp:"The Finance Commission is constituted every 5 years under Article 280."},
+{q:"The first Finance Commission was set up in:",opts:["1950","1951","1952","1955"],ans:1,cat:"Economy",exp:"The First Finance Commission was set up in 1951 under K.C. Neogy."},
+{q:"Which bank is known as the 'Bankers' Bank' of India?",opts:["SBI","PNB","RBI","ICICI"],ans:2,cat:"Economy",exp:"The RBI acts as the Bankers' Bank in India."},
+{q:"Which is the oldest stock exchange in Asia?",opts:["NSE","BSE","NASDAQ","Tokyo Stock Exchange"],ans:1,cat:"Economy",exp:"The Bombay Stock Exchange (BSE), founded in 1875, is Asia's oldest stock exchange."},
+{q:"Nifty 50 is the index of which stock exchange?",opts:["BSE","NSE","OTCEI","MSEI"],ans:1,cat:"Economy",exp:"Nifty 50 is the benchmark index of the National Stock Exchange (NSE)."},
+{q:"The Sensex is the benchmark index of:",opts:["NSE","BSE","MCX","MSE"],ans:1,cat:"Economy",exp:"Sensex is the benchmark index of the Bombay Stock Exchange (BSE)."},
+{q:"Which organization issues currency notes in India (except Re 1)?",opts:["Ministry of Finance","Reserve Bank of India","State Bank of India","Mint of India"],ans:1,cat:"Economy",exp:"The RBI issues all banknotes except the Re 1 note, which is issued by the Government of India."},
+{q:"Who designed the Indian rupee symbol?",opts:["D. Udaya Kumar","Raghuram Rajan","M.S. Swaminathan","E. Sreedharan"],ans:0,cat:"Economy",exp:"D. Udaya Kumar designed the Indian rupee symbol (₹), adopted in 2010."},
+{q:"The 12th Five-Year Plan of India was the:",opts:["First","Last","Middle","Extended"],ans:1,cat:"Economy",exp:"The 12th FYP (2012-17) was the last Five-Year Plan – replaced by NITI Aayog's approach."},
+
+/* ---------- GENERAL SCIENCE (42) ---------- */
+{q:"The chemical symbol for gold is:",opts:["Go","Au","Ag","Gd"],ans:1,cat:"Science",exp:"Gold's symbol Au comes from the Latin 'aurum'."},
+{q:"The chemical symbol for silver is:",opts:["Si","Sv","Ag","Au"],ans:2,cat:"Science",exp:"Silver's symbol Ag comes from the Latin 'argentum'."},
+{q:"What is the chemical formula of water?",opts:["H2O","HO2","H2O2","OH"],ans:0,cat:"Science",exp:"Water is H2O – two hydrogen atoms bonded to one oxygen atom."},
+{q:"The SI unit of force is:",opts:["Joule","Newton","Watt","Pascal"],ans:1,cat:"Science",exp:"Force is measured in Newton (N) = kg·m/s²."},
+{q:"The SI unit of electric current is:",opts:["Volt","Watt","Ampere","Ohm"],ans:2,cat:"Science",exp:"Electric current is measured in Ampere (A)."},
+{q:"The SI unit of pressure is:",opts:["Newton","Pascal","Joule","Watt"],ans:1,cat:"Science",exp:"Pressure is measured in Pascal (Pa) = N/m²."},
+{q:"Which gas is most abundant in Earth's atmosphere?",opts:["Oxygen","Nitrogen","Carbon dioxide","Argon"],ans:1,cat:"Science",exp:"Nitrogen makes up about 78% of Earth's atmosphere."},
+{q:"The pH of pure water is:",opts:["5","6","7","8"],ans:2,cat:"Science",exp:"Pure water is neutral with pH 7 at 25°C."},
+{q:"Which vitamin is produced by the skin in sunlight?",opts:["Vitamin A","Vitamin B","Vitamin C","Vitamin D"],ans:3,cat:"Science",exp:"Vitamin D is synthesized in the skin upon exposure to UV sunlight."},
+{q:"Deficiency of which vitamin causes scurvy?",opts:["Vitamin A","Vitamin B","Vitamin C","Vitamin D"],ans:2,cat:"Science",exp:"Vitamin C (ascorbic acid) deficiency causes scurvy."},
+{q:"Deficiency of which vitamin causes night blindness?",opts:["Vitamin A","Vitamin B","Vitamin C","Vitamin K"],ans:0,cat:"Science",exp:"Vitamin A deficiency causes night blindness."},
+{q:"The process by which plants make food is called:",opts:["Respiration","Photosynthesis","Transpiration","Digestion"],ans:1,cat:"Science",exp:"Photosynthesis: plants use sunlight, water, and CO₂ to make glucose and oxygen."},
+{q:"The powerhouse of the cell is:",opts:["Nucleus","Mitochondria","Ribosome","Chloroplast"],ans:1,cat:"Science",exp:"Mitochondria produce ATP and are called the powerhouse of the cell."},
+{q:"The human body has how many bones (adult)?",opts:["204","206","210","215"],ans:1,cat:"Science",exp:"An adult human skeleton has 206 bones."},
+{q:"The largest bone in the human body is:",opts:["Femur","Tibia","Humerus","Fibula"],ans:0,cat:"Science",exp:"The femur (thigh bone) is the longest and largest bone in the human body."},
+{q:"The smallest bone in the human body is in the:",opts:["Foot","Ear","Nose","Hand"],ans:1,cat:"Science",exp:"The stapes, located in the middle ear, is the smallest bone in the body."},
+{q:"The science of heredity is called:",opts:["Ecology","Genetics","Cytology","Biology"],ans:1,cat:"Science",exp:"Genetics is the branch of biology that studies heredity and variation."},
+{q:"DNA stands for:",opts:["Deoxyribonucleic Acid","Dinitric Acid","Diribonucleic Acid","Deoxyribose Acid"],ans:0,cat:"Science",exp:"DNA – Deoxyribonucleic Acid – carries genetic information."},
+{q:"Which blood group is the universal donor?",opts:["A","B","AB","O negative"],ans:3,cat:"Science",exp:"O-negative blood can be donated to any blood type."},
+{q:"Which blood group is the universal recipient?",opts:["A","B","AB positive","O"],ans:2,cat:"Science",exp:"AB-positive blood can receive from any blood group."},
+{q:"The normal human body temperature is:",opts:["36°C","37°C","38°C","39°C"],ans:1,cat:"Science",exp:"Average human body temperature is about 37°C (98.6°F)."},
+{q:"Which organ produces insulin in the human body?",opts:["Liver","Pancreas","Kidney","Stomach"],ans:1,cat:"Science",exp:"Insulin is produced by the beta cells of the pancreas."},
+{q:"The hardest substance in the human body is:",opts:["Bone","Enamel","Nail","Cartilage"],ans:1,cat:"Science",exp:"Tooth enamel is the hardest substance in the human body."},
+{q:"Light travels faster in:",opts:["Water","Glass","Vacuum","Diamond"],ans:2,cat:"Science",exp:"Light travels fastest in a vacuum at about 3×10⁸ m/s."},
+{q:"Speed of light in vacuum is approximately:",opts:["3x10^5 km/s","3x10^8 m/s","3x10^6 m/s","3x10^10 m/s"],ans:1,cat:"Science",exp:"Light in vacuum travels at approximately 3×10⁸ m/s (299,792,458 m/s)."},
+{q:"Who invented the telephone?",opts:["Thomas Edison","Alexander Graham Bell","Nikola Tesla","Guglielmo Marconi"],ans:1,cat:"Science",exp:"Alexander Graham Bell is credited with inventing the telephone in 1876."},
+{q:"Who discovered penicillin?",opts:["Louis Pasteur","Alexander Fleming","Edward Jenner","Robert Koch"],ans:1,cat:"Science",exp:"Sir Alexander Fleming discovered penicillin in 1928."},
+{q:"Who discovered the law of gravity?",opts:["Albert Einstein","Galileo Galilei","Isaac Newton","Michael Faraday"],ans:2,cat:"Science",exp:"Sir Isaac Newton formulated the law of universal gravitation."},
+{q:"E = mc² was given by:",opts:["Newton","Einstein","Bohr","Planck"],ans:1,cat:"Science",exp:"Albert Einstein gave the mass-energy equivalence E = mc² in 1905."},
+{q:"The unit of resistance is:",opts:["Ampere","Volt","Ohm","Watt"],ans:2,cat:"Science",exp:"Electrical resistance is measured in Ohms (Ω)."},
+{q:"The gas used in electric bulbs is:",opts:["Oxygen","Nitrogen","Argon","Hydrogen"],ans:2,cat:"Science",exp:"Argon is used in incandescent bulbs to prevent oxidation of the filament."},
+{q:"Which planet is known as the 'Red Planet'?",opts:["Venus","Mars","Jupiter","Mercury"],ans:1,cat:"Science",exp:"Mars is called the Red Planet due to iron oxide (rust) on its surface."},
+{q:"The largest planet in the solar system is:",opts:["Saturn","Jupiter","Neptune","Uranus"],ans:1,cat:"Science",exp:"Jupiter is the largest planet in our solar system."},
+{q:"Which is the closest planet to the Sun?",opts:["Venus","Mercury","Earth","Mars"],ans:1,cat:"Science",exp:"Mercury is the closest planet to the Sun."},
+{q:"The study of earthquakes is called:",opts:["Seismology","Volcanology","Meteorology","Oceanography"],ans:0,cat:"Science",exp:"Seismology is the scientific study of earthquakes."},
+{q:"The instrument used to measure atmospheric pressure is:",opts:["Thermometer","Barometer","Hygrometer","Anemometer"],ans:1,cat:"Science",exp:"A barometer measures atmospheric pressure."},
+{q:"The instrument used to measure wind speed is:",opts:["Barometer","Anemometer","Hygrometer","Thermometer"],ans:1,cat:"Science",exp:"An anemometer is used to measure wind speed."},
+{q:"Common salt chemical name is:",opts:["Sodium carbonate","Sodium chloride","Calcium carbonate","Potassium chloride"],ans:1,cat:"Science",exp:"Common salt is sodium chloride (NaCl)."},
+{q:"Which acid is found in the human stomach?",opts:["Sulphuric acid","Nitric acid","Hydrochloric acid","Acetic acid"],ans:2,cat:"Science",exp:"Hydrochloric acid (HCl) is secreted by parietal cells in the stomach."},
+{q:"Which gas is used in LPG cylinders?",opts:["Methane","Propane and Butane","Carbon dioxide","Hydrogen"],ans:1,cat:"Science",exp:"LPG (Liquefied Petroleum Gas) primarily contains propane and butane."},
+{q:"Number of chromosomes in a normal human body cell is:",opts:["44","46","48","23"],ans:1,cat:"Science",exp:"Human body cells have 46 chromosomes (23 pairs)."},
+{q:"Which organ purifies blood in the human body?",opts:["Liver","Heart","Kidneys","Lungs"],ans:2,cat:"Science",exp:"The kidneys filter blood and remove waste as urine."},
+
+/* ---------- STATIC GK + SPORTS & CULTURE (42) ---------- */
+{q:"Who wrote the National Anthem of India?",opts:["Bankim Chandra Chatterjee","Rabindranath Tagore","Sarojini Naidu","Subramania Bharati"],ans:1,cat:"Culture",exp:"Rabindranath Tagore wrote 'Jana Gana Mana' – India's National Anthem."},
+{q:"Who wrote the National Song 'Vande Mataram'?",opts:["Rabindranath Tagore","Bankim Chandra Chatterjee","Aurobindo Ghosh","Sarat Chandra Chatterjee"],ans:1,cat:"Culture",exp:"Bankim Chandra Chattopadhyay wrote 'Vande Mataram' in his novel Anandamath."},
+{q:"The National Emblem of India is adapted from:",opts:["Ashoka's Lion Capital at Sarnath","Konark Sun Temple","Mahabodhi Temple","Khajuraho Temple"],ans:0,cat:"Culture",exp:"India's National Emblem is adapted from the Lion Capital of Ashoka at Sarnath."},
+{q:"The National Flag of India was designed by:",opts:["Mahatma Gandhi","Pingali Venkayya","Jawaharlal Nehru","Rabindranath Tagore"],ans:1,cat:"Culture",exp:"Pingali Venkayya designed the Indian National Flag; adopted 22 July 1947."},
+{q:"The National Animal of India is:",opts:["Lion","Tiger","Elephant","Leopard"],ans:1,cat:"Culture",exp:"The Bengal Tiger is India's National Animal since 1973."},
+{q:"The National Bird of India is:",opts:["Eagle","Peacock","Parrot","Pigeon"],ans:1,cat:"Culture",exp:"The Indian Peacock is India's National Bird."},
+{q:"The National Flower of India is:",opts:["Rose","Lotus","Sunflower","Jasmine"],ans:1,cat:"Culture",exp:"The Lotus is India's National Flower."},
+{q:"Who was the first Indian to win a Nobel Prize?",opts:["C.V. Raman","Rabindranath Tagore","Mother Teresa","Amartya Sen"],ans:1,cat:"Culture",exp:"Rabindranath Tagore won the Nobel Prize for Literature in 1913 for 'Gitanjali'."},
+{q:"C.V. Raman won the Nobel Prize in Physics in:",opts:["1928","1930","1932","1935"],ans:1,cat:"Culture",exp:"Sir C.V. Raman won the Nobel Prize in Physics in 1930 for the Raman Effect."},
+{q:"Who were the first recipients of the Bharat Ratna in 1954?",opts:["Nehru, Patel, Azad","C. Rajagopalachari, S. Radhakrishnan, C.V. Raman","Nehru, Tagore, Gandhi","Ambedkar, Patel, Raman"],ans:1,cat:"Culture",exp:"The first Bharat Ratna awards (1954) went to C. Rajagopalachari, Sarvepalli Radhakrishnan, and C.V. Raman."},
+{q:"Bharatanatyam is the classical dance form of which state?",opts:["Kerala","Tamil Nadu","Karnataka","Andhra Pradesh"],ans:1,cat:"Culture",exp:"Bharatanatyam is a classical dance form of Tamil Nadu."},
+{q:"Kathakali is associated with which state?",opts:["Kerala","Karnataka","Tamil Nadu","Andhra Pradesh"],ans:0,cat:"Culture",exp:"Kathakali is a classical dance-drama form of Kerala."},
+{q:"Kuchipudi dance form originated in:",opts:["Kerala","Odisha","Andhra Pradesh","Karnataka"],ans:2,cat:"Culture",exp:"Kuchipudi originated in Andhra Pradesh, named after Kuchipudi village."},
+{q:"Odissi is the classical dance of:",opts:["West Bengal","Odisha","Assam","Bihar"],ans:1,cat:"Culture",exp:"Odissi is the classical dance form of Odisha."},
+{q:"Manipuri dance is associated with:",opts:["Meghalaya","Mizoram","Manipur","Nagaland"],ans:2,cat:"Culture",exp:"Manipuri is a classical dance form from Manipur."},
+{q:"Kathak dance form originated in:",opts:["North India","South India","East India","West India"],ans:0,cat:"Culture",exp:"Kathak is a classical dance form of North India, particularly Uttar Pradesh."},
+{q:"The Taj Mahal is located in:",opts:["Delhi","Agra","Jaipur","Lucknow"],ans:1,cat:"Culture",exp:"The Taj Mahal is in Agra, Uttar Pradesh."},
+{q:"The Red Fort in Delhi was built by:",opts:["Akbar","Jahangir","Shah Jahan","Aurangzeb"],ans:2,cat:"Culture",exp:"Shah Jahan built the Red Fort (Lal Qila) in Delhi in 1648."},
+{q:"The Gateway of India is located in:",opts:["Delhi","Mumbai","Kolkata","Chennai"],ans:1,cat:"Culture",exp:"The Gateway of India is in Mumbai, built to commemorate King George V's visit in 1911."},
+{q:"What is India's highest sporting honour?",opts:["Arjuna Award","Major Dhyan Chand Khel Ratna","Dronacharya Award","Padma Shri"],ans:1,cat:"Culture",exp:"The Major Dhyan Chand Khel Ratna Award (renamed from Rajiv Gandhi Khel Ratna in 2021) is India's highest sporting honour."},
+{q:"Major Dhyan Chand won how many Olympic gold medals in hockey for India?",opts:["Two","Three","Four","Five"],ans:1,cat:"Culture",exp:"Dhyan Chand won three Olympic golds: 1928 Amsterdam, 1932 Los Angeles, and 1936 Berlin."},
+{q:"Sachin Tendulkar was awarded the Bharat Ratna in:",opts:["2012","2013","2014","2015"],ans:2,cat:"Culture",exp:"Sachin Tendulkar received the Bharat Ratna in 2014."},
+{q:"The highest civilian award in India is:",opts:["Padma Vibhushan","Bharat Ratna","Padma Bhushan","Param Vir Chakra"],ans:1,cat:"Culture",exp:"The Bharat Ratna is India's highest civilian award."},
+{q:"The highest gallantry award in India is:",opts:["Maha Vir Chakra","Param Vir Chakra","Ashoka Chakra","Vir Chakra"],ans:1,cat:"Culture",exp:"The Param Vir Chakra is India's highest military gallantry award."},
+{q:"The 'Jnanpith Award' is given in the field of:",opts:["Science","Literature","Sports","Cinema"],ans:1,cat:"Culture",exp:"The Jnanpith Award is India's highest literary honour."},
+{q:"Who was the first recipient of the Jnanpith Award?",opts:["G. Sankara Kurup","Firaq Gorakhpuri","Umashankar Joshi","Mahadevi Varma"],ans:0,cat:"Culture",exp:"G. Sankara Kurup (Malayalam) received the first Jnanpith Award in 1965."},
+{q:"The 'Dadasaheb Phalke Award' is given in the field of:",opts:["Literature","Cinema","Music","Theatre"],ans:1,cat:"Culture",exp:"The Dadasaheb Phalke Award is India's highest honour in cinema."},
+{q:"Who was the first Indian woman to win a Nobel Prize? (honorary Indian citizen)",opts:["Indira Gandhi","Mother Teresa","Kiran Bedi","Amrita Pritam"],ans:1,cat:"Culture",exp:"Mother Teresa won the Nobel Peace Prize in 1979 (she became an Indian citizen)."},
+{q:"Who was the first Indian woman to climb Mount Everest?",opts:["Arunima Sinha","Bachendri Pal","Santosh Yadav","Premlata Agarwal"],ans:1,cat:"Culture",exp:"Bachendri Pal became the first Indian woman to summit Mount Everest in 1984."},
+{q:"The 'Khajuraho Temples' are located in:",opts:["Madhya Pradesh","Rajasthan","Uttar Pradesh","Gujarat"],ans:0,cat:"Culture",exp:"The Khajuraho Group of Temples is in Chhatarpur, Madhya Pradesh – a UNESCO site."},
+{q:"The 'Konark Sun Temple' is in:",opts:["Odisha","West Bengal","Tamil Nadu","Andhra Pradesh"],ans:0,cat:"Culture",exp:"The Konark Sun Temple is in Odisha – a UNESCO World Heritage Site."},
+{q:"Who invented the game of Chess (traditionally)?",opts:["Indians","Chinese","Greeks","Arabs"],ans:0,cat:"Culture",exp:"Chess is traditionally believed to have originated in India as Chaturanga."},
+{q:"Which trophy/cup is associated with Cricket?",opts:["Davis Cup","Ryder Cup","Ranji Trophy","Thomas Cup"],ans:2,cat:"Culture",exp:"The Ranji Trophy is India's premier domestic first-class cricket competition."},
+{q:"Which cup is associated with Badminton?",opts:["Davis Cup","Thomas Cup","Ryder Cup","Stanley Cup"],ans:1,cat:"Culture",exp:"The Thomas Cup is a major men's badminton tournament."},
+{q:"The Davis Cup is associated with:",opts:["Tennis","Golf","Table Tennis","Hockey"],ans:0,cat:"Culture",exp:"The Davis Cup is an international men's tennis competition."},
+{q:"How many players are there in a cricket team on the field?",opts:["10","11","12","9"],ans:1,cat:"Culture",exp:"A cricket team has 11 players on the field."},
+{q:"'Ranji Trophy' was named after:",opts:["Ranjitsinhji","Ranji Vibhaji","Ranji Singh","Ranjit Singh"],ans:0,cat:"Culture",exp:"The Ranji Trophy is named after Kumar Shri Ranjitsinhji of Nawanagar."},
+{q:"Who wrote the book 'Wings of Fire'?",opts:["Jawaharlal Nehru","A.P.J. Abdul Kalam","Arundhati Roy","Vikram Seth"],ans:1,cat:"Culture",exp:"Former President A.P.J. Abdul Kalam wrote 'Wings of Fire' (autobiography)."},
+{q:"Who wrote 'The God of Small Things'?",opts:["Arundhati Roy","Vikram Seth","Salman Rushdie","R.K. Narayan"],ans:0,cat:"Culture",exp:"Arundhati Roy's 'The God of Small Things' won the Booker Prize in 1997."},
+{q:"The Elephanta Caves are located near:",opts:["Chennai","Mumbai","Kolkata","Hyderabad"],ans:1,cat:"Culture",exp:"Elephanta Caves are on Elephanta Island near Mumbai."},
+{q:"The Ajanta Caves are famous for:",opts:["Paintings","Stone carvings","Statues","Inscriptions"],ans:0,cat:"Culture",exp:"The Ajanta Caves in Maharashtra are famous for Buddhist paintings and frescoes."},
+{q:"Which festival is known as the 'Festival of Lights'?",opts:["Holi","Diwali","Onam","Pongal"],ans:1,cat:"Culture",exp:"Diwali, the Festival of Lights, celebrates the victory of light over darkness."}
+];
+
+/* ===================== GAME LOGIC ===================== */
+var CATS=['All','History','Geography','Polity','Economy','Science','Culture'];
+var selCat='All',selMode='blitz';
+var quizPool,curIdx,score,correct,attempted,totalQ,catScore,startTime;
+var totalTimer=null,qTimer=null,totalRemain=60,qRemain=10;
+var inAnswer=false;
+var PRACTICE_COUNT=20;
+
+var catGridE=document.getElementById('cat_grid');
+var modeDescE=document.getElementById('mode_desc');
+var bestLineE=document.getElementById('best_line');
+var howtoHead=document.getElementById('howto_head');
+var howtoBody=document.getElementById('howto_body');
+var howtoArrow=document.getElementById('howto_arrow');
+var btnPlay=document.getElementById('btn_play');
+var sStart=document.getElementById('s_start'),sQuiz=document.getElementById('s_quiz'),sEnd=document.getElementById('s_end');
+var qCounterE=document.getElementById('q_counter'),qCatE=document.getElementById('q_cat'),qScoreE=document.getElementById('q_score');
+var qTextE=document.getElementById('q_text'),qOptsE=document.getElementById('q_opts');
+var timerFillE=document.getElementById('timer_fill'),qTimeE=document.getElementById('q_time');
+var expBoxE=document.getElementById('exp_box'),fbPopE=document.getElementById('fb_pop');
+var btnSkip=document.getElementById('btn_skip'),btnNext=document.getElementById('btn_next');
+var pracWrap=document.getElementById('prac_prog_wrap'),pracProg=document.getElementById('prac_prog');
+var endTitleE=document.getElementById('end_title'),endScoreE=document.getElementById('end_score');
+var esCorrectE=document.getElementById('es_correct'),esAccE=document.getElementById('es_acc'),esAttE=document.getElementById('es_att');
+var catBreakE=document.getElementById('cat_break'),endBestE=document.getElementById('end_best');
+var btnAgain=document.getElementById('btn_again'),btnChange=document.getElementById('btn_change'),btnShare=document.getElementById('btn_share');
+
+/* Storage helpers */
+function sget(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function sset(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function bestKey(c,m){return 'gk_best_'+c+'_'+m}
+function getBest(c,m){var v=sget(bestKey(c,m));return v?parseInt(v)||0:0}
+function setBest(c,m,v){sset(bestKey(c,m),String(v))}
+
+/* Build category selector */
+function buildCatGrid(){
+var html='';
+for(var i=0;i<CATS.length;i++){
+var c=CATS[i];
+html+='<button class="opt-btn'+(c===selCat?' active':'')+'" data-cat="'+c+'" ontouchstart="">'+c+'</button>';
+}
+catGridE.innerHTML=html;
+var btns=catGridE.querySelectorAll('.opt-btn');
+for(var k=0;k<btns.length;k++){
+(function(b){
+b.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+selCat=b.getAttribute('data-cat');
+for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');
+b.classList.add('active');
+updateBestLine();
+});
+b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+})(btns[k]);
+}
+}
+
+function initModeBtns(){
+var mbs=document.querySelectorAll('.mode-btn');
+for(var i=0;i<mbs.length;i++){
+(function(b){
+b.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+selMode=b.getAttribute('data-mode');
+for(var j=0;j<mbs.length;j++)mbs[j].classList.remove('active');
+b.classList.add('active');
+modeDescE.textContent=selMode==='blitz'?'60s rapid-fire · 10s per question · max score wins':'Untimed · 20 questions · see explanations';
+updateBestLine();
+});
+b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+})(mbs[i]);
+}
+}
+
+function updateBestLine(){
+var b=getBest(selCat,selMode);
+bestLineE.textContent='Best ['+selCat+' · '+selMode.toUpperCase()+']: '+b;
+}
+
+howtoHead.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+var open=howtoBody.classList.toggle('open');
+howtoArrow.textContent=open?'▲':'▼';
+});
+
+btnPlay.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+startQuiz();
+});
+btnPlay.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+
+/* ---- Quiz core ---- */
+function shuffle(arr){
+var a=arr.slice();
+for(var i=a.length-1;i>0;i--){
+var j=Math.floor(Math.random()*(i+1));
+var t=a[i];a[i]=a[j];a[j]=t;
+}
+return a;
+}
+
+function buildPool(){
+var filtered=[];
+for(var i=0;i<QUESTIONS.length;i++){
+if(selCat==='All'||QUESTIONS[i].cat===selCat)filtered.push(QUESTIONS[i]);
+}
+return shuffle(filtered);
+}
+
+function startQuiz(){
+quizPool=buildPool();
+curIdx=0;score=0;correct=0;attempted=0;
+catScore={History:{c:0,t:0},Geography:{c:0,t:0},Polity:{c:0,t:0},Economy:{c:0,t:0},Science:{c:0,t:0},Culture:{c:0,t:0}};
+totalRemain=60;
+inAnswer=false;
+sStart.classList.add('hidden');
+sEnd.classList.add('hidden');
+sQuiz.classList.remove('hidden');
+qScoreE.textContent='0';
+if(selMode==='practice'){
+totalQ=Math.min(PRACTICE_COUNT,quizPool.length);
+pracWrap.style.display='block';
+timerFillE.parentNode.style.display='none';
+qTimeE.style.display='none';
+}else{
+totalQ=quizPool.length;
+pracWrap.style.display='none';
+timerFillE.parentNode.style.display='block';
+qTimeE.style.display='block';
+startTotalTimer();
+}
+loadQuestion();
+}
+
+function startTotalTimer(){
+totalRemain=60;
+updateTotalBar();
+if(totalTimer)clearInterval(totalTimer);
+totalTimer=setInterval(function(){
+totalRemain--;
+updateTotalBar();
+if(totalRemain<=0){
+clearInterval(totalTimer);totalTimer=null;
+if(qTimer){clearInterval(qTimer);qTimer=null}
+endQuiz();
+}
+},1000);
+}
+
+function updateTotalBar(){
+var pct=Math.max(0,(totalRemain/60)*100);
+timerFillE.style.width=pct+'%';
+qTimeE.textContent=totalRemain+'s';
+}
+
+function startQTimer(){
+qRemain=10;
+if(qTimer)clearInterval(qTimer);
+qTimer=setInterval(function(){
+qRemain--;
+if(qRemain<=0){
+clearInterval(qTimer);qTimer=null;
+if(!inAnswer)onTimeout();
+}
+},1000);
+}
+
+function loadQuestion(){
+if(curIdx>=totalQ){endQuiz();return}
+if(curIdx>=quizPool.length){
+// recycle
+quizPool=quizPool.concat(shuffle(buildPool()));
+}
+var q=quizPool[curIdx];
+inAnswer=false;
+expBoxE.classList.remove('show');
+btnNext.classList.remove('show');
+qCounterE.textContent='Q'+(curIdx+1);
+qCatE.textContent=q.cat;
+qCatE.className='q-cat cat-'+q.cat.toLowerCase();
+
+qTextE.textContent=q.q;
+
+// shuffle options, track correct
+var idxs=[0,1,2,3];
+idxs=shuffle(idxs);
+var correctIdx=idxs.indexOf(q.ans);
+qOptsE.innerHTML='';
+var letters=['A','B','C','D'];
+for(var i=0;i<4;i++){
+(function(i,origI){
+var btn=document.createElement('button');
+btn.className='q-opt';
+btn.setAttribute('ontouchstart','');
+btn.innerHTML='<span class="letter">'+letters[i]+'</span>'+q.opts[origI];
+btn.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+if(inAnswer)return;
+onAnswer(i,correctIdx,btn);
+});
+btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+qOptsE.appendChild(btn);
+})(i,idxs[i]);
+}
+
+if(selMode==='practice'){
+pracProg.style.width=((curIdx/totalQ)*100)+'%';
+}else{
+startQTimer();
+}
+}
+
+function onAnswer(picked,correctIdx,btnEl){
+inAnswer=true;
+if(qTimer){clearInterval(qTimer);qTimer=null}
+var q=quizPool[curIdx];
+attempted++;
+catScore[q.cat].t++;
+var opts=qOptsE.querySelectorAll('.q-opt');
+for(var i=0;i<opts.length;i++)opts[i].classList.add('disabled');
+if(picked===correctIdx){
+correct++;score++;
+catScore[q.cat].c++;
+btnEl.classList.add('correct');
+qScoreE.textContent=String(score);
+showFeedback(true);
+if(selMode==='practice'){
+expBoxE.innerHTML='<b style="color:#22c55e">Correct!</b> '+(q.exp||'');
+expBoxE.classList.add('show');
+btnNext.classList.add('show');
+}else{
+setTimeout(nextQuestion,800);
+}
+}else{
+btnEl.classList.add('wrong');
+if(opts[correctIdx])opts[correctIdx].classList.add('correct');
+showFeedback(false);
+if(selMode==='practice'){
+expBoxE.innerHTML='<b style="color:#ef4444">Wrong.</b> Correct answer: <b>'+q.opts[q.ans]+'</b>. '+(q.exp||'');
+expBoxE.classList.add('show');
+btnNext.classList.add('show');
+}else{
+setTimeout(nextQuestion,1500);
+}
+}
+}
+
+function onTimeout(){
+inAnswer=true;
+var q=quizPool[curIdx];
+attempted++;
+catScore[q.cat].t++;
+var opts=qOptsE.querySelectorAll('.q-opt');
+// find correct
+var letters=['A','B','C','D'];
+for(var i=0;i<opts.length;i++){
+opts[i].classList.add('disabled');
+// identify which opt is correct by text match
+var txt=opts[i].textContent.replace(/^[A-D]/,'').trim();
+if(txt===q.opts[q.ans]){opts[i].classList.add('correct')}
+}
+showFeedback(false);
+setTimeout(nextQuestion,1200);
+}
+
+function showFeedback(ok){
+fbPopE.textContent=ok?'+1':'✗';
+fbPopE.className='feedback-pop '+(ok?'ok':'no');
+fbPopE.offsetHeight;
+fbPopE.classList.add('show');
+setTimeout(function(){fbPopE.classList.remove('show')},600);
+}
+
+function nextQuestion(){
+curIdx++;
+if(selMode==='blitz'&&(totalRemain<=0||curIdx>=totalQ)){endQuiz();return}
+if(selMode==='practice'&&curIdx>=totalQ){endQuiz();return}
+// Inter-question ad slot in practice mode every 5 questions
+if(selMode==='practice'&&curIdx>0&&curIdx%5===0&&curIdx<totalQ){
+showInterAd(function(){loadQuestion()});
+return;
+}
+loadQuestion();
+}
+
+function showInterAd(onDone){
+// quick inline ad slot shown in place of question
+qTextE.innerHTML='';
+qOptsE.innerHTML='<div class="ad-slot" style="margin:0">Advertisement</div>';
+expBoxE.classList.remove('show');
+btnNext.textContent='CONTINUE ▶';
+btnNext.classList.add('show');
+var handler=function(e){
+e.preventDefault();e.stopPropagation();
+btnNext.removeEventListener('pointerdown',handler);
+btnNext.textContent='NEXT ▶';
+onDone();
+};
+btnNext.addEventListener('pointerdown',handler);
+}
+
+btnNext.addEventListener('pointerdown',function(e){
+// In practice mode this advances
+if(selMode!=='practice')return;
+e.preventDefault();e.stopPropagation();
+if(!btnNext.classList.contains('show'))return;
+nextQuestion();
+});
+btnNext.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+
+btnSkip.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+if(inAnswer)return;
+if(qTimer){clearInterval(qTimer);qTimer=null}
+inAnswer=true;
+attempted++;
+var q=quizPool[curIdx];
+catScore[q.cat].t++;
+showFeedback(false);
+var opts=qOptsE.querySelectorAll('.q-opt');
+for(var i=0;i<opts.length;i++){
+opts[i].classList.add('disabled');
+var txt=opts[i].textContent.replace(/^[A-D]/,'').trim();
+if(txt===q.opts[q.ans])opts[i].classList.add('correct');
+}
+if(selMode==='practice'){
+expBoxE.innerHTML='<b style="color:#ef4444">Skipped.</b> Correct answer: <b>'+q.opts[q.ans]+'</b>. '+(q.exp||'');
+expBoxE.classList.add('show');
+btnNext.classList.add('show');
+}else{
+setTimeout(nextQuestion,900);
+}
+});
+btnSkip.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+
+function endQuiz(){
+if(totalTimer){clearInterval(totalTimer);totalTimer=null}
+if(qTimer){clearInterval(qTimer);qTimer=null}
+sQuiz.classList.add('hidden');
+sEnd.classList.remove('hidden');
+endTitleE.textContent=selMode==='blitz'?'TIME UP!':'DONE!';
+endScoreE.textContent='0';
+animateScore(score);
+esCorrectE.textContent=correct+'/'+attempted;
+esAttE.textContent=String(attempted);
+var accP=attempted>0?Math.round((correct/attempted)*100):0;
+esAccE.textContent=accP+'%';
+// category breakdown if All
+if(selCat==='All'){
+var html='<div class="cat-break-head">Category Breakdown</div>';
+var cats=['History','Geography','Polity','Economy','Science','Culture'];
+for(var i=0;i<cats.length;i++){
+var c=cats[i],cs=catScore[c];
+if(cs.t>0){
+html+='<div class="cat-row"><span class="cat-name">'+c+'</span><span class="cat-score">'+cs.c+'/'+cs.t+'</span></div>';
+}
+}
+catBreakE.innerHTML=html;
+catBreakE.style.display='block';
+}else{
+catBreakE.innerHTML='';
+catBreakE.style.display='none';
+}
+// best
+var b=getBest(selCat,selMode);
+if(score>b){setBest(selCat,selMode,score);b=score;endBestE.innerHTML='🏆 <b>New Best!</b> '+b;}
+else{endBestE.textContent='Best: '+b;}
+btnShare.classList.remove('copied');
+btnShare.textContent='📋 COPY SCORE';
+}
+
+function animateScore(target){
+var start=0,dur=700,t0=Date.now();
+var tick=function(){
+var p=Math.min(1,(Date.now()-t0)/dur);
+var v=Math.floor(start+(target-start)*p);
+endScoreE.textContent=String(v);
+if(p<1)requestAnimationFrame(tick);
+else endScoreE.textContent=String(target);
+};
+tick();
+}
+
+btnAgain.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+startQuiz();
+});
+btnAgain.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+
+btnChange.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+sEnd.classList.add('hidden');
+sQuiz.classList.add('hidden');
+sStart.classList.remove('hidden');
+updateBestLine();
+});
+btnChange.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+
+btnShare.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+var modeTxt=selMode==='blitz'?'BLITZ':'PRACTICE';
+var accP=attempted>0?Math.round((correct/attempted)*100):0;
+var txt='🎯 GK Blitz ['+selCat+' · '+modeTxt+']\nScore: '+score+' | '+correct+'/'+attempted+' correct ('+accP+'%)\nTry it yourself!';
+var ok=false;
+try{
+if(navigator.clipboard&&navigator.clipboard.writeText){
+navigator.clipboard.writeText(txt).then(function(){
+btnShare.classList.add('copied');
+btnShare.textContent='✓ COPIED!';
+setTimeout(function(){btnShare.classList.remove('copied');btnShare.textContent='📋 COPY SCORE'},1800);
+},function(){fallbackCopy(txt)});
+ok=true;
+}
+}catch(err){}
+if(!ok)fallbackCopy(txt);
+});
+btnShare.addEventListener('click',function(e){e.preventDefault();e.stopPropagation()});
+
+function fallbackCopy(txt){
+try{
+var ta=document.createElement('textarea');
+ta.value=txt;ta.style.position='fixed';ta.style.left='-9999px';
+document.body.appendChild(ta);ta.select();
+document.execCommand('copy');
+document.body.removeChild(ta);
+btnShare.classList.add('copied');
+btnShare.textContent='✓ COPIED!';
+setTimeout(function(){btnShare.classList.remove('copied');btnShare.textContent='📋 COPY SCORE'},1800);
+}catch(err){}
+}
+
+/* Prevent scroll bounce on quiz/end pointer events */
+document.addEventListener('touchmove',function(e){
+// allow vertical scroll inside .scr
+var t=e.target;
+while(t&&t!==document.body){if(t.classList&&t.classList.contains('scr'))return;t=t.parentNode}
+e.preventDefault();
+},{passive:false});
+
+/* Init */
+buildCatGrid();
+initModeBtns();
+updateBestLine();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="qmbg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#0a0e27"/>
+<stop offset="100%" stop-color="#1a1e47"/>
+</linearGradient>
+</defs>
+<rect width="400" height="300" fill="url(#qmbg)"/>
+<!-- timer circle -->
+<circle cx="60" cy="55" r="26" fill="none" stroke="#ffa500" stroke-width="4" stroke-dasharray="120 180"/>
+<text x="60" y="62" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#ffa500" text-anchor="middle">42</text>
+<!-- score badge -->
+<rect x="305" y="28" width="80" height="48" rx="6" fill="rgba(255,165,0,0.15)" stroke="#ffa500" stroke-width="1"/>
+<text x="345" y="48" font-family="Arial, sans-serif" font-size="10" fill="#ffa500" text-anchor="middle" letter-spacing="2">SCORE</text>
+<text x="345" y="68" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#fff" text-anchor="middle">28</text>
+<!-- main equation -->
+<text x="200" y="150" font-family="Arial Black, sans-serif" font-size="60" font-weight="900" fill="#fff" text-anchor="middle">15 × 12 = ?</text>
+<!-- answer options row -->
+<g font-family="Arial Black, sans-serif" font-weight="900" text-anchor="middle">
+<rect x="55" y="185" width="66" height="40" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,165,0,0.4)" stroke-width="1"/>
+<text x="88" y="212" font-size="22" fill="#fff">170</text>
+<rect x="135" y="185" width="66" height="40" rx="6" fill="#ffa500"/>
+<text x="168" y="212" font-size="22" fill="#0a0e27">180</text>
+<rect x="215" y="185" width="66" height="40" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,165,0,0.4)" stroke-width="1"/>
+<text x="248" y="212" font-size="22" fill="#fff">160</text>
+<rect x="295" y="185" width="66" height="40" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,165,0,0.4)" stroke-width="1"/>
+<text x="328" y="212" font-size="22" fill="#fff">185</text>
+</g>
+<!-- combo badge -->
+<text x="200" y="248" font-family="Arial Black, sans-serif" font-size="14" font-weight="900" fill="#ffd700" text-anchor="middle">⚡ COMBO ×3</text>
+<!-- title -->
+<text x="200" y="283" font-family="Arial Black, sans-serif" font-size="30" font-weight="900" fill="#ffa500" text-anchor="middle">QUICK MATH 60</text>
+</svg>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Sudoku Pro</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#f5f3ef}
+body{display:flex;flex-direction:column;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#222}
+.wrap{width:100%;max-width:520px;height:100%;display:flex;flex-direction:column;position:relative}
+.head{width:100%;padding:10px 12px 6px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sb{background:#fff;border:1px solid #d4d0c8;border-radius:10px;padding:5px 9px;text-align:center;min-width:60px;flex:1;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sl{color:#8a8a8a;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+.sv{color:#222;font-size:clamp(14px,4vw,18px);font-weight:800;line-height:1.1}
+.sv.warn{color:#dc2626}
+.bw{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 8px;min-height:0}
+.grid{display:grid;grid-template-columns:repeat(9,1fr);width:min(96vw,460px);aspect-ratio:1;background:#333;border:3px solid #333;border-radius:6px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.cell{background:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4.5vw,24px);font-weight:600;color:#2563eb;position:relative;cursor:pointer;border:1px solid #d4d0c8;transition:background .12s}
+.cell.clue{color:#222;font-weight:800;background:#f8f7f3}
+.cell.sel{background:#bfdbfe!important}
+.cell.high{background:#eef2f7}
+.cell.same{background:#dbeafe}
+.cell.err{background:#fecaca!important;color:#dc2626!important;animation:shake .25s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.cell:nth-child(3n):not(:nth-child(9n)){border-right:2px solid #333}
+.cell:nth-child(9n){border-right:none}
+.cell[data-r="2"],.cell[data-r="5"]{border-bottom:2px solid #333}
+.pencil{position:absolute;inset:2px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);font-size:clamp(7px,1.8vw,10px);color:#777;font-weight:600}
+.pencil span{display:flex;align-items:center;justify-content:center}
+.ad-slot{width:min(96vw,460px);height:50px;margin:6px auto;border:1.5px dashed #bbb;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;letter-spacing:2px;font-weight:600;background:rgba(255,255,255,.5)}
+.ad-slot::after{content:"AD SPACE"}
+.tools{width:min(96vw,460px);display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+.tb{background:#fff;border:1px solid #d4d0c8;border-radius:10px;padding:8px 6px;font-size:11px;font-weight:700;color:#444;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-family:inherit;flex:1;min-width:56px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tb:active{transform:scale(.95);background:#f0efeb}
+.tb.on{background:#2563eb;color:#fff;border-color:#2563eb}
+.tb .ic{font-size:16px;line-height:1}
+.tb .lb{font-size:10px;letter-spacing:.5px}
+.pad{width:min(96vw,460px);display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:8px}
+.nb{background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:10px 0;font-size:clamp(16px,4.2vw,22px);font-weight:800;color:#2563eb;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-family:inherit;min-height:44px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.nb:active{transform:scale(.95);background:#dbeafe}
+.nb.done{opacity:.3;color:#999;pointer-events:none}
+.ob{position:absolute;inset:0;background:rgba(245,243,239,.96);z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:20;padding:18px;text-align:center;overflow-y:auto}
+.ov.hidden,.ob.hidden{display:none}
+.ov h1{font-size:clamp(40px,11vw,68px);color:#1e3a8a;letter-spacing:-1px;line-height:.95;font-weight:900}
+.ov h2{font-size:clamp(26px,7vw,40px);color:#1e3a8a;letter-spacing:-.5px;line-height:1;font-weight:900}
+.tag{color:#555;font-size:clamp(12px,3.2vw,15px);letter-spacing:1px;margin-top:-6px}
+.lvlsel{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:min(86vw,360px);margin-top:4px}
+.lb{background:#fff;color:#2563eb;border:2px solid #2563eb;padding:12px 10px;font-size:13px;font-weight:800;font-family:inherit;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+.lb:active{background:#eff6ff;transform:scale(.97)}
+.lb .clues{font-size:10px;color:#666;font-weight:600;letter-spacing:.5px}
+.lb.hard{color:#dc2626;border-color:#dc2626}
+.lb.hard:active{background:#fef2f2}
+.lb.exp{color:#7c3aed;border-color:#7c3aed}
+.lb.exp:active{background:#f5f3ff}
+.btn{background:linear-gradient(180deg,#2563eb,#1e40af);color:#fff;border:none;padding:13px 40px;font:800 clamp(15px,4vw,20px) inherit;border-radius:10px;letter-spacing:2px;box-shadow:0 4px 14px rgba(37,99,235,.35);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn.alt{background:linear-gradient(180deg,#fff,#f0efeb);color:#2563eb;border:2px solid #2563eb;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.btn.ghost{background:transparent;color:#666;border:1.5px solid #bbb;box-shadow:none;padding:9px 22px;font-size:13px;letter-spacing:1px}
+.cont{background:#fff;border:2px solid #16a34a;border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;align-items:center;gap:2px;width:min(86vw,360px);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-family:inherit}
+.cont:active{background:#f0fdf4;transform:scale(.98)}
+.cont .t1{color:#16a34a;font-size:14px;font-weight:900;letter-spacing:2px}
+.cont .t2{color:#555;font-size:11px;font-weight:600}
+.howto{background:#fff;border:1px solid #d4d0c8;border-radius:10px;width:min(86vw,360px);overflow:hidden}
+.howto-h{padding:10px 14px;font-size:12px;font-weight:800;color:#444;letter-spacing:1px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.howto-h .ar{transition:transform .2s}
+.howto.open .ar{transform:rotate(90deg)}
+.howto-b{display:none;padding:4px 14px 12px;font-size:12px;color:#555;line-height:1.6;text-align:left}
+.howto.open .howto-b{display:block}
+.bests{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:min(86vw,360px)}
+.bests .bc{flex:1;min-width:70px;background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:6px;text-align:center}
+.bests .bc .bl{font-size:9px;color:#888;letter-spacing:1px;font-weight:700}
+.bests .bc .bv{font-size:13px;color:#222;font-weight:800;margin-top:1px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.stats .s{background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:8px 14px;min-width:80px}
+.stats .s .sl{font-size:9px;color:#888;letter-spacing:1.5px;font-weight:700;text-transform:uppercase}
+.stats .s .sv{font-size:20px;font-weight:800;color:#222}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+<div class="head" id="gameHead" style="display:none">
+<div class="sb"><div class="sl">Time</div><div class="sv" id="sTime">00:00</div></div>
+<div class="sb"><div class="sl">Mistakes</div><div class="sv" id="sMist">0/3</div></div>
+<div class="sb"><div class="sl">Hints</div><div class="sv" id="sHint">3</div></div>
+<div class="sb"><div class="sl">Level</div><div class="sv" id="sDiff">-</div></div>
+</div>
+
+<div class="bw" id="gameArea" style="display:none">
+<div class="grid" id="grid"></div>
+<div class="ad-slot"></div>
+<div class="tools">
+<button class="tb" id="btUndo" ontouchstart=""><span class="ic">&#x21B6;</span><span class="lb">UNDO</span></button>
+<button class="tb" id="btErase" ontouchstart=""><span class="ic">&#x232B;</span><span class="lb">ERASE</span></button>
+<button class="tb" id="btPen" ontouchstart=""><span class="ic">&#x270E;</span><span class="lb">PENCIL</span></button>
+<button class="tb" id="btHint" ontouchstart=""><span class="ic">&#x1F4A1;</span><span class="lb">HINT</span></button>
+<button class="tb" id="btNew" ontouchstart=""><span class="ic">&#x21BB;</span><span class="lb">NEW</span></button>
+</div>
+<div class="pad" id="pad"></div>
+</div>
+
+<div class="ob" id="obStart"></div>
+<div class="ov" id="ovStart">
+<h1>SUDOKU<br>PRO</h1>
+<div class="tag">LOGIC PUZZLE FOR SHARPER REASONING</div>
+<div class="ad-slot"></div>
+<button class="cont hidden" id="btCont" ontouchstart="">
+<div class="t1">&#x25B6; CONTINUE</div>
+<div class="t2" id="contInfo"></div>
+</button>
+<div class="lvlsel">
+<button class="lb" data-lvl="easy" ontouchstart=""><span>EASY</span><span class="clues">45 CLUES</span></button>
+<button class="lb" data-lvl="medium" ontouchstart=""><span>MEDIUM</span><span class="clues">35 CLUES</span></button>
+<button class="lb hard" data-lvl="hard" ontouchstart=""><span>HARD</span><span class="clues">28 CLUES</span></button>
+<button class="lb exp" data-lvl="expert" ontouchstart=""><span>EXPERT</span><span class="clues">22 CLUES</span></button>
+</div>
+<div class="howto" id="howto">
+<div class="howto-h" id="howtoH">HOW TO PLAY<span class="ar">&#x25B6;</span></div>
+<div class="howto-b">
+&bull; Fill the 9&times;9 grid so every row, column, and 3&times;3 box has digits 1-9<br>
+&bull; Each number can appear only ONCE per row, column, or box<br>
+&bull; Tap a cell to select, then tap a number (1-9)<br>
+&bull; Use Pencil Mode for possible candidates<br>
+&bull; Use Hints sparingly &mdash; only 3 per game<br>
+&bull; 3 mistakes = game over
+</div>
+</div>
+<div class="bests" id="bests"></div>
+</div>
+
+<div class="ob hidden" id="obWin"></div>
+<div class="ov hidden" id="ovWin">
+<h2>PUZZLE<br>SOLVED!</h2>
+<div class="tag">EXCELLENT WORK</div>
+<div class="ad-slot"></div>
+<div class="stats">
+<div class="s"><div class="sl">Time</div><div class="sv" id="wTime">00:00</div></div>
+<div class="s"><div class="sl">Mistakes</div><div class="sv" id="wMist">0</div></div>
+<div class="s"><div class="sl">Hints</div><div class="sv" id="wHint">0</div></div>
+</div>
+<div id="wBest" class="tag"></div>
+<button class="btn" id="btWinAgain" ontouchstart="">NEW PUZZLE</button>
+<button class="btn ghost" id="btWinHome" ontouchstart="">HOME</button>
+</div>
+
+<div class="ob hidden" id="obLose"></div>
+<div class="ov hidden" id="ovLose">
+<h2>GAME<br>OVER</h2>
+<div class="tag">3 MISTAKES REACHED</div>
+<div class="ad-slot"></div>
+<div class="stats">
+<div class="s"><div class="sl">Time</div><div class="sv" id="lTime">00:00</div></div>
+<div class="s"><div class="sl">Filled</div><div class="sv" id="lFill">0/81</div></div>
+</div>
+<button class="btn alt" id="btLoseShow" ontouchstart="">REVEAL SOLUTION</button>
+<button class="btn" id="btLoseNew" ontouchstart="">NEW PUZZLE</button>
+<button class="btn ghost" id="btLoseHome" ontouchstart="">HOME</button>
+</div>
+
+</div>
+
+<script>
+(function(){'use strict';
+
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+var LS_SAVE='sdk_save';
+var LS_BEST_PRE='sdk_best_';
+var DIFF_CLUES={easy:45,medium:35,hard:28,expert:22};
+var DIFF_LABEL={easy:'EASY',medium:'MEDIUM',hard:'HARD',expert:'EXPERT'};
+
+var gridE=document.getElementById('grid');
+var padE=document.getElementById('pad');
+var sTime=document.getElementById('sTime'),sMist=document.getElementById('sMist'),sHint=document.getElementById('sHint'),sDiff=document.getElementById('sDiff');
+var gameHead=document.getElementById('gameHead'),gameArea=document.getElementById('gameArea');
+var ovStart=document.getElementById('ovStart'),obStart=document.getElementById('obStart');
+var ovWin=document.getElementById('ovWin'),obWin=document.getElementById('obWin');
+var ovLose=document.getElementById('ovLose'),obLose=document.getElementById('obLose');
+var btCont=document.getElementById('btCont'),contInfo=document.getElementById('contInfo');
+var bestsE=document.getElementById('bests');
+var howto=document.getElementById('howto'),howtoH=document.getElementById('howtoH');
+var btUndo=document.getElementById('btUndo'),btErase=document.getElementById('btErase'),btPen=document.getElementById('btPen'),btHint=document.getElementById('btHint'),btNew=document.getElementById('btNew');
+
+var state={
+solution:null,
+puzzle:null,
+player:null,
+pencil:null,
+fixed:null,
+sel:-1,
+mistakes:0,
+hints:3,
+diff:'easy',
+elapsed:0,
+running:false,
+undoStack:[],
+pencilMode:false,
+cells:[]
+};
+
+var timerId=null,saveId=null,startT=0;
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+
+function isValid(g,row,col,num){
+var i;
+for(i=0;i<9;i++){if(g[row][i]===num)return false;if(g[i][col]===num)return false}
+var br=Math.floor(row/3)*3,bc=Math.floor(col/3)*3;
+for(var r=br;r<br+3;r++)for(var c=bc;c<bc+3;c++)if(g[r][c]===num)return false;
+return true
+}
+
+function solve(g){
+for(var r=0;r<9;r++)for(var c=0;c<9;c++){
+if(g[r][c]===0){
+for(var n=1;n<=9;n++){
+if(isValid(g,r,c,n)){g[r][c]=n;if(solve(g))return true;g[r][c]=0}
+}
+return false
+}
+}
+return true
+}
+
+function generateSolved(){
+var g=[];for(var r=0;r<9;r++){g.push([]);for(var c=0;c<9;c++)g[r].push(0)}
+// seed diagonal 3x3 boxes for speed and variety
+for(var b=0;b<3;b++){
+var nums=shuffle([1,2,3,4,5,6,7,8,9]);
+var idx=0;
+for(var r=b*3;r<b*3+3;r++)for(var c=b*3;c<b*3+3;c++){g[r][c]=nums[idx++]}
+}
+solve(g);
+return g
+}
+
+// Count solutions, cap at 2 (used for uniqueness check)
+function countSolutions(g,cap){
+var count=0;
+function rec(){
+if(count>=cap)return;
+for(var r=0;r<9;r++)for(var c=0;c<9;c++){
+if(g[r][c]===0){
+for(var n=1;n<=9;n++){
+if(isValid(g,r,c,n)){g[r][c]=n;rec();g[r][c]=0;if(count>=cap)return}
+}
+return
+}
+}
+count++
+}
+rec();
+return count
+}
+
+function cloneGrid(g){var n=[];for(var r=0;r<9;r++)n.push(g[r].slice());return n}
+
+function removeCells(full,targetClues){
+var puzzle=cloneGrid(full);
+var positions=[];for(var i=0;i<81;i++)positions.push(i);
+shuffle(positions);
+var cluesLeft=81;
+for(var p=0;p<positions.length&&cluesLeft>targetClues;p++){
+var idx=positions[p];
+var r=Math.floor(idx/9),c=idx%9;
+if(puzzle[r][c]===0)continue;
+var backup=puzzle[r][c];
+puzzle[r][c]=0;
+var trial=cloneGrid(puzzle);
+var n=countSolutions(trial,2);
+if(n!==1){puzzle[r][c]=backup}
+else{cluesLeft--}
+}
+return puzzle
+}
+
+function generatePuzzle(diff){
+var target=DIFF_CLUES[diff];
+var attempts=0;
+while(attempts<3){
+attempts++;
+var solved=generateSolved();
+var puzzle=removeCells(solved,target);
+var actualClues=0;
+for(var r=0;r<9;r++)for(var c=0;c<9;c++)if(puzzle[r][c]!==0)actualClues++;
+// easier levels tolerate small overshoot, harder levels require close match
+var tol=(diff==='easy'||diff==='medium')?6:10;
+if(actualClues-target<=tol){
+return{solution:solved,puzzle:puzzle}
+}
+}
+// fallback: return what we have
+var solved2=generateSolved();
+return{solution:solved2,puzzle:removeCells(solved2,target)}
+}
+
+function fmtTime(s){var m=Math.floor(s/60),ss=s%60;return(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss}
+
+function loadBests(){
+var out={};
+var keys=['easy','medium','hard','expert'];
+for(var i=0;i<keys.length;i++){
+try{var v=localStorage.getItem(LS_BEST_PRE+keys[i]);out[keys[i]]=v?parseInt(v,10):0}catch(e){out[keys[i]]=0}
+}
+return out
+}
+
+function renderBests(){
+var b=loadBests();
+bestsE.innerHTML='';
+var keys=['easy','medium','hard','expert'];
+for(var i=0;i<keys.length;i++){
+var k=keys[i];
+var d=document.createElement('div');d.className='bc';
+d.innerHTML='<div class="bl">'+DIFF_LABEL[k]+'</div><div class="bv">'+(b[k]?fmtTime(b[k]):'—')+'</div>';
+bestsE.appendChild(d)
+}
+}
+
+function saveGame(){
+if(!state.running)return;
+try{
+var data={
+solution:state.solution,
+puzzle:state.puzzle,
+player:state.player,
+pencil:state.pencil,
+fixed:state.fixed,
+mistakes:state.mistakes,
+hints:state.hints,
+diff:state.diff,
+elapsed:Math.floor((Date.now()-startT)/1000)
+};
+localStorage.setItem(LS_SAVE,JSON.stringify(data))
+}catch(e){}
+}
+
+function loadSave(){
+try{var raw=localStorage.getItem(LS_SAVE);if(!raw)return null;var d=JSON.parse(raw);if(!d||!d.puzzle||!d.player||!d.solution)return null;return d}catch(e){return null}
+}
+
+function clearSave(){try{localStorage.removeItem(LS_SAVE)}catch(e){}}
+
+function buildGrid(){
+gridE.innerHTML='';
+state.cells=[];
+for(var r=0;r<9;r++){
+for(var c=0;c<9;c++){
+var d=document.createElement('div');
+d.className='cell';
+d.setAttribute('data-r',r);
+d.setAttribute('data-c',c);
+d.setAttribute('data-i',r*9+c);
+(function(idx){
+d.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();selectCell(idx)})
+})(r*9+c);
+gridE.appendChild(d);
+state.cells.push(d)
+}
+}
+}
+
+function buildPad(){
+padE.innerHTML='';
+for(var n=1;n<=9;n++){
+var b=document.createElement('button');
+b.className='nb';b.setAttribute('ontouchstart','');b.textContent=n;
+b.setAttribute('data-n',n);
+(function(num){
+b.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();enterNumber(num)})
+})(n);
+padE.appendChild(b)
+}
+}
+
+function selectCell(idx){
+state.sel=idx;
+renderCells()
+}
+
+function countNumbers(){
+var counts=[0,0,0,0,0,0,0,0,0,0];
+for(var i=0;i<81;i++){var v=state.player[i];if(v)counts[v]++}
+return counts
+}
+
+function renderPad(){
+var counts=countNumbers();
+var btns=padE.querySelectorAll('.nb');
+for(var i=0;i<btns.length;i++){
+var n=i+1;
+if(counts[n]>=9)btns[i].classList.add('done');
+else btns[i].classList.remove('done')
+}
+}
+
+function renderCells(){
+var sel=state.sel;
+var selR=sel>=0?Math.floor(sel/9):-1;
+var selC=sel>=0?sel%9:-1;
+var selVal=sel>=0?state.player[sel]:0;
+for(var i=0;i<81;i++){
+var el=state.cells[i];
+var r=Math.floor(i/9),c=i%9;
+var v=state.player[i];
+el.className='cell';
+if(state.fixed[i])el.classList.add('clue');
+// highlight row/col/box
+if(sel>=0){
+var inBox=Math.floor(r/3)===Math.floor(selR/3)&&Math.floor(c/3)===Math.floor(selC/3);
+if(r===selR||c===selC||inBox)el.classList.add('high');
+if(selVal&&v===selVal&&v!==0)el.classList.add('same');
+if(i===sel)el.classList.add('sel')
+}
+// check error: filled and doesn't match solution
+if(v&&!state.fixed[i]&&v!==state.solution[r][c])el.classList.add('err');
+// render content
+if(v){el.innerHTML=String(v)}
+else{
+var p=state.pencil[i];
+if(p&&p.length){
+var html='<div class="pencil">';
+for(var k=1;k<=9;k++){html+='<span>'+(p.indexOf(k)>=0?k:'')+'</span>'}
+html+='</div>';
+el.innerHTML=html
+}else{el.innerHTML=''}
+}
+}
+renderPad()
+}
+
+function pushUndo(){
+state.undoStack.push({
+player:state.player.slice(),
+pencil:state.pencil.map(function(p){return p?p.slice():null}),
+mistakes:state.mistakes
+});
+if(state.undoStack.length>60)state.undoStack.shift()
+}
+
+function enterNumber(n){
+if(state.sel<0||!state.running)return;
+var idx=state.sel;
+if(state.fixed[idx])return;
+pushUndo();
+if(state.pencilMode){
+var p=state.pencil[idx]||[];
+var i=p.indexOf(n);
+if(i>=0)p.splice(i,1);else p.push(n);
+state.pencil[idx]=p;
+state.player[idx]=0
+}else{
+var r=Math.floor(idx/9),c=idx%9;
+state.pencil[idx]=null;
+if(state.player[idx]===n){
+state.player[idx]=0
+}else{
+state.player[idx]=n;
+if(state.solution[r][c]!==n){
+state.mistakes++;
+sMist.textContent=state.mistakes+'/3';
+if(state.mistakes>=3){
+sMist.classList.add('warn');
+renderCells();
+setTimeout(loseGame,500);
+return
+}
+}else{
+// clear same-number pencils in row/col/box
+clearPencilPeers(r,c,n)
+}
+}
+}
+sMist.textContent=state.mistakes+'/3';
+renderCells();
+if(checkWin())winGame()
+}
+
+function clearPencilPeers(r,c,n){
+for(var i=0;i<9;i++){
+var idxR=r*9+i,idxC=i*9+c;
+if(state.pencil[idxR]){var p=state.pencil[idxR];var k=p.indexOf(n);if(k>=0)p.splice(k,1)}
+if(state.pencil[idxC]){var p2=state.pencil[idxC];var k2=p2.indexOf(n);if(k2>=0)p2.splice(k2,1)}
+}
+var br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3;
+for(var rr=br;rr<br+3;rr++)for(var cc=bc;cc<bc+3;cc++){
+var idx=rr*9+cc;
+if(state.pencil[idx]){var p3=state.pencil[idx];var k3=p3.indexOf(n);if(k3>=0)p3.splice(k3,1)}
+}
+}
+
+function doErase(){
+if(state.sel<0||!state.running)return;
+var idx=state.sel;
+if(state.fixed[idx])return;
+pushUndo();
+state.player[idx]=0;
+state.pencil[idx]=null;
+renderCells()
+}
+
+function doUndo(){
+if(!state.undoStack.length||!state.running)return;
+var s=state.undoStack.pop();
+state.player=s.player;
+state.pencil=s.pencil;
+state.mistakes=s.mistakes;
+sMist.textContent=state.mistakes+'/3';
+if(state.mistakes<3)sMist.classList.remove('warn');
+renderCells()
+}
+
+function doHint(){
+if(state.hints<=0||!state.running)return;
+// find an empty or wrong cell
+var empties=[];
+for(var i=0;i<81;i++){
+if(state.fixed[i])continue;
+var r=Math.floor(i/9),c=i%9;
+if(state.player[i]!==state.solution[r][c])empties.push(i)
+}
+if(!empties.length)return;
+var pick=empties[Math.floor(Math.random()*empties.length)];
+pushUndo();
+var pr=Math.floor(pick/9),pc=pick%9;
+state.player[pick]=state.solution[pr][pc];
+state.pencil[pick]=null;
+state.fixed[pick]=true;
+state.hints--;
+sHint.textContent=state.hints;
+state.sel=pick;
+renderCells();
+if(checkWin())winGame()
+}
+
+function togglePencil(){
+state.pencilMode=!state.pencilMode;
+if(state.pencilMode)btPen.classList.add('on');else btPen.classList.remove('on')
+}
+
+function checkWin(){
+for(var i=0;i<81;i++){
+var r=Math.floor(i/9),c=i%9;
+if(state.player[i]!==state.solution[r][c])return false
+}
+return true
+}
+
+function startTimer(){
+clearInterval(timerId);
+timerId=setInterval(function(){
+if(!state.running)return;
+var sec=Math.floor((Date.now()-startT)/1000);
+sTime.textContent=fmtTime(sec)
+},500);
+clearInterval(saveId);
+saveId=setInterval(saveGame,10000)
+}
+
+function stopTimer(){clearInterval(timerId);clearInterval(saveId)}
+
+function newGame(diff){
+state.diff=diff;
+var gen=generatePuzzle(diff);
+state.solution=gen.solution;
+state.puzzle=gen.puzzle;
+state.player=[];state.fixed=[];state.pencil=[];
+for(var r=0;r<9;r++)for(var c=0;c<9;c++){
+var v=gen.puzzle[r][c];
+state.player.push(v);
+state.fixed.push(v!==0);
+state.pencil.push(null)
+}
+state.sel=-1;state.mistakes=0;state.hints=3;state.elapsed=0;
+state.undoStack=[];state.pencilMode=false;
+btPen.classList.remove('on');sMist.classList.remove('warn');
+sMist.textContent='0/3';sHint.textContent='3';sTime.textContent='00:00';
+sDiff.textContent=DIFF_LABEL[diff];
+startT=Date.now();
+state.running=true;
+showGame();
+renderCells();
+renderPad();
+startTimer();
+saveGame()
+}
+
+function resumeGame(d){
+state.diff=d.diff;
+state.solution=d.solution;
+state.puzzle=d.puzzle;
+state.player=d.player.slice();
+state.pencil=d.pencil.map(function(p){return p?p.slice():null});
+state.fixed=d.fixed.slice();
+state.mistakes=d.mistakes||0;
+state.hints=typeof d.hints==='number'?d.hints:3;
+state.sel=-1;state.undoStack=[];state.pencilMode=false;
+btPen.classList.remove('on');
+if(state.mistakes>=3)sMist.classList.add('warn');else sMist.classList.remove('warn');
+sMist.textContent=state.mistakes+'/3';sHint.textContent=state.hints;
+sDiff.textContent=DIFF_LABEL[state.diff];
+startT=Date.now()-(d.elapsed||0)*1000;
+sTime.textContent=fmtTime(d.elapsed||0);
+state.running=true;
+showGame();
+renderCells();
+renderPad();
+startTimer()
+}
+
+function showGame(){
+ovStart.classList.add('hidden');obStart.classList.add('hidden');
+ovWin.classList.add('hidden');obWin.classList.add('hidden');
+ovLose.classList.add('hidden');obLose.classList.add('hidden');
+gameHead.style.display='flex';
+gameArea.style.display='flex'
+}
+
+function showStart(){
+gameHead.style.display='none';
+gameArea.style.display='none';
+ovWin.classList.add('hidden');obWin.classList.add('hidden');
+ovLose.classList.add('hidden');obLose.classList.add('hidden');
+ovStart.classList.remove('hidden');obStart.classList.remove('hidden');
+refreshStart()
+}
+
+function refreshStart(){
+renderBests();
+var sv=loadSave();
+if(sv&&sv.player){
+var filled=0;for(var i=0;i<81;i++)if(sv.player[i])filled++;
+if(filled<81&&(sv.mistakes||0)<3){
+btCont.classList.remove('hidden');
+contInfo.textContent=DIFF_LABEL[sv.diff]+' · '+fmtTime(sv.elapsed||0)+' · '+filled+'/81'
+}else{btCont.classList.add('hidden')}
+}else{btCont.classList.add('hidden')}
+}
+
+function winGame(){
+state.running=false;
+stopTimer();
+var sec=Math.floor((Date.now()-startT)/1000);
+document.getElementById('wTime').textContent=fmtTime(sec);
+document.getElementById('wMist').textContent=state.mistakes;
+document.getElementById('wHint').textContent=3-state.hints;
+var bestKey=LS_BEST_PRE+state.diff;
+var prev=0;try{prev=parseInt(localStorage.getItem(bestKey),10)||0}catch(e){}
+var isNew=false;
+if(!prev||sec<prev){try{localStorage.setItem(bestKey,sec);isNew=true}catch(e){}}
+document.getElementById('wBest').textContent=isNew?'NEW BEST TIME!':('Best: '+(prev?fmtTime(prev):'—'));
+clearSave();
+obWin.classList.remove('hidden');
+ovWin.classList.remove('hidden')
+}
+
+function loseGame(){
+state.running=false;
+stopTimer();
+var sec=Math.floor((Date.now()-startT)/1000);
+document.getElementById('lTime').textContent=fmtTime(sec);
+var filled=0;for(var i=0;i<81;i++)if(state.player[i])filled++;
+document.getElementById('lFill').textContent=filled+'/81';
+clearSave();
+obLose.classList.remove('hidden');
+ovLose.classList.remove('hidden')
+}
+
+function revealSolution(){
+for(var i=0;i<81;i++){
+var r=Math.floor(i/9),c=i%9;
+state.player[i]=state.solution[r][c]
+}
+obLose.classList.add('hidden');
+ovLose.classList.add('hidden');
+state.running=false;
+renderCells()
+}
+
+// Event wiring
+document.querySelectorAll('.lb').forEach(function(b){
+b.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+var d=b.dataset.lvl;
+clearSave();
+newGame(d)
+})
+});
+
+btCont.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+var sv=loadSave();if(sv)resumeGame(sv)
+});
+
+howtoH.addEventListener('pointerdown',function(e){
+e.preventDefault();e.stopPropagation();
+howto.classList.toggle('open')
+});
+
+btUndo.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();doUndo()});
+btErase.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();doErase()});
+btPen.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();togglePencil()});
+btHint.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();doHint()});
+btNew.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();
+state.running=false;stopTimer();clearSave();showStart()});
+
+document.getElementById('btWinAgain').addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();newGame(state.diff)});
+document.getElementById('btWinHome').addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();showStart()});
+document.getElementById('btLoseShow').addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();revealSolution()});
+document.getElementById('btLoseNew').addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();newGame(state.diff)});
+document.getElementById('btLoseHome').addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();showStart()});
+
+// Keyboard support for desktop testing
+document.addEventListener('keydown',function(e){
+if(!state.running)return;
+var key=e.key;
+if(key>='1'&&key<='9'){enterNumber(parseInt(key,10))}
+else if(key==='Backspace'||key==='Delete'||key==='0'){doErase()}
+else if(key==='p'||key==='P'){togglePencil()}
+else if(key==='h'||key==='H'){doHint()}
+else if(key==='u'||key==='U'||(e.ctrlKey&&key==='z')){doUndo()}
+else if(key==='ArrowUp'||key==='ArrowDown'||key==='ArrowLeft'||key==='ArrowRight'){
+if(state.sel<0){selectCell(40);return}
+var r=Math.floor(state.sel/9),c=state.sel%9;
+if(key==='ArrowUp')r=(r+8)%9;
+else if(key==='ArrowDown')r=(r+1)%9;
+else if(key==='ArrowLeft')c=(c+8)%9;
+else if(key==='ArrowRight')c=(c+1)%9;
+selectCell(r*9+c)
+}
+});
+
+// Init
+buildGrid();
+buildPad();
+showStart();
+
+// Save on unload
+window.addEventListener('pagehide',saveGame);
+window.addEventListener('beforeunload',saveGame);
+
+})();
+</script>
+</body>
+</html>

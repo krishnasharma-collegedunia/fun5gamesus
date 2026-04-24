@@ -1,5 +1,47 @@
 [
   {
+    "id": 13,
+    "title": "Quick Math 60",
+    "slug": "quickmath",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/quickmath.svg",
+    "game_url": "public/games/quickmath.html",
+    "description": "60-second arithmetic rush! Build exam-level speed calculation for SSC, Banking, Railways. 4 difficulty levels from Easy to Expert.",
+    "featured": true,
+    "trending": true,
+    "tags": ["brain", "math", "aptitude", "exam-prep"],
+    "controls": "Tap the correct option. Build combos for bonus points.",
+    "rating": 4.9
+  },
+  {
+    "id": 14,
+    "title": "Sudoku Pro",
+    "slug": "sudoku",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/sudoku.svg",
+    "game_url": "public/games/sudoku.html",
+    "description": "Classic 9x9 Sudoku with 4 difficulty levels. Features hints, pencil marks, mistake counter, and auto-save. Train your logical reasoning.",
+    "featured": true,
+    "trending": true,
+    "tags": ["brain", "puzzle", "logic", "exam-prep"],
+    "controls": "Tap a cell, then tap a number 1-9. Use pencil mode for notes.",
+    "rating": 4.9
+  },
+  {
+    "id": 15,
+    "title": "GK Blitz",
+    "slug": "gkblitz",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/gkblitz.svg",
+    "game_url": "public/games/gkblitz.html",
+    "description": "260+ verified General Knowledge MCQs for UPSC, SSC, Banking exams. Pick a category: History, Geography, Polity, Economy, Science, Culture.",
+    "featured": true,
+    "trending": true,
+    "tags": ["brain", "quiz", "gk", "exam-prep"],
+    "controls": "Tap the correct option. Blitz mode: 60s. Practice mode: explanations shown.",
+    "rating": 4.9
+  },
+  {
     "id": 1,
     "title": "Fruit Slice Master",
     "slug": "fruitninjanew",
