@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Code Cracker</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#00ff41}
+body{display:flex;flex-direction:column;align-items:center;height:100dvh;position:relative}
+
+/* Matrix-style scanline + grid background */
+body::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,65,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:1}
+body::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0px,rgba(0,0,0,.15) 1px,transparent 1px,transparent 3px);pointer-events:none;z-index:2;opacity:.5}
+
+.wrap{width:100%;max-width:560px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden;z-index:5}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 14px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;z-index:5}
+.scr.hidden{display:none}
+
+/* ============ START SCREEN ============ */
+.brand{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
+.brand-dot{width:10px;height:10px;border-radius:50%;background:#00ff41;box-shadow:0 0 12px #00ff41;animation:blink 1.2s infinite}
+@keyframes blink{0%,70%{opacity:1}80%,100%{opacity:.2}}
+.brand-txt{font-family:'Courier New','Consolas',monospace;font-size:11px;letter-spacing:3px;color:rgba(0,255,65,.7);text-transform:uppercase}
+
+.title{font-family:'Courier New','Consolas',monospace;font-size:clamp(38px,10vw,58px);font-weight:900;letter-spacing:3px;text-align:center;color:#00ff41;text-shadow:0 0 16px rgba(0,255,65,.7),0 0 32px rgba(0,255,65,.3);line-height:1;margin-top:10px}
+.title .dim{color:rgba(0,255,65,.45)}
+.tag{font-family:'Courier New','Consolas',monospace;font-size:clamp(11px,3vw,13px);text-align:center;color:rgba(0,255,65,.65);margin-top:8px;letter-spacing:1px}
+.tag::before{content:"> "}
+.tag .cursor{display:inline-block;width:7px;height:12px;background:#00ff41;margin-left:2px;vertical-align:text-bottom;animation:cursor 1s infinite}
+@keyframes cursor{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+.ad-slot{border:1px dashed rgba(0,255,65,.35);background:rgba(0,255,65,.03);color:rgba(0,255,65,.55);font-size:11px;padding:12px;text-align:center;margin:14px 4px;font-family:'Courier New',monospace;letter-spacing:2px;text-transform:uppercase;border-radius:4px}
+
+.sec-label{font-family:'Courier New','Consolas',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(0,255,65,.8);margin:14px 4px 8px;font-weight:bold}
+.sec-label::before{content:"// "}
+
+.diff-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 4px}
+.diff-btn{background:rgba(0,255,65,.06);border:1.5px solid rgba(0,255,65,.3);color:rgba(0,255,65,.85);padding:14px 6px;font-family:'Courier New','Consolas',monospace;font-size:13px;font-weight:bold;border-radius:6px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:2px;text-transform:uppercase;transition:all .15s}
+.diff-btn .sub{display:block;font-size:9px;color:rgba(0,255,65,.55);font-weight:normal;margin-top:3px;letter-spacing:1px;text-transform:none}
+.diff-btn.active{background:rgba(0,255,65,.18);border-color:#00ff41;color:#00ff41;box-shadow:0 0 18px rgba(0,255,65,.35),inset 0 0 12px rgba(0,255,65,.2)}
+.diff-btn.active .sub{color:rgba(0,255,65,.85)}
+.diff-btn:active{transform:scale(.97)}
+
+.play-btn{display:block;margin:20px auto 8px;background:rgba(0,255,65,.15);color:#00ff41;border:2px solid #00ff41;padding:16px 56px;font-family:'Courier New','Consolas',monospace;font-size:clamp(18px,5vw,22px);font-weight:900;border-radius:4px;letter-spacing:6px;box-shadow:0 0 30px rgba(0,255,65,.4),inset 0 0 18px rgba(0,255,65,.15);touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.play-btn:active{transform:scale(.96);box-shadow:0 0 16px rgba(0,255,65,.5)}
+.play-btn::before{content:"> "}
+.play-btn::after{content:" _"}
+
+.best-block{margin:14px 4px 0;padding:10px 12px;background:rgba(0,255,65,.04);border:1px solid rgba(0,255,65,.2);border-radius:4px;font-family:'Courier New','Consolas',monospace;font-size:12px;color:rgba(0,255,65,.75)}
+.best-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;letter-spacing:1px}
+.best-row .lbl{color:rgba(0,255,65,.55)}
+.best-row .val{color:#00ff41;font-weight:bold}
+
+.howto-box{margin:14px 4px 8px;border:1px solid rgba(0,255,65,.25);border-radius:4px;background:rgba(0,255,65,.03);overflow:hidden}
+.howto-head{padding:11px 14px;font-family:'Courier New','Consolas',monospace;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(0,255,65,.85);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.howto-head::before{content:"# "}
+.howto-body{padding:0 14px 12px;font-family:'Courier New','Consolas',monospace;font-size:12px;line-height:1.75;color:rgba(0,255,65,.7);display:none}
+.howto-body.open{display:block}
+.howto-body ul{list-style:none;padding:0}
+.howto-body li{padding:2px 0}
+.howto-body li::before{content:"» ";color:#00ff41}
+
+/* ============ GAME SCREEN ============ */
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 8px;gap:8px;font-family:'Courier New','Consolas',monospace}
+.hud-chip{background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.3);border-radius:4px;padding:5px 10px;font-size:12px;color:#00ff41;font-weight:bold;letter-spacing:1px}
+.hud-chip .lbl{color:rgba(0,255,65,.6);font-weight:normal;margin-right:4px}
+
+.timer-wrap{position:relative;height:10px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.2);border-radius:2px;margin:4px 4px 6px;overflow:hidden}
+.timer-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#00ff41,#a7ff5e);box-shadow:0 0 10px rgba(0,255,65,.6);transition:width .2s linear}
+.timer-fill.warn{background:linear-gradient(90deg,#ff9600,#ff4040);box-shadow:0 0 14px rgba(255,70,70,.7)}
+.timer-txt{text-align:center;font-family:'Courier New','Consolas',monospace;font-size:11px;color:rgba(0,255,65,.65);margin:0 0 8px;letter-spacing:2px}
+.timer-txt .crit{color:#ff5555}
+
+.slate{margin:4px 4px 10px;background:rgba(0,255,65,.04);border:1.5px solid rgba(0,255,65,.3);border-radius:6px;padding:16px 14px;position:relative;box-shadow:inset 0 0 24px rgba(0,255,65,.06),0 0 18px rgba(0,255,65,.08)}
+.slate::before{content:"┌─ PUZZLE ──┐";position:absolute;top:-8px;left:12px;background:#0a0a0a;padding:0 6px;font-family:'Courier New','Consolas',monospace;font-size:10px;color:rgba(0,255,65,.55);letter-spacing:1px}
+.slate-hint{font-family:'Courier New','Consolas',monospace;font-size:11px;color:rgba(0,255,65,.55);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+.slate-hint::before{content:"// "}
+
+.clue-list{font-family:'Courier New','Consolas',monospace;font-size:clamp(14px,3.8vw,17px);color:#00ff41;line-height:1.55;text-align:center;padding:8px 2px}
+.clue-line{padding:2px 0;letter-spacing:1px}
+.clue-eq{color:#00ff41;font-weight:bold;text-shadow:0 0 8px rgba(0,255,65,.5)}
+.clue-word{color:#a7ff5e}
+.clue-val{color:#ffe84a;text-shadow:0 0 8px rgba(255,232,74,.4)}
+
+.ask{margin:12px 4px 10px;text-align:center;font-family:'Courier New','Consolas',monospace;font-size:clamp(16px,4.5vw,20px);color:rgba(0,255,65,.85);letter-spacing:1px}
+.ask .target{color:#ffe84a;font-weight:bold;text-shadow:0 0 10px rgba(255,232,74,.55);padding:0 3px}
+.ask .qmark{color:#00ff41;animation:blink 1.2s infinite}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 4px;margin-top:4px}
+.opt{position:relative;background:rgba(0,255,65,.05);border:1.5px solid rgba(0,255,65,.25);color:#00ff41;padding:16px 8px 16px 32px;font-family:'Courier New','Consolas',monospace;font-size:clamp(15px,4vw,18px);font-weight:bold;border-radius:4px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;text-align:center;letter-spacing:1px;transition:all .12s;word-break:break-all;min-height:54px;display:flex;align-items:center;justify-content:center}
+.opt .letter{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:3px;background:rgba(0,255,65,.15);color:rgba(0,255,65,.85);font-weight:900;font-size:11px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,65,.35)}
+.opt:active{transform:scale(.97)}
+.opt.ok{background:rgba(0,255,65,.25);border-color:#00ff41;color:#00ff41;box-shadow:0 0 20px rgba(0,255,65,.55),inset 0 0 14px rgba(0,255,65,.2);animation:flashOk .4s ease}
+.opt.ok .letter{background:#00ff41;color:#0a0a0a}
+.opt.bad{background:rgba(255,70,70,.2);border-color:#ff4040;color:#ff6060;box-shadow:0 0 18px rgba(255,70,70,.35);animation:shake .35s ease}
+.opt.bad .letter{background:#ff4040;color:#fff;border-color:#ff4040}
+.opt.dim{opacity:.45}
+.opt[disabled]{pointer-events:none}
+
+@keyframes flashOk{0%,50%{background:rgba(0,255,65,.5)}100%{background:rgba(0,255,65,.25)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.skip-row{display:flex;justify-content:center;margin-top:12px;padding:0 4px;gap:10px}
+.skip-btn{background:transparent;border:1px solid rgba(0,255,65,.3);color:rgba(0,255,65,.7);padding:9px 22px;font-family:'Courier New','Consolas',monospace;font-size:11px;font-weight:bold;border-radius:4px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:2px;text-transform:uppercase}
+.skip-btn:active{transform:scale(.96)}
+
+.fb-pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);font-family:'Courier New','Consolas',monospace;font-size:40px;font-weight:900;pointer-events:none;z-index:30;transition:transform .25s cubic-bezier(.5,1.6,.6,1);letter-spacing:2px}
+.fb-pop.show{transform:translate(-50%,-50%) scale(1)}
+.fb-pop.ok{color:#00ff41;text-shadow:0 0 24px rgba(0,255,65,.8)}
+.fb-pop.no{color:#ff4040;text-shadow:0 0 24px rgba(255,60,60,.7)}
+
+/* ============ END SCREEN ============ */
+.end-title{font-family:'Courier New','Consolas',monospace;font-size:clamp(32px,8vw,48px);font-weight:900;letter-spacing:3px;text-align:center;color:#00ff41;text-shadow:0 0 18px rgba(0,255,65,.6);margin-top:6px;line-height:1}
+.end-title::before{content:"[ "}
+.end-title::after{content:" ]"}
+.end-score{font-family:'Courier New','Consolas',monospace;font-size:clamp(60px,16vw,96px);font-weight:900;color:#00ff41;text-align:center;line-height:1;margin:16px 0 4px;text-shadow:0 0 34px rgba(0,255,65,.6)}
+.end-lbl{font-family:'Courier New','Consolas',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(0,255,65,.7);text-align:center;font-weight:bold}
+.end-stats{display:flex;gap:10px;padding:0 4px;margin-top:16px}
+.end-stat{flex:1;background:rgba(0,255,65,.04);border:1px solid rgba(0,255,65,.22);border-radius:4px;padding:10px 6px;text-align:center}
+.es-lbl{font-family:'Courier New','Consolas',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,255,65,.6);font-weight:bold}
+.es-val{font-family:'Courier New','Consolas',monospace;font-size:clamp(18px,5vw,24px);font-weight:900;color:#00ff41;margin-top:2px}
+.end-best{text-align:center;font-family:'Courier New','Consolas',monospace;font-size:13px;color:rgba(0,255,65,.8);margin-top:12px;letter-spacing:1px}
+.new-best{color:#ffe84a;font-weight:bold;display:block;margin-top:4px;text-shadow:0 0 10px rgba(255,232,74,.4);animation:blink 1s infinite}
+
+.end-btns{display:flex;gap:8px;padding:0 4px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.e-btn{flex:1;min-width:130px;background:rgba(0,255,65,.15);color:#00ff41;border:2px solid #00ff41;padding:13px 14px;font-family:'Courier New','Consolas',monospace;font-size:13px;font-weight:900;border-radius:4px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase;box-shadow:0 0 16px rgba(0,255,65,.2)}
+.e-btn.alt{background:transparent;border-color:rgba(0,255,65,.35);color:rgba(0,255,65,.85);box-shadow:none}
+.e-btn:active{transform:scale(.96)}
+.share-btn{display:block;margin:12px auto 0;background:transparent;border:1px solid rgba(0,255,65,.35);color:rgba(0,255,65,.85);padding:10px 26px;font-family:'Courier New','Consolas',monospace;font-size:11px;font-weight:bold;border-radius:22px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.share-btn.copied{background:rgba(0,255,65,.2);color:#00ff41;border-color:#00ff41}
+
+.toast{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(0,255,65,.95);color:#0a0a0a;padding:10px 20px;border-radius:4px;font-family:'Courier New','Consolas',monospace;font-size:12px;font-weight:bold;letter-spacing:1px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.toast.show{opacity:1}
+
+.flash-ok{animation:scrFlashOk .45s ease}
+.flash-no{animation:scrFlashNo .45s ease}
+@keyframes scrFlashOk{0%{background:rgba(0,255,65,.12)}100%{background:transparent}}
+@keyframes scrFlashNo{0%{background:rgba(255,60,60,.15)}100%{background:transparent}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- =============== START SCREEN =============== -->
+<div class="scr" id="s_start">
+<div class="brand"><span class="brand-dot"></span><span class="brand-txt">SYSTEM ONLINE</span></div>
+<div class="title">CODE<span class="dim">_</span>CRACKER</div>
+<div class="tag">Crack the code! Exam-style reasoning.<span class="cursor"></span></div>
+<div class="ad-slot">Advertisement</div>
+
+<div class="sec-label">Select Difficulty</div>
+<div class="diff-row">
+<button class="diff-btn active" data-d="easy" ontouchstart="">EASY<span class="sub">SSC/CHSL</span></button>
+<button class="diff-btn" data-d="med" ontouchstart="">MED<span class="sub">Bank PO</span></button>
+<button class="diff-btn" data-d="hard" ontouchstart="">HARD<span class="sub">CAT/UPSC</span></button>
+</div>
+
+<button class="play-btn" id="btn_play" ontouchstart="">PLAY</button>
+
+<div class="best-block">
+<div class="best-row"><span class="lbl">BEST [EASY]</span><span class="val" id="best_easy">0</span></div>
+<div class="best-row"><span class="lbl">BEST [MED]</span><span class="val" id="best_med">0</span></div>
+<div class="best-row"><span class="lbl">BEST [HARD]</span><span class="val" id="best_hard">0</span></div>
+</div>
+
+<div class="howto-box">
+<div class="howto-head" id="howto_head"><span>HOW TO PLAY</span><span id="howto_arrow">[+]</span></div>
+<div class="howto-body" id="howto_body">
+<ul>
+<li>Each puzzle shows a coding pattern</li>
+<li>Study the example: "If CAT = 24, what is DOG?"</li>
+<li>Find the logic: position sum, shift, reverse...</li>
+<li>Pick the correct decoded answer</li>
+<li>20 seconds per question · 10 questions total</li>
+<li>Correct answer = +10 points (bonus for speed)</li>
+<li>Wrong/timeout = no penalty, move on</li>
+<li>Patterns: position sum, Caesar cipher, reverse alphabet, product, vowel shift</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- =============== GAME SCREEN =============== -->
+<div class="scr hidden" id="s_game">
+<div class="hud">
+<div class="hud-chip"><span class="lbl">Q</span><span id="q_count">1/10</span></div>
+<div class="hud-chip"><span class="lbl">LVL</span><span id="q_lvl">EASY</span></div>
+<div class="hud-chip"><span class="lbl">SCORE</span><span id="q_score">0</span></div>
+</div>
+<div class="timer-wrap"><div class="timer-fill" id="timer_fill" style="width:100%"></div></div>
+<div class="timer-txt" id="timer_txt">20s</div>
+
+<div class="slate">
+<div class="slate-hint" id="slate_hint">DECODE PATTERN</div>
+<div class="clue-list" id="clue_list"></div>
+</div>
+
+<div class="ask" id="ask_text"></div>
+
+<div class="opts" id="opts_grid"></div>
+
+<div class="skip-row">
+<button class="skip-btn" id="btn_skip" ontouchstart="">SKIP &gt;&gt;</button>
+<button class="skip-btn" id="btn_quit" ontouchstart="">QUIT</button>
+</div>
+
+<div class="fb-pop" id="fb_pop"></div>
+</div>
+
+<!-- =============== END SCREEN =============== -->
+<div class="scr hidden" id="s_end">
+<div class="end-title" id="end_title">MISSION COMPLETE</div>
+<div class="end-score" id="end_score">0</div>
+<div class="end-lbl">FINAL SCORE</div>
+<div class="end-stats">
+<div class="end-stat"><div class="es-lbl">Correct</div><div class="es-val" id="es_correct">0</div></div>
+<div class="end-stat"><div class="es-lbl">Accuracy</div><div class="es-val" id="es_acc">0%</div></div>
+<div class="end-stat"><div class="es-lbl">Avg Time</div><div class="es-val" id="es_avg">0s</div></div>
+</div>
+<div class="end-best" id="end_best">Best: 0</div>
+<div class="ad-slot">Advertisement</div>
+<div class="end-btns">
+<button class="e-btn" id="btn_again" ontouchstart="">RETRY</button>
+<button class="e-btn alt" id="btn_home" ontouchstart="">HOME</button>
+</div>
+<button class="share-btn" id="btn_share" ontouchstart="">COPY SCORE</button>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+</div>
+
+<script>
+(function(){'use strict';
+
+/* Block iOS touchmove scrolling */
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+/* ==================== CONSTANTS ==================== */
+var TOTAL_Q = 10;
+var TIME_PER_Q = 20;
+var POINTS_BASE = 10;
+var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/* Word pools by difficulty */
+var WORDS_EASY = [
+"CAT","DOG","BAT","SUN","RAT","HAT","RUN","BED","CAR","HEN",
+"BOX","CUP","PEN","MAP","ANT","OWL","FOX","COW","EGG","ARM",
+"BAG","BOY","DAY","EAR","EYE","FAN","KEY","LEG","MAN","ONE",
+"PIE","RED","SIT","TEN","TOP","ZIP","AGE","APE","ARC","BEE"
+];
+var WORDS_MED = [
+"MOON","STAR","FISH","BIRD","TREE","BOOK","LAMP","DESK","BANK","LION",
+"GOLD","IRON","SNOW","FIRE","WIND","RAIN","MILK","SALT","SOUP","CAKE",
+"KING","ROSE","SHOE","WOLF","BEAR","FROG","DUCK","HORN","SHIP","TRAP",
+"CLUB","RING","WAVE","HORSE","PLANT","CHAIR","TABLE","HOUSE","BREAD","CLOUD"
+];
+var WORDS_HARD = [
+"ORANGE","PURPLE","WINDOW","LETTER","SILVER","COPPER","MARBLE","SCHOOL",
+"BRIDGE","CANDLE","MASTER","PLANET","SINGER","WRITER","DOCTOR","JUNGLE",
+"MARKET","HAMMER","FRIEND","LEADER","NATION","OCEAN","MASTER","NUMBER",
+"RHYTHM","SPRING","TURTLE","VIOLIN","THUNDER","WHISTLE","KINGDOM","QUARTER",
+"MOUNTAIN","DIAMOND","HORIZON","PICTURE","VICTORY","JOURNEY","CAPITAL","HARMONY"
+];
+
+/* ==================== HELPERS ==================== */
+function rnd(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rnd(a.length)];}
+function shuffle(a){var i,j,t;for(i=a.length-1;i>0;i--){j=rnd(i+1);t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function posOf(ch){return ALPHA.indexOf(ch.toUpperCase())+1;} /* A=1..Z=26 */
+function letterAt(n){while(n<=0)n+=26;while(n>26)n-=26;return ALPHA.charAt(n-1);}
+
+function loadLS(k,def){try{var v=localStorage.getItem(k);return v==null?def:v;}catch(e){return def;}}
+function saveLS(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+/* ==================== PATTERN GENERATORS ==================== */
+/* Each returns: {hint, pairs:[[word,val]...], targetWord, answer, distractors:[], kind} */
+
+function posSum(word){var s=0,i;for(i=0;i<word.length;i++)s+=posOf(word.charAt(i));return s;}
+function posProduct(word){var s=1,i;for(i=0;i<word.length;i++)s*=posOf(word.charAt(i));return s;}
+function reverseWord(word){var i,out="";for(i=0;i<word.length;i++)out+=letterAt(27-posOf(word.charAt(i)));return out;}
+function caesarWord(word,shift){var i,out="";for(i=0;i<word.length;i++)out+=letterAt(posOf(word.charAt(i))+shift);return out;}
+function shiftBackWord(word,shift){return caesarWord(word,-shift);}
+function vowelConsonantWord(word,vShift,cShift){
+  var v="AEIOU",i,ch,out="";
+  for(i=0;i<word.length;i++){
+    ch=word.charAt(i);
+    if(v.indexOf(ch)>-1)out+=letterAt(posOf(ch)+vShift);
+    else out+=letterAt(posOf(ch)+cShift);
+  }
+  return out;
+}
+function posSumDouble(word){return posSum(word)*2;}
+function posSumPlusLen(word){return posSum(word)+word.length;}
+function posDigitalSum(word){
+  var s=posSum(word);
+  while(s>=10){var t=0,n=s;while(n>0){t+=n%10;n=Math.floor(n/10);}s=t;}
+  return s;
+}
+function firstLastSum(word){return posOf(word.charAt(0))+posOf(word.charAt(word.length-1));}
+function skipNextLetter(word){
+  /* each letter replaced by next (like Caesar +1) with wrap */
+  return caesarWord(word,1);
+}
+
+/* ---- Pattern 1: Positional Sum (A=1..Z=26, sum all) ---- */
+function genPosSum(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  var v1=posSum(w1),v2=posSum(w2),ans=posSum(target);
+  return {
+    hint:"Letter position sum (A=1, B=2... Z=26)",
+    kind:"numeric",
+    pairs:[[w1,v1],[w2,v2]],
+    targetWord:target,
+    answer:String(ans),
+    distractors:numericDistractors(ans,pool.length>30?30:15)
+  };
+}
+
+/* ---- Pattern 2: Positional Product ---- */
+function genPosProduct(pool){
+  /* Use short words to keep product manageable */
+  var shortPool=[];
+  var i;
+  for(i=0;i<pool.length;i++){if(pool[i].length<=3)shortPool.push(pool[i]);}
+  if(shortPool.length<3)shortPool=WORDS_EASY;
+  var w1=pick(shortPool),w2=pick(shortPool);
+  while(w2===w1)w2=pick(shortPool);
+  var target=pick(shortPool);
+  while(target===w1||target===w2)target=pick(shortPool);
+  var v1=posProduct(w1),v2=posProduct(w2),ans=posProduct(target);
+  return {
+    hint:"Letter position PRODUCT (A=1, B=2... multiply)",
+    kind:"numeric",
+    pairs:[[w1,v1],[w2,v2]],
+    targetWord:target,
+    answer:String(ans),
+    distractors:numericDistractors(ans,Math.max(50,Math.round(ans*0.3)))
+  };
+}
+
+/* ---- Pattern 3: Reverse Alphabet (A<->Z) ---- */
+function genReverse(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  return {
+    hint:"Reverse alphabet (A=Z, B=Y, C=X...)",
+    kind:"word",
+    pairs:[[w1,reverseWord(w1)],[w2,reverseWord(w2)]],
+    targetWord:target,
+    answer:reverseWord(target),
+    distractors:wordDistractors(target,reverseWord(target),["caesar1","caesar-1","caesar2","shuffle"])
+  };
+}
+
+/* ---- Pattern 4: Caesar Cipher (shift) ---- */
+function genCaesar(pool,minShift,maxShift){
+  var shift=minShift+rnd(maxShift-minShift+1);
+  if(shift===0)shift=1;
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  return {
+    hint:"Shift each letter forward by "+shift+" in the alphabet",
+    kind:"word",
+    pairs:[[w1,caesarWord(w1,shift)],[w2,caesarWord(w2,shift)]],
+    targetWord:target,
+    answer:caesarWord(target,shift),
+    distractors:wordDistractors(target,caesarWord(target,shift),["caesar1","caesar-1","reverse","shuffle"],shift)
+  };
+}
+
+/* ---- Pattern 5: Caesar Backward ---- */
+function genCaesarBack(pool,minShift,maxShift){
+  var shift=minShift+rnd(maxShift-minShift+1);
+  if(shift===0)shift=1;
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  return {
+    hint:"Shift each letter BACKWARD by "+shift+" in the alphabet",
+    kind:"word",
+    pairs:[[w1,shiftBackWord(w1,shift)],[w2,shiftBackWord(w2,shift)]],
+    targetWord:target,
+    answer:shiftBackWord(target,shift),
+    distractors:wordDistractors(target,shiftBackWord(target,shift),["caesar1","caesar-1","reverse","shuffle"],shift)
+  };
+}
+
+/* ---- Pattern 6: Vowel/Consonant split shift ---- */
+function genVowelCon(pool){
+  var vS=1+rnd(4),cS=1+rnd(4);
+  if(vS===cS)cS=(cS+1)%6||1;
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  return {
+    hint:"Vowels shift +"+vS+", consonants shift +"+cS,
+    kind:"word",
+    pairs:[[w1,vowelConsonantWord(w1,vS,cS)],[w2,vowelConsonantWord(w2,vS,cS)]],
+    targetWord:target,
+    answer:vowelConsonantWord(target,vS,cS),
+    distractors:wordDistractors(target,vowelConsonantWord(target,vS,cS),["caesar1","caesar-1","reverse","shuffle"],Math.max(vS,cS))
+  };
+}
+
+/* ---- Pattern 7: Positional sum * 2 (double) ---- */
+function genDoubleSum(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  var v1=posSumDouble(w1),v2=posSumDouble(w2),ans=posSumDouble(target);
+  return {
+    hint:"Sum of letter positions × 2",
+    kind:"numeric",
+    pairs:[[w1,v1],[w2,v2]],
+    targetWord:target,
+    answer:String(ans),
+    distractors:numericDistractors(ans,25)
+  };
+}
+
+/* ---- Pattern 8: Positional sum + length bonus ---- */
+function genSumPlusLen(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  var v1=posSumPlusLen(w1),v2=posSumPlusLen(w2),ans=posSumPlusLen(target);
+  return {
+    hint:"Sum of positions + number of letters",
+    kind:"numeric",
+    pairs:[[w1,v1],[w2,v2]],
+    targetWord:target,
+    answer:String(ans),
+    distractors:numericDistractors(ans,15)
+  };
+}
+
+/* ---- Pattern 9: Digital root (reduce to 1 digit) ---- */
+function genDigitalSum(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  var v1=posDigitalSum(w1),v2=posDigitalSum(w2),ans=posDigitalSum(target);
+  return {
+    hint:"Sum of positions, then reduce to single digit",
+    kind:"numeric",
+    pairs:[[w1,v1],[w2,v2]],
+    targetWord:target,
+    answer:String(ans),
+    distractors:["1","2","3","4","5","6","7","8","9"].filter(function(x){return x!==String(ans);}).sort(function(){return Math.random()-0.5;}).slice(0,3)
+  };
+}
+
+/* ---- Pattern 10: First + Last letter sum ---- */
+function genFirstLast(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  var v1=firstLastSum(w1),v2=firstLastSum(w2),ans=firstLastSum(target);
+  return {
+    hint:"Position of FIRST letter + LAST letter",
+    kind:"numeric",
+    pairs:[[w1,v1],[w2,v2]],
+    targetWord:target,
+    answer:String(ans),
+    distractors:numericDistractors(ans,15)
+  };
+}
+
+/* ---- Pattern 11: Skip next letter (Caesar +1 with wrap) ---- */
+function genSkipNext(pool){
+  var w1=pick(pool),w2=pick(pool);
+  while(w2===w1)w2=pick(pool);
+  var target=pick(pool);
+  while(target===w1||target===w2)target=pick(pool);
+  return {
+    hint:"Each letter → next letter (A→B, Z→A)",
+    kind:"word",
+    pairs:[[w1,skipNextLetter(w1)],[w2,skipNextLetter(w2)]],
+    targetWord:target,
+    answer:skipNextLetter(target),
+    distractors:wordDistractors(target,skipNextLetter(target),["caesar-1","caesar2","reverse","shuffle"],1)
+  };
+}
+
+/* ==================== DISTRACTOR FACTORIES ==================== */
+function numericDistractors(correct,spread){
+  var out=[],used={},n=parseInt(correct,10);
+  used[n]=1;
+  var tries=0,attempts=[];
+  /* Generate nearby plausible wrong answers */
+  attempts.push(n+1);attempts.push(n-1);
+  attempts.push(n+2);attempts.push(n-2);
+  attempts.push(n+Math.max(3,Math.round(spread/4)));
+  attempts.push(n-Math.max(3,Math.round(spread/4)));
+  attempts.push(n+Math.max(5,Math.round(spread/2)));
+  attempts.push(n-Math.max(5,Math.round(spread/2)));
+  /* Off-by-one-letter variations */
+  attempts.push(n+10);attempts.push(n-10);
+  /* Shuffle and pick */
+  shuffle(attempts);
+  var i;
+  for(i=0;i<attempts.length&&out.length<3;i++){
+    var v=attempts[i];
+    if(v>0&&!used[v]){used[v]=1;out.push(String(v));}
+  }
+  /* Fill if not enough */
+  while(out.length<3){
+    var r=n+(rnd(2)===0?1:-1)*(1+rnd(Math.max(3,spread)));
+    if(r>0&&!used[r]){used[r]=1;out.push(String(r));tries++;if(tries>20)break;}
+  }
+  while(out.length<3)out.push(String(n+out.length+1));
+  return out;
+}
+
+function wordDistractors(sourceWord,correct,styles,shift){
+  var out=[],used={};used[correct]=1;
+  var s=shift||1;
+  var style,val,i;
+  /* Produce plausible variants */
+  var candidates=[];
+  candidates.push(caesarWord(sourceWord,s+1));
+  candidates.push(caesarWord(sourceWord,s-1));
+  candidates.push(caesarWord(sourceWord,-s));
+  candidates.push(reverseWord(sourceWord));
+  candidates.push(caesarWord(sourceWord,2));
+  candidates.push(caesarWord(sourceWord,-2));
+  /* Shuffle candidates */
+  shuffle(candidates);
+  for(i=0;i<candidates.length&&out.length<3;i++){
+    var c=candidates[i];
+    if(c!==correct&&!used[c]&&c.length===correct.length){
+      used[c]=1;
+      out.push(c);
+    }
+  }
+  /* Fallback: scramble or slight change */
+  while(out.length<3){
+    var scr=scrambleOne(correct,out.length+1);
+    if(!used[scr]){used[scr]=1;out.push(scr);}else break;
+  }
+  while(out.length<3)out.push(caesarWord(sourceWord,out.length+5));
+  return out;
+}
+
+function scrambleOne(w,seed){
+  /* Swap a pair of letters or shift one letter by +/-1 */
+  if(w.length<2)return caesarWord(w,seed||1);
+  var arr=w.split("");
+  var i=rnd(w.length-1);
+  /* Shift one letter by +/-1 */
+  if(seed%2===0){
+    arr[i]=letterAt(posOf(arr[i])+1);
+  }else{
+    var j=i+1+rnd(Math.max(1,w.length-1-i));
+    if(j>=w.length)j=w.length-1;
+    var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  }
+  return arr.join("");
+}
+
+/* ==================== DIFFICULTY → POOL & PATTERN SET ==================== */
+function makePuzzle(diff,idx){
+  var pool,generators;
+  if(diff==="easy"){
+    pool=WORDS_EASY;
+    generators=[genPosSum,genPosSum,genCaesar,genCaesar,genReverse,genSkipNext,genFirstLast,genDoubleSum];
+  }else if(diff==="med"){
+    pool=WORDS_MED;
+    generators=[genPosSum,genCaesar,genCaesarBack,genReverse,genDoubleSum,genSumPlusLen,genVowelCon,genFirstLast,genDigitalSum,genPosProduct];
+  }else{
+    pool=WORDS_HARD;
+    generators=[genPosSum,genPosProduct,genReverse,genCaesar,genCaesarBack,genVowelCon,genSumPlusLen,genDigitalSum,genFirstLast,genDoubleSum];
+  }
+  /* Prevent same pattern twice in a row by using idx-based variety */
+  var pick1;
+  if(diff==="easy")pick1=generators[idx%generators.length];
+  else pick1=generators[rnd(generators.length)];
+
+  /* Caesar needs shift range per difficulty */
+  if(pick1===genCaesar||pick1===genCaesarBack){
+    var minS=2,maxS=5;
+    if(diff==="easy"){minS=1;maxS=3;}
+    if(diff==="med"){minS=2;maxS=5;}
+    if(diff==="hard"){minS=3;maxS=9;}
+    return pick1(pool,minS,maxS);
+  }
+  return pick1(pool);
+}
+
+/* ==================== GAME STATE ==================== */
+var state={
+  diff:"easy",
+  qIdx:0,
+  score:0,
+  correct:0,
+  totalTime:0,
+  qStartTime:0,
+  timer:null,
+  timeLeft:TIME_PER_Q,
+  curPuzzle:null,
+  answered:false,
+  best:{easy:0,med:0,hard:0}
+};
+
+function resetState(){
+  state.qIdx=0;
+  state.score=0;
+  state.correct=0;
+  state.totalTime=0;
+  state.answered=false;
+  clearTimer();
+}
+
+function loadBest(){
+  state.best.easy=parseInt(loadLS("cc_best_easy","0"),10)||0;
+  state.best.med=parseInt(loadLS("cc_best_med","0"),10)||0;
+  state.best.hard=parseInt(loadLS("cc_best_hard","0"),10)||0;
+}
+function saveBest(diff,score){
+  var k="cc_best_"+diff;
+  if(score>state.best[diff]){
+    state.best[diff]=score;
+    saveLS(k,String(score));
+    return true;
+  }
+  return false;
+}
+
+/* ==================== DOM REFS ==================== */
+var $=function(id){return document.getElementById(id);};
+var scrStart=$("s_start"),scrGame=$("s_game"),scrEnd=$("s_end");
+
+/* ==================== SCREEN SWITCHING ==================== */
+function showScreen(which){
+  scrStart.classList.add("hidden");
+  scrGame.classList.add("hidden");
+  scrEnd.classList.add("hidden");
+  if(which==="start"){scrStart.classList.remove("hidden");refreshBest();}
+  else if(which==="game")scrGame.classList.remove("hidden");
+  else if(which==="end")scrEnd.classList.remove("hidden");
+}
+
+function refreshBest(){
+  $("best_easy").textContent=state.best.easy;
+  $("best_med").textContent=state.best.med;
+  $("best_hard").textContent=state.best.hard;
+}
+
+/* ==================== DIFFICULTY BUTTONS ==================== */
+var diffBtns=document.querySelectorAll(".diff-btn");
+var i;
+for(i=0;i<diffBtns.length;i++){
+  (function(btn){
+    btn.addEventListener("pointerdown",function(e){
+      e.stopPropagation();e.preventDefault();
+      var k;
+      for(k=0;k<diffBtns.length;k++)diffBtns[k].classList.remove("active");
+      btn.classList.add("active");
+      state.diff=btn.getAttribute("data-d");
+    });
+  })(diffBtns[i]);
+}
+
+/* ==================== HOW TO PLAY TOGGLE ==================== */
+$("howto_head").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  var body=$("howto_body"),arrow=$("howto_arrow");
+  if(body.classList.contains("open")){
+    body.classList.remove("open");arrow.textContent="[+]";
+  }else{
+    body.classList.add("open");arrow.textContent="[-]";
+  }
+});
+
+/* ==================== PLAY BUTTON ==================== */
+$("btn_play").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  startGame();
+});
+
+function startGame(){
+  resetState();
+  $("q_lvl").textContent=state.diff.toUpperCase();
+  showScreen("game");
+  nextQuestion();
+}
+
+/* ==================== QUESTION RENDERING ==================== */
+function nextQuestion(){
+  if(state.qIdx>=TOTAL_Q){endGame();return;}
+  state.qIdx++;
+  state.answered=false;
+  state.timeLeft=TIME_PER_Q;
+  state.qStartTime=Date.now();
+
+  var p=makePuzzle(state.diff,state.qIdx-1);
+  state.curPuzzle=p;
+
+  $("q_count").textContent=state.qIdx+"/"+TOTAL_Q;
+  $("q_score").textContent=state.score;
+  $("slate_hint").textContent=p.hint;
+
+  /* Build clue list */
+  var cl=$("clue_list");
+  cl.innerHTML="";
+  var k;
+  for(k=0;k<p.pairs.length;k++){
+    var div=document.createElement("div");
+    div.className="clue-line";
+    var wrd=p.pairs[k][0],val=p.pairs[k][1];
+    div.innerHTML='<span class="clue-word">'+escHtml(wrd)+'</span> <span class="clue-eq">=</span> <span class="clue-val">'+escHtml(String(val))+'</span>';
+    cl.appendChild(div);
+  }
+
+  /* Ask text */
+  $("ask_text").innerHTML='<span class="target">'+escHtml(p.targetWord)+'</span> <span class="clue-eq">=</span> <span class="qmark">?</span>';
+
+  /* Options: dedupe against correct answer and each other */
+  var opts=[String(p.answer)];
+  var seen={};seen[String(p.answer)]=1;
+  var j;
+  for(j=0;j<p.distractors.length&&opts.length<4;j++){
+    var d=String(p.distractors[j]);
+    if(!seen[d]){seen[d]=1;opts.push(d);}
+  }
+  /* Pad if dedupe left us short */
+  var pad=1;
+  while(opts.length<4){
+    var alt;
+    if(p.kind==="numeric"){
+      alt=String(Math.max(1,parseInt(p.answer,10)+pad*7));
+    }else{
+      alt=caesarWord(p.targetWord,pad+5);
+    }
+    if(!seen[alt]){seen[alt]=1;opts.push(alt);}
+    pad++;
+    if(pad>30)break;
+  }
+  while(opts.length<4)opts.push(String(opts.length+100));
+  shuffle(opts);
+  var grid=$("opts_grid");
+  grid.innerHTML="";
+  var letters=["A","B","C","D"];
+  for(k=0;k<4;k++){
+    (function(val,lt){
+      var btn=document.createElement("button");
+      btn.className="opt";
+      btn.setAttribute("ontouchstart","");
+      btn.innerHTML='<span class="letter">'+lt+'</span>'+escHtml(String(val));
+      btn.addEventListener("pointerdown",function(e){
+        e.stopPropagation();e.preventDefault();
+        if(state.answered)return;
+        selectAnswer(btn,val);
+      });
+      grid.appendChild(btn);
+    })(opts[k],letters[k]);
+  }
+
+  startTimer();
+}
+
+function escHtml(s){
+  return String(s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+/* ==================== TIMER ==================== */
+function startTimer(){
+  clearTimer();
+  updateTimerUI();
+  state.timer=setInterval(function(){
+    state.timeLeft-=0.2;
+    if(state.timeLeft<=0){
+      clearTimer();
+      state.timeLeft=0;
+      updateTimerUI();
+      onTimeout();
+    }else{
+      updateTimerUI();
+    }
+  },200);
+}
+function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
+function updTimer(){/* alias */}
+
+function updateTimerUI(){
+  var pct=Math.max(0,Math.min(100,(state.timeLeft/TIME_PER_Q)*100));
+  var fill=$("timer_fill");
+  fill.style.width=pct+"%";
+  if(state.timeLeft<=5)fill.classList.add("warn");
+  else fill.classList.remove("warn");
+
+  var t=Math.ceil(state.timeLeft);
+  var tEl=$("timer_txt");
+  if(state.timeLeft<=5)tEl.innerHTML='<span class="crit">'+t+'s [!]</span>';
+  else tEl.textContent=t+'s';
+}
+
+/* ==================== ANSWER HANDLING ==================== */
+function selectAnswer(btn,val){
+  if(state.answered)return;
+  state.answered=true;
+  clearTimer();
+  var elapsed=(Date.now()-state.qStartTime)/1000;
+  state.totalTime+=elapsed;
+  var correct=state.curPuzzle.answer;
+
+  /* Disable all */
+  var all=document.querySelectorAll(".opt");
+  var k;
+  for(k=0;k<all.length;k++){
+    all[k].setAttribute("disabled","true");
+    if(all[k]!==btn)all[k].classList.add("dim");
+  }
+
+  if(String(val)===String(correct)){
+    btn.classList.remove("dim");
+    btn.classList.add("ok");
+    /* Score: base + time bonus */
+    var bonus=Math.max(0,Math.round((TIME_PER_Q-elapsed)/2));
+    var gain=POINTS_BASE+bonus;
+    state.score+=gain;
+    state.correct++;
+    $("q_score").textContent=state.score;
+    popFeedback("+"+gain,"ok");
+    flashScreen(true);
+  }else{
+    btn.classList.remove("dim");
+    btn.classList.add("bad");
+    /* Highlight correct answer */
+    for(k=0;k<all.length;k++){
+      var txt=all[k].textContent.replace(/^[A-D]/,"").trim();
+      if(txt===String(correct)){
+        all[k].classList.remove("dim");
+        all[k].classList.add("ok");
+      }
+    }
+    popFeedback("WRONG","no");
+    flashScreen(false);
+  }
+
+  setTimeout(function(){nextQuestion();},1200);
+}
+
+function onTimeout(){
+  if(state.answered)return;
+  state.answered=true;
+  state.totalTime+=TIME_PER_Q;
+  var all=document.querySelectorAll(".opt");
+  var k,correct=state.curPuzzle.answer;
+  for(k=0;k<all.length;k++){
+    all[k].setAttribute("disabled","true");
+    all[k].classList.add("dim");
+    var txt=all[k].textContent.replace(/^[A-D]/,"").trim();
+    if(txt===String(correct)){all[k].classList.remove("dim");all[k].classList.add("ok");}
+  }
+  popFeedback("TIME!","no");
+  flashScreen(false);
+  setTimeout(function(){nextQuestion();},1300);
+}
+
+function popFeedback(txt,cls){
+  var p=$("fb_pop");
+  p.textContent=txt;
+  p.className="fb-pop "+cls+" show";
+  setTimeout(function(){p.classList.remove("show");},900);
+}
+
+function flashScreen(ok){
+  var el=scrGame;
+  el.classList.remove("flash-ok","flash-no");
+  /* trigger reflow */
+  void el.offsetWidth;
+  el.classList.add(ok?"flash-ok":"flash-no");
+}
+
+/* ==================== SKIP / QUIT ==================== */
+$("btn_skip").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  if(state.answered)return;
+  state.answered=true;
+  clearTimer();
+  state.totalTime+=(Date.now()-state.qStartTime)/1000;
+  var all=document.querySelectorAll(".opt"),k,correct=state.curPuzzle.answer;
+  for(k=0;k<all.length;k++){
+    all[k].setAttribute("disabled","true");
+    all[k].classList.add("dim");
+    var txt=all[k].textContent.replace(/^[A-D]/,"").trim();
+    if(txt===String(correct)){all[k].classList.remove("dim");all[k].classList.add("ok");}
+  }
+  popFeedback("SKIP","no");
+  setTimeout(function(){nextQuestion();},900);
+});
+
+$("btn_quit").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  clearTimer();
+  endGame();
+});
+
+/* ==================== END GAME ==================== */
+function endGame(){
+  clearTimer();
+  /* If we quit mid-question (not answered yet), exclude it from attempted count */
+  var attempted=state.qIdx;
+  if(!state.answered&&state.qIdx>0)attempted=state.qIdx-1;
+  var acc=attempted>0?Math.round((state.correct/attempted)*100):0;
+  var avgTime=attempted>0?Math.round((state.totalTime/attempted)*10)/10:0;
+
+  $("end_score").textContent=state.score;
+  $("es_correct").textContent=state.correct+"/"+TOTAL_Q;
+  $("es_acc").textContent=acc+"%";
+  $("es_avg").textContent=avgTime+"s";
+
+  var isNew=saveBest(state.diff,state.score);
+  var bestVal=state.best[state.diff];
+  var eb=$("end_best");
+  if(isNew&&state.score>0){
+    eb.innerHTML="Best ["+state.diff.toUpperCase()+"]: <b>"+bestVal+"</b><span class=\"new-best\">NEW BEST!</span>";
+  }else{
+    eb.innerHTML="Best ["+state.diff.toUpperCase()+"]: <b>"+bestVal+"</b>";
+  }
+
+  /* Title variation */
+  var title;
+  if(state.score>=150)title="DECRYPTED!";
+  else if(state.score>=100)title="HACKED IT";
+  else if(state.score>=50)title="GOOD RUN";
+  else title="TRY AGAIN";
+  $("end_title").textContent=title;
+
+  showScreen("end");
+}
+
+$("btn_again").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  startGame();
+});
+$("btn_home").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  showScreen("start");
+});
+
+/* ==================== SHARE ==================== */
+$("btn_share").addEventListener("pointerdown",function(e){
+  e.stopPropagation();e.preventDefault();
+  var txt="I scored "+state.score+" on Code Cracker ("+state.diff.toUpperCase()+") at fun5games.us — can you beat it?";
+  copyToClipboard(txt);
+  var btn=$("btn_share");
+  btn.classList.add("copied");
+  btn.textContent="COPIED!";
+  showToast("Score copied!");
+  setTimeout(function(){
+    btn.classList.remove("copied");
+    btn.textContent="COPY SCORE";
+  },2000);
+});
+
+function copyToClipboard(t){
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t);return;
+    }
+  }catch(e){}
+  try{
+    var ta=document.createElement("textarea");
+    ta.value=t;
+    ta.style.position="absolute";ta.style.left="-9999px";
+    document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");
+    document.body.removeChild(ta);
+  }catch(e){}
+}
+
+function showToast(msg){
+  var t=$("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},1500);
+}
+
+/* ==================== KEYBOARD SUPPORT ==================== */
+document.addEventListener("keydown",function(e){
+  /* Start screen: Space/Enter to play */
+  if(!scrStart.classList.contains("hidden")){
+    if(e.key===" "||e.key==="Enter"){e.preventDefault();$("btn_play").click();}
+    return;
+  }
+  /* Game screen: 1-4 or A-D to answer */
+  if(!scrGame.classList.contains("hidden")){
+    var idx=-1;
+    if(e.key==="1"||e.key==="a"||e.key==="A")idx=0;
+    else if(e.key==="2"||e.key==="b"||e.key==="B")idx=1;
+    else if(e.key==="3"||e.key==="c"||e.key==="C")idx=2;
+    else if(e.key==="4"||e.key==="d"||e.key==="D")idx=3;
+    else if(e.key==="s"||e.key==="S"){$("btn_skip").click();return;}
+    else if(e.key==="Escape"){$("btn_quit").click();return;}
+    if(idx>=0){
+      var opts=document.querySelectorAll(".opt");
+      if(opts[idx]&&!state.answered){
+        e.preventDefault();
+        /* Simulate pointerdown */
+        var ev=new Event("pointerdown",{bubbles:true});
+        opts[idx].dispatchEvent(ev);
+      }
+    }
+    return;
+  }
+  /* End screen: Enter to retry */
+  if(!scrEnd.classList.contains("hidden")){
+    if(e.key===" "||e.key==="Enter"){e.preventDefault();$("btn_again").click();}
+    else if(e.key==="Escape")$("btn_home").click();
+  }
+});
+
+/* ==================== INIT ==================== */
+loadBest();
+refreshBest();
+showScreen("start");
+
+})();
+</script>
+</body>
+</html>

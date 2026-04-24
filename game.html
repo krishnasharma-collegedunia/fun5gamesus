@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#2563eb">
   <meta name="robots" content="index, follow">
   <meta name="description" content="" id="metaDesc">
   <meta property="og:title" content="" id="ogTitle">
@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Google Ad Placeholder -->
+  <!-- Ad Placeholder Script -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
   <script type="application/ld+json" id="jsonLd">
@@ -24,60 +24,93 @@
 </head>
 <body>
 
-  <div class="site-wrap">
-    <div class="game-page">
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-flex">
+        <a class="brand" href="index.html">
+          <div class="brand-icon">🎮</div>
+          <div>
+            <div class="brand-text">Fun5Games</div>
+            <div class="brand-sub">Free brain games &amp; arcade</div>
+          </div>
+        </a>
+        <nav class="header-nav">
+          <a href="index.html">All Games</a>
+          <a href="index.html#brain">Brain &amp; Skills</a>
+          <a href="index.html#arcade">Arcade</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <div class="game-page">
+    <div class="container">
 
       <!-- BACK NAV -->
-      <header class="game-topbar">
-        <a href="index.html" class="back-btn">&#8592; Games</a>
+      <div class="game-topbar">
+        <a href="index.html" class="back-btn">&#8592; All Games</a>
         <span class="game-breadcrumb" id="breadcrumb">Loading...</span>
-      </header>
+      </div>
 
       <!-- AD SLOT: Pre-game -->
       <div class="ad-slot ad-pre">
         <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
-      <!-- GAME IFRAME -->
-      <div class="game-frame-container" id="gameFrameContainer">
-        <div class="game-frame-wrapper" id="gameFrameWrapper">
-          <div class="game-loading" id="gameLoading">
-            <div class="spinner"></div>
-            <p>Loading game...</p>
+      <!-- MAIN GAME LAYOUT -->
+      <div class="game-layout">
+        <div class="game-main">
+
+          <!-- GAME IFRAME -->
+          <div class="game-frame-container" id="gameFrameContainer">
+            <div class="game-frame-wrapper" id="gameFrameWrapper">
+              <div class="game-loading" id="gameLoading">
+                <div class="spinner"></div>
+                <p>Loading game...</p>
+              </div>
+            </div>
           </div>
+
+          <!-- GAME INFO + CONTROLS -->
+          <div class="game-info-bar">
+            <div class="game-info-main">
+              <h1 id="gameTitle">Loading...</h1>
+              <div class="game-meta">
+                <span class="stars" id="gameStars"></span>
+                <span class="cat-badge" id="gameBadge"></span>
+              </div>
+            </div>
+            <div class="game-controls">
+              <button class="ctrl-btn ctrl-fs" id="fullscreenBtn">⛶ Fullscreen</button>
+              <button class="ctrl-btn ctrl-reload" id="reloadBtn">🔄 Reload</button>
+            </div>
+          </div>
+
+          <!-- HOW TO PLAY -->
+          <div class="how-to-play">
+            <h3>📖 How to Play</h3>
+            <p id="gameDescription">Loading...</p>
+            <div class="tag-row" id="gameTags"></div>
+          </div>
+
+          <!-- AD SLOT: Mid-page -->
+          <div class="ad-slot ad-mid">
+            <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
+          </div>
+
         </div>
-      </div>
 
-      <!-- GAME TITLE -->
-      <div class="game-info-bar">
-        <h1 id="gameTitle">Loading...</h1>
-        <div class="game-meta">
-          <span class="stars" id="gameStars"></span>
-          <span class="cat-badge" id="gameBadge"></span>
-        </div>
-      </div>
-
-      <!-- CONTROLS -->
-      <div class="game-controls">
-        <button class="ctrl-btn ctrl-fs" id="fullscreenBtn">⛶ Full Screen</button>
-        <button class="ctrl-btn ctrl-reload" id="reloadBtn">🔄 Reload</button>
-      </div>
-
-      <!-- AD SLOT: Below controls -->
-      <div class="ad-slot ad-below">
-        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
-      </div>
-
-      <!-- HOW TO PLAY -->
-      <div class="how-to-play">
-        <h3>📖 How to Play</h3>
-        <p id="gameDescription">Loading...</p>
-        <div class="tag-row" id="gameTags"></div>
-      </div>
-
-      <!-- AD SLOT: Mid-page -->
-      <div class="ad-slot ad-mid">
-        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
+        <!-- SIDEBAR (shows on desktop) -->
+        <aside class="game-sidebar">
+          <div class="sidebar-card">
+            <h3>💡 Quick Tips</h3>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6" id="sidebarTips">Use keyboard shortcuts for faster play. Practice daily to build exam-level speed.</p>
+          </div>
+          <div class="ad-slot" style="padding:0">
+            <div class="ad-inner" style="min-height:250px"><span class="ad-text">Advertisement</span></div>
+          </div>
+        </aside>
       </div>
 
       <!-- MORE GAMES -->
@@ -86,27 +119,29 @@
         <div class="game-grid" id="relatedGrid"></div>
       </section>
 
-      <!-- PLAY MORE -->
-      <div class="play-more-wrap">
-        <a href="index.html" class="play-more-btn">🎮 Play More Games</a>
-      </div>
-
-      <!-- AD SLOT: Bottom -->
+      <!-- BOTTOM AD -->
       <div class="ad-slot ad-bottom">
         <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
     </div>
-
-    <footer class="site-footer">
-      <a href="privacy.html">Privacy Policy</a>
-      <span class="dot">·</span>
-      <a href="terms.html">Terms</a>
-      <span class="dot">·</span>
-      <a href="contact.html">Contact</a>
-      <p class="copy">&copy; 2026 Fun5Games. All rights reserved.</p>
-    </footer>
   </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-flex">
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="dot">·</span>
+          <a href="terms.html">Terms</a>
+          <span class="dot">·</span>
+          <a href="contact.html">Contact</a>
+        </div>
+        <div class="copy">&copy; 2026 Fun5Games. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
 
   <script src="js/game.js"></script>
 </body>

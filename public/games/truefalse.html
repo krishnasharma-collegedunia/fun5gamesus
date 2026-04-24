@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>True or False</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#0f172a;background:linear-gradient(160deg,#0f172a 0%,#1e293b 55%,#0f172a 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#fff}
+body{display:flex;flex-direction:column;align-items:center;height:100dvh;position:relative}
+.wrap{width:100%;max-width:560px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 14px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.scr.hidden{display:none}
+
+/* Start screen */
+.title{font-size:clamp(42px,11vw,72px);font-weight:900;letter-spacing:3px;text-align:center;background:linear-gradient(180deg,#22c55e 0%,#dc2626 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(34,197,94,.2);line-height:1;margin-top:10px}
+.tag{font-size:clamp(11px,3vw,14px);text-align:center;color:rgba(255,255,255,.7);margin-top:6px;letter-spacing:1px}
+.ad-slot{border:1px dashed #555;background:rgba(255,255,255,.05);color:#777;font-size:11px;padding:12px;text-align:center;margin:14px 4px 8px;letter-spacing:2px;border-radius:8px;text-transform:uppercase}
+.sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(134,239,172,.85);margin:14px 4px 8px;font-weight:bold}
+.cats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 4px}
+.cat-btn{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);color:#fff;padding:14px 6px;font-size:12px;font-weight:bold;font-family:inherit;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-transform:uppercase;transition:all .15s;text-align:center}
+.cat-btn.active{background:linear-gradient(180deg,#22c55e,#16a34a);color:#fff;border-color:#fff;box-shadow:0 4px 18px rgba(34,197,94,.5)}
+.cat-btn .cat-best{display:block;font-size:10px;font-weight:bold;color:rgba(255,215,100,.9);margin-top:4px;letter-spacing:.5px}
+.cat-btn.active .cat-best{color:#fff}
+.play-btn{display:block;margin:18px auto 8px;background:linear-gradient(180deg,#22c55e,#16a34a);color:#fff;border:3px solid rgba(255,255,255,.4);padding:16px 54px;font:900 clamp(18px,5vw,24px) inherit;border-radius:50px;letter-spacing:4px;box-shadow:0 8px 28px rgba(34,197,94,.5);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.play-btn:active{transform:scale(.96)}
+.best-line{text-align:center;font-size:12px;color:rgba(134,239,172,.95);margin-top:6px;letter-spacing:1px}
+.howto-box{margin:12px 4px 8px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(0,0,0,.2);overflow:hidden}
+.howto-head{padding:10px 14px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(134,239,172,.9);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.howto-body{padding:0 14px 12px;font-size:12px;line-height:1.7;color:rgba(255,255,255,.75);display:none}
+.howto-body.open{display:block}
+.howto-body ul{list-style:none;padding:0}
+.howto-body li{padding:2px 0}
+.howto-body li:before{content:"• ";color:#22c55e;margin-right:4px}
+
+/* Game screen */
+.g-head{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 8px;gap:8px}
+.g-cat{font-size:10px;padding:4px 10px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#fff}
+.g-mid{display:flex;gap:6px;align-items:center}
+.g-time{font-size:15px;font-weight:900;color:#fff;padding:4px 10px;letter-spacing:1px;min-width:48px;text-align:center}
+.g-time.low{color:#fca5a5;animation:pulse .5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.g-score{font-size:14px;font-weight:900;color:#0f172a;background:linear-gradient(180deg,#fde047,#facc15);padding:5px 12px;border-radius:10px;letter-spacing:1px}
+.timer-bar{position:relative;height:10px;background:rgba(255,255,255,.15);border-radius:5px;margin:4px 4px 12px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+.timer-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#22c55e 0%,#fde047 60%,#dc2626 100%);border-radius:5px;transition:width .25s linear;width:100%}
+.streak-row{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:8px;min-height:20px}
+.streak-badge{font-size:11px;font-weight:bold;color:#0f172a;background:linear-gradient(180deg,#fde047,#f59e0b);padding:3px 10px;border-radius:10px;letter-spacing:1px;text-transform:uppercase;display:none;animation:streakPop .35s ease-out}
+.streak-badge.show{display:inline-block}
+.streak-badge.multi{background:linear-gradient(180deg,#fb7185,#e11d48);color:#fff;box-shadow:0 0 16px rgba(244,63,94,.7)}
+@keyframes streakPop{0%{transform:scale(.4)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.stmt-card{position:relative;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.15);border-radius:18px;margin:6px 4px 14px;padding:26px 18px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;overflow:hidden}
+.stmt-card.flash-true{background:linear-gradient(180deg,rgba(34,197,94,.5),rgba(22,163,74,.4));border-color:#22c55e;box-shadow:0 0 26px rgba(34,197,94,.7)}
+.stmt-card.flash-false{background:linear-gradient(180deg,rgba(220,38,38,.5),rgba(185,28,28,.4));border-color:#dc2626;box-shadow:0 0 26px rgba(220,38,38,.7)}
+.stmt-card.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+.stmt-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(134,239,172,.75);margin-bottom:12px;font-weight:bold}
+.stmt-text{font-size:clamp(17px,4.8vw,22px);font-weight:600;line-height:1.4;color:#fff;text-align:center;padding:2px 4px}
+.correct-hint{position:absolute;bottom:8px;left:0;right:0;font-size:12px;font-weight:bold;letter-spacing:2px;text-align:center;color:#fff;opacity:0;transition:opacity .2s;text-transform:uppercase}
+.correct-hint.show{opacity:1}
+.correct-hint.ok{color:#86efac}
+.correct-hint.no{color:#fca5a5}
+
+/* Answer buttons */
+.ans-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 4px;margin-top:auto}
+.ans-btn{padding:22px 10px;font-size:clamp(18px,5.6vw,26px);font-weight:900;font-family:inherit;border-radius:16px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:3px;border:3px solid rgba(255,255,255,.35);text-transform:uppercase;transition:transform .1s,box-shadow .15s;min-height:88px}
+.ans-btn:active{transform:scale(.96)}
+.ans-btn.disabled{pointer-events:none;opacity:.55}
+.ans-true{background:linear-gradient(180deg,#22c55e,#16a34a);color:#fff;box-shadow:0 6px 20px rgba(34,197,94,.5)}
+.ans-false{background:linear-gradient(180deg,#ef4444,#dc2626);color:#fff;box-shadow:0 6px 20px rgba(220,38,38,.5)}
+.ans-icon{display:block;font-size:28px;margin-bottom:2px;font-weight:900}
+
+.qtimer-wrap{margin:0 4px 8px}
+.qtimer-bar{position:relative;height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden}
+.qtimer-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#86efac,#fde047,#fca5a5);border-radius:3px;transition:width .1s linear;width:100%}
+.qtime-lbl{text-align:center;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.5);margin-top:2px;font-weight:bold;text-transform:uppercase}
+.penalty-pop{position:absolute;left:50%;top:18%;transform:translate(-50%,0);font-size:28px;font-weight:900;color:#fca5a5;pointer-events:none;z-index:30;opacity:0;text-shadow:0 0 12px rgba(220,38,38,.7)}
+.penalty-pop.show{animation:penaltyAnim 1s ease-out forwards}
+@keyframes penaltyAnim{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-10px) scale(1.1)}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}}
+.plus-pop{position:absolute;left:50%;top:18%;transform:translate(-50%,0);font-size:24px;font-weight:900;color:#86efac;pointer-events:none;z-index:30;opacity:0;text-shadow:0 0 12px rgba(34,197,94,.7)}
+.plus-pop.show{animation:plusAnim .8s ease-out forwards}
+@keyframes plusAnim{0%{opacity:0;transform:translate(-50%,0) scale(.6)}25%{opacity:1;transform:translate(-50%,-8px) scale(1.1)}100%{opacity:0;transform:translate(-50%,-28px) scale(1)}}
+
+/* End screen */
+.end-title{font-size:clamp(34px,9vw,52px);font-weight:900;letter-spacing:3px;text-align:center;background:linear-gradient(180deg,#22c55e 0%,#facc15 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:6px;line-height:1}
+.end-score{font-size:clamp(60px,16vw,96px);font-weight:900;color:#fff;text-align:center;line-height:1;margin:16px 0 4px;text-shadow:0 0 30px rgba(34,197,94,.5)}
+.end-lbl{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(134,239,172,.9);text-align:center;font-weight:bold}
+.end-stats{display:flex;gap:10px;padding:0 4px;margin-top:16px}
+.end-stat{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 6px;text-align:center}
+.es-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(134,239,172,.8);font-weight:bold}
+.es-val{font-size:clamp(18px,5vw,24px);font-weight:900;color:#fff;margin-top:2px}
+.end-best{text-align:center;font-size:13px;color:rgba(253,224,71,.95);margin-top:12px;letter-spacing:1px;font-weight:bold}
+.end-btns{display:flex;gap:8px;padding:0 4px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.e-btn{flex:1;min-width:130px;background:linear-gradient(180deg,#22c55e,#16a34a);color:#fff;border:2px solid rgba(255,255,255,.4);padding:13px 14px;font:900 13px inherit;border-radius:24px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.e-btn.alt{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+.e-btn:active{transform:scale(.96)}
+.share-btn{display:block;margin:10px auto 0;background:rgba(253,224,71,.15);border:1px solid rgba(253,224,71,.4);color:#fde047;padding:10px 26px;font:bold 12px inherit;border-radius:22px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.share-btn.copied{background:rgba(34,197,94,.3);border-color:#22c55e;color:#fff}
+.footer-note{text-align:center;font-size:10px;color:rgba(255,255,255,.35);margin-top:14px;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ START SCREEN ============ -->
+<div class="scr" id="startScr">
+  <div class="title">TRUE OR FALSE</div>
+  <div class="tag">60-second rapid-fire GK challenge</div>
+
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="sec-label">Choose Category</div>
+  <div class="cats-grid" id="catsGrid">
+    <button class="cat-btn active" data-cat="All" ontouchstart="">All<span class="cat-best" id="bestAll">-</span></button>
+    <button class="cat-btn" data-cat="History" ontouchstart="">History<span class="cat-best" id="bestHistory">-</span></button>
+    <button class="cat-btn" data-cat="Geography" ontouchstart="">Geography<span class="cat-best" id="bestGeography">-</span></button>
+    <button class="cat-btn" data-cat="Polity" ontouchstart="">Polity<span class="cat-best" id="bestPolity">-</span></button>
+    <button class="cat-btn" data-cat="Science" ontouchstart="">Science<span class="cat-best" id="bestScience">-</span></button>
+    <button class="cat-btn" data-cat="Sports" ontouchstart="">Sports<span class="cat-best" id="bestSports">-</span></button>
+  </div>
+
+  <button class="play-btn" id="playBtn" ontouchstart="">PLAY</button>
+  <div class="best-line" id="bestLine">Best (All): 0</div>
+
+  <div class="howto-box">
+    <div class="howto-head" id="howtoHead" ontouchstart="">
+      <span>How to Play</span>
+      <span id="howtoArrow">+</span>
+    </div>
+    <div class="howto-body" id="howtoBody">
+      <ul>
+        <li>You have <b>60 seconds</b> to answer as many statements as possible.</li>
+        <li>Tap <b style="color:#86efac">TRUE</b> if the statement is correct, <b style="color:#fca5a5">FALSE</b> if wrong.</li>
+        <li><b>+1 point</b> for every correct answer.</li>
+        <li><b>-2 seconds</b> penalty for each wrong answer. Time pressure!</li>
+        <li>Each question has <b>10 seconds</b> max. Auto-skip counts as wrong.</li>
+        <li><b>Streak bonus</b>: 5 correct in a row activates ×2 multiplier for the next question.</li>
+        <li>Desktop: press <b>T</b> / <b>Left Arrow</b> for TRUE, <b>F</b> / <b>Right Arrow</b> for FALSE.</li>
+        <li>Game ends when timer hits zero. Beat your best!</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-note">200+ verified facts for UPSC / SSC / Banking / Railway aspirants</div>
+</div>
+
+<!-- ============ GAME SCREEN ============ -->
+<div class="scr hidden" id="gameScr">
+  <div class="g-head">
+    <span class="g-cat" id="gCat">ALL</span>
+    <div class="g-mid">
+      <span class="g-time" id="gTime">60s</span>
+    </div>
+    <span class="g-score" id="gScore">0</span>
+  </div>
+
+  <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+
+  <div class="streak-row">
+    <span class="streak-badge" id="streakBadge">Streak 0</span>
+  </div>
+
+  <div class="stmt-card" id="stmtCard">
+    <div class="stmt-label">True or False?</div>
+    <div class="stmt-text" id="stmtText">Loading...</div>
+    <div class="correct-hint" id="correctHint"></div>
+    <div class="penalty-pop" id="penaltyPop">-2s</div>
+    <div class="plus-pop" id="plusPop">+1</div>
+  </div>
+
+  <div class="qtimer-wrap">
+    <div class="qtimer-bar"><div class="qtimer-fill" id="qtimerFill"></div></div>
+    <div class="qtime-lbl" id="qtimeLbl">10s per question</div>
+  </div>
+
+  <div class="ans-row">
+    <button class="ans-btn ans-true" id="btnTrue" ontouchstart=""><span class="ans-icon">&#10003;</span>TRUE</button>
+    <button class="ans-btn ans-false" id="btnFalse" ontouchstart=""><span class="ans-icon">&#10007;</span>FALSE</button>
+  </div>
+</div>
+
+<!-- ============ END SCREEN ============ -->
+<div class="scr hidden" id="endScr">
+  <div class="end-title">GAME OVER</div>
+  <div class="end-score" id="endScore">0</div>
+  <div class="end-lbl">Final Score</div>
+
+  <div class="end-stats">
+    <div class="end-stat"><div class="es-lbl">Correct</div><div class="es-val" id="esCorrect">0</div></div>
+    <div class="end-stat"><div class="es-lbl">Wrong</div><div class="es-val" id="esWrong">0</div></div>
+    <div class="end-stat"><div class="es-lbl">Accuracy</div><div class="es-val" id="esAcc">0%</div></div>
+  </div>
+  <div class="end-stats">
+    <div class="end-stat"><div class="es-lbl">Best Streak</div><div class="es-val" id="esStreak">0</div></div>
+    <div class="end-stat"><div class="es-lbl">Category</div><div class="es-val" id="esCat">All</div></div>
+  </div>
+
+  <div class="end-best" id="endBest">Best: 0</div>
+
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="end-btns">
+    <button class="e-btn" id="playAgainBtn" ontouchstart="">Play Again</button>
+    <button class="e-btn alt" id="homeBtn" ontouchstart="">Home</button>
+  </div>
+  <button class="share-btn" id="shareBtn" ontouchstart="">Share Score</button>
+</div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+// ============ STATEMENT POOL (200+ VERIFIED FACTS) ============
+var STATEMENTS = [
+  // =========== HISTORY (45 statements) ===========
+  {s:"The Taj Mahal was built by Shah Jahan.", a:true, c:"History"},
+  {s:"The Taj Mahal was built by Akbar.", a:false, c:"History"},
+  {s:"Mahatma Gandhi led the Salt March in 1930.", a:true, c:"History"},
+  {s:"The Battle of Plassey was fought in 1757.", a:true, c:"History"},
+  {s:"The Battle of Panipat in 1526 was won by Babur.", a:true, c:"History"},
+  {s:"India gained independence on 15 August 1947.", a:true, c:"History"},
+  {s:"Jawaharlal Nehru was the first Prime Minister of India.", a:true, c:"History"},
+  {s:"Sardar Vallabhbhai Patel was called the Iron Man of India.", a:true, c:"History"},
+  {s:"The Quit India Movement was launched in 1942.", a:true, c:"History"},
+  {s:"The Jallianwala Bagh massacre took place in 1919.", a:true, c:"History"},
+  {s:"The first war of Indian independence was fought in 1857.", a:true, c:"History"},
+  {s:"Ashoka belonged to the Gupta dynasty.", a:false, c:"History"},
+  {s:"Ashoka belonged to the Maurya dynasty.", a:true, c:"History"},
+  {s:"Chandragupta Maurya founded the Mauryan Empire.", a:true, c:"History"},
+  {s:"The Red Fort in Delhi was built by Akbar.", a:false, c:"History"},
+  {s:"The Red Fort in Delhi was built by Shah Jahan.", a:true, c:"History"},
+  {s:"Rabindranath Tagore wrote the national anthem of India.", a:true, c:"History"},
+  {s:"Bankim Chandra Chatterjee wrote Vande Mataram.", a:true, c:"History"},
+  {s:"The Indian National Congress was founded in 1885.", a:true, c:"History"},
+  {s:"The Indian National Congress was founded by A. O. Hume.", a:true, c:"History"},
+  {s:"Netaji Subhas Chandra Bose founded the Indian National Army (Azad Hind Fauj).", a:true, c:"History"},
+  {s:"Bhagat Singh was hanged in 1931.", a:true, c:"History"},
+  {s:"Lala Lajpat Rai was known as the Lion of Punjab.", a:true, c:"History"},
+  {s:"Bal Gangadhar Tilak gave the slogan 'Swaraj is my birthright'.", a:true, c:"History"},
+  {s:"Akbar was the son of Babur.", a:false, c:"History"},
+  {s:"Akbar was the grandson of Babur.", a:true, c:"History"},
+  {s:"Humayun was the father of Akbar.", a:true, c:"History"},
+  {s:"Aurangzeb was the last powerful Mughal emperor.", a:true, c:"History"},
+  {s:"The Battle of Haldighati was fought in 1576.", a:true, c:"History"},
+  {s:"Maharana Pratap fought against Akbar at Haldighati.", a:true, c:"History"},
+  {s:"The Harappan civilization was discovered in the 1920s.", a:true, c:"History"},
+  {s:"Mohenjo-Daro is located in present-day Pakistan.", a:true, c:"History"},
+  {s:"The Rig Veda is the oldest of the four Vedas.", a:true, c:"History"},
+  {s:"Gautama Buddha was born in Lumbini.", a:true, c:"History"},
+  {s:"Mahavira was the founder of Jainism.", a:false, c:"History"},
+  {s:"Mahavira was the 24th Tirthankara of Jainism.", a:true, c:"History"},
+  {s:"The Gupta period is often called the Golden Age of India.", a:true, c:"History"},
+  {s:"Samudragupta is called the Napoleon of India.", a:true, c:"History"},
+  {s:"Shivaji founded the Maratha Empire.", a:true, c:"History"},
+  {s:"Rani Lakshmibai was the queen of Jhansi.", a:true, c:"History"},
+  {s:"Dr. B. R. Ambedkar drafted the Indian Constitution.", a:true, c:"History"},
+  {s:"The Dandi March covered about 240 miles.", a:true, c:"History"},
+  {s:"Vasco da Gama reached Calicut in 1498.", a:true, c:"History"},
+  {s:"The East India Company was established in 1600.", a:true, c:"History"},
+  {s:"Tipu Sultan was the ruler of Mysore.", a:true, c:"History"},
+
+  // =========== GEOGRAPHY (45 statements) ===========
+  {s:"Mount Everest is located in India.", a:false, c:"Geography"},
+  {s:"Mount Everest lies on the border of Nepal and China.", a:true, c:"Geography"},
+  {s:"The Ganga originates from the Gangotri glacier.", a:true, c:"Geography"},
+  {s:"Jaipur is the capital of Rajasthan.", a:true, c:"Geography"},
+  {s:"Kanchenjunga is located in Sikkim.", a:true, c:"Geography"},
+  {s:"Kanchenjunga is the highest peak in India.", a:true, c:"Geography"},
+  {s:"The Thar Desert is in Rajasthan.", a:true, c:"Geography"},
+  {s:"The Sundarbans are shared by India and Bangladesh.", a:true, c:"Geography"},
+  {s:"The Brahmaputra flows through Assam.", a:true, c:"Geography"},
+  {s:"Chennai is the capital of Tamil Nadu.", a:true, c:"Geography"},
+  {s:"Bengaluru is the capital of Kerala.", a:false, c:"Geography"},
+  {s:"Bengaluru is the capital of Karnataka.", a:true, c:"Geography"},
+  {s:"Thiruvananthapuram is the capital of Kerala.", a:true, c:"Geography"},
+  {s:"Hyderabad is the capital of Telangana.", a:true, c:"Geography"},
+  {s:"The Tropic of Cancer passes through India.", a:true, c:"Geography"},
+  {s:"India lies entirely in the Southern Hemisphere.", a:false, c:"Geography"},
+  {s:"The Godavari is the longest river flowing only through India.", a:true, c:"Geography"},
+  {s:"The Ganga is the longest river of India.", a:true, c:"Geography"},
+  {s:"The Indus river flows mainly through Pakistan.", a:true, c:"Geography"},
+  {s:"Mumbai is on the Arabian Sea.", a:true, c:"Geography"},
+  {s:"Kolkata is on the Bay of Bengal coast.", a:false, c:"Geography"},
+  {s:"The Andaman and Nicobar Islands are in the Bay of Bengal.", a:true, c:"Geography"},
+  {s:"Lakshadweep islands are in the Arabian Sea.", a:true, c:"Geography"},
+  {s:"India shares a border with China.", a:true, c:"Geography"},
+  {s:"India shares a land border with Russia.", a:false, c:"Geography"},
+  {s:"Sri Lanka is separated from India by the Palk Strait.", a:true, c:"Geography"},
+  {s:"The Western Ghats are also known as Sahyadri.", a:true, c:"Geography"},
+  {s:"Cherrapunji receives very low rainfall.", a:false, c:"Geography"},
+  {s:"Mawsynram is one of the wettest places on Earth.", a:true, c:"Geography"},
+  {s:"Mawsynram is located in Meghalaya.", a:true, c:"Geography"},
+  {s:"The Nilgiri Hills are part of the Eastern Ghats.", a:false, c:"Geography"},
+  {s:"The Nilgiri Hills are part of the Western Ghats.", a:true, c:"Geography"},
+  {s:"The Aravalli Range is one of the oldest fold mountains in the world.", a:true, c:"Geography"},
+  {s:"Guru Shikhar is the highest peak of the Aravalli Range.", a:true, c:"Geography"},
+  {s:"The Sambhar Lake is India's largest saltwater lake.", a:true, c:"Geography"},
+  {s:"The Dal Lake is in Jammu and Kashmir.", a:false, c:"Geography"},
+  {s:"The Dal Lake is in Srinagar.", a:true, c:"Geography"},
+  {s:"Wular Lake is the largest freshwater lake in India.", a:true, c:"Geography"},
+  {s:"The Chilika Lake is a brackish water lagoon in Odisha.", a:true, c:"Geography"},
+  {s:"Loktak Lake is in Manipur.", a:true, c:"Geography"},
+  {s:"India has the second largest population in the world after China.", a:false, c:"Geography"},
+  {s:"Rajasthan is the largest state of India by area.", a:true, c:"Geography"},
+  {s:"Goa is the smallest state of India by area.", a:true, c:"Geography"},
+  {s:"Ladakh became a Union Territory in 2019.", a:true, c:"Geography"},
+  {s:"The Sun rises first in Arunachal Pradesh in India.", a:true, c:"Geography"},
+
+  // =========== POLITY (42 statements) ===========
+  {s:"India has 28 states.", a:true, c:"Polity"},
+  {s:"India has 8 Union Territories.", a:true, c:"Polity"},
+  {s:"The President of India is the head of state.", a:true, c:"Polity"},
+  {s:"Article 370 related to the special status of Jammu and Kashmir.", a:true, c:"Polity"},
+  {s:"The Indian Constitution came into force on 26 January 1950.", a:true, c:"Polity"},
+  {s:"The Indian Constitution was adopted on 26 November 1949.", a:true, c:"Polity"},
+  {s:"Dr. B. R. Ambedkar was the chairman of the Drafting Committee.", a:true, c:"Polity"},
+  {s:"The Lok Sabha has a maximum strength of 552 members.", a:true, c:"Polity"},
+  {s:"The Rajya Sabha has a maximum strength of 250 members.", a:true, c:"Polity"},
+  {s:"The term of a Lok Sabha is 5 years.", a:true, c:"Polity"},
+  {s:"The Rajya Sabha is a permanent house.", a:true, c:"Polity"},
+  {s:"The Vice President of India is the ex-officio Chairman of the Rajya Sabha.", a:true, c:"Polity"},
+  {s:"The Prime Minister of India is elected directly by the people.", a:false, c:"Polity"},
+  {s:"The President of India is elected directly by the people.", a:false, c:"Polity"},
+  {s:"The Chief Justice of India is appointed by the President.", a:true, c:"Polity"},
+  {s:"The Supreme Court of India is located in New Delhi.", a:true, c:"Polity"},
+  {s:"The Fundamental Rights are contained in Part III of the Constitution.", a:true, c:"Polity"},
+  {s:"The Directive Principles are contained in Part IV of the Constitution.", a:true, c:"Polity"},
+  {s:"The Right to Education is a Fundamental Right.", a:true, c:"Polity"},
+  {s:"The minimum age to vote in India is 18 years.", a:true, c:"Polity"},
+  {s:"The minimum age to become the President of India is 35 years.", a:true, c:"Polity"},
+  {s:"The minimum age to become a member of the Lok Sabha is 25 years.", a:true, c:"Polity"},
+  {s:"The minimum age to become a member of the Rajya Sabha is 30 years.", a:true, c:"Polity"},
+  {s:"The Election Commission of India is a constitutional body.", a:true, c:"Polity"},
+  {s:"The Comptroller and Auditor General (CAG) is appointed by the President.", a:true, c:"Polity"},
+  {s:"The Preamble to the Indian Constitution declares India a sovereign, socialist, secular, democratic republic.", a:true, c:"Polity"},
+  {s:"The Indian Constitution is the longest written constitution in the world.", a:true, c:"Polity"},
+  {s:"There are 22 languages recognised in the Eighth Schedule of the Constitution.", a:true, c:"Polity"},
+  {s:"Hindi and English are the official languages of the Union.", a:true, c:"Polity"},
+  {s:"The judiciary in India is independent of the executive and legislature.", a:true, c:"Polity"},
+  {s:"A Money Bill can be introduced only in the Lok Sabha.", a:true, c:"Polity"},
+  {s:"The concept of Fundamental Duties was added by the 42nd Amendment.", a:true, c:"Polity"},
+  {s:"The 73rd Amendment relates to Panchayati Raj institutions.", a:true, c:"Polity"},
+  {s:"The 74th Amendment relates to urban local bodies.", a:true, c:"Polity"},
+  {s:"The Finance Commission is constituted every 5 years.", a:true, c:"Polity"},
+  {s:"The Governor of a state is appointed by the President.", a:true, c:"Polity"},
+  {s:"The Chief Minister is the head of the state government.", a:true, c:"Polity"},
+  {s:"The Speaker of the Lok Sabha is elected by the members of the Lok Sabha.", a:true, c:"Polity"},
+  {s:"The Indian Constitution was drafted by Mahatma Gandhi.", a:false, c:"Polity"},
+  {s:"India became a republic on 26 January 1950.", a:true, c:"Polity"},
+  {s:"The tenure of the President of India is 5 years.", a:true, c:"Polity"},
+  {s:"A state of emergency is declared under Article 352 of the Constitution.", a:true, c:"Polity"},
+
+  // =========== SCIENCE (45 statements) ===========
+  {s:"Water boils at 100 degrees Celsius at sea level.", a:true, c:"Science"},
+  {s:"The Sun is a planet.", a:false, c:"Science"},
+  {s:"The Sun is a star.", a:true, c:"Science"},
+  {s:"Insulin is produced by the pancreas.", a:true, c:"Science"},
+  {s:"The human body has 206 bones.", a:true, c:"Science"},
+  {s:"The heart has four chambers.", a:true, c:"Science"},
+  {s:"Red blood cells carry oxygen.", a:true, c:"Science"},
+  {s:"DNA stands for Deoxyribonucleic Acid.", a:true, c:"Science"},
+  {s:"Light travels faster than sound.", a:true, c:"Science"},
+  {s:"Sound travels faster in vacuum than in air.", a:false, c:"Science"},
+  {s:"The chemical symbol for gold is Au.", a:true, c:"Science"},
+  {s:"The chemical symbol for silver is Ag.", a:true, c:"Science"},
+  {s:"Water has the chemical formula H2O.", a:true, c:"Science"},
+  {s:"The Earth revolves around the Sun.", a:true, c:"Science"},
+  {s:"The Moon revolves around the Earth.", a:true, c:"Science"},
+  {s:"Jupiter is the largest planet in our solar system.", a:true, c:"Science"},
+  {s:"Mercury is the closest planet to the Sun.", a:true, c:"Science"},
+  {s:"Mars is known as the Red Planet.", a:true, c:"Science"},
+  {s:"Venus is the hottest planet in the solar system.", a:true, c:"Science"},
+  {s:"Pluto is classified as a dwarf planet.", a:true, c:"Science"},
+  {s:"There are 8 planets in our solar system.", a:true, c:"Science"},
+  {s:"Saturn is known for its prominent ring system.", a:true, c:"Science"},
+  {s:"Neil Armstrong was the first human to walk on the Moon.", a:true, c:"Science"},
+  {s:"Chandrayaan-1 was India's first lunar mission.", a:true, c:"Science"},
+  {s:"Mangalyaan was India's Mars mission.", a:true, c:"Science"},
+  {s:"ISRO stands for Indian Space Research Organisation.", a:true, c:"Science"},
+  {s:"ISRO is headquartered in Bengaluru.", a:true, c:"Science"},
+  {s:"Photosynthesis occurs in chloroplasts.", a:true, c:"Science"},
+  {s:"Plants release oxygen during photosynthesis.", a:true, c:"Science"},
+  {s:"Chlorophyll is green in colour.", a:true, c:"Science"},
+  {s:"The hardest natural substance on Earth is diamond.", a:true, c:"Science"},
+  {s:"Mercury is liquid at room temperature.", a:true, c:"Science"},
+  {s:"A year on Earth is about 365 days.", a:true, c:"Science"},
+  {s:"The speed of light is approximately 3 lakh kilometres per second.", a:true, c:"Science"},
+  {s:"The human eye has rods and cones in the retina.", a:true, c:"Science"},
+  {s:"The largest organ of the human body is the skin.", a:true, c:"Science"},
+  {s:"Bats are blind and cannot see at all.", a:false, c:"Science"},
+  {s:"A whale is a mammal, not a fish.", a:true, c:"Science"},
+  {s:"Penicillin was discovered by Alexander Fleming.", a:true, c:"Science"},
+  {s:"Isaac Newton formulated the three laws of motion.", a:true, c:"Science"},
+  {s:"Albert Einstein proposed the theory of relativity.", a:true, c:"Science"},
+  {s:"Charles Darwin proposed the theory of evolution by natural selection.", a:true, c:"Science"},
+  {s:"C. V. Raman won the Nobel Prize in Physics.", a:true, c:"Science"},
+  {s:"The study of the stars and universe is called astronomy.", a:true, c:"Science"},
+  {s:"H. J. Bhabha is known as the father of India's nuclear programme.", a:true, c:"Science"},
+
+  // =========== SPORTS (40 statements) ===========
+  {s:"India won the Cricket World Cup in 1983.", a:true, c:"Sports"},
+  {s:"India won the Cricket World Cup in 2011.", a:true, c:"Sports"},
+  {s:"Kapil Dev was the captain of India's 1983 World Cup-winning team.", a:true, c:"Sports"},
+  {s:"Mahendra Singh Dhoni was the captain when India won the 2011 World Cup.", a:true, c:"Sports"},
+  {s:"Sachin Tendulkar played his last Test match in 2013.", a:true, c:"Sports"},
+  {s:"Sachin Tendulkar has scored over 100 international centuries.", a:true, c:"Sports"},
+  {s:"Abhinav Bindra won an Olympic gold in 2008 in shooting.", a:true, c:"Sports"},
+  {s:"Abhinav Bindra won Olympic gold in 2004.", a:false, c:"Sports"},
+  {s:"Neeraj Chopra won an Olympic gold in javelin throw in 2021.", a:true, c:"Sports"},
+  {s:"Neeraj Chopra's gold at Tokyo 2020 was India's first athletics Olympic gold.", a:true, c:"Sports"},
+  {s:"P. V. Sindhu is a badminton player.", a:true, c:"Sports"},
+  {s:"P. V. Sindhu won a silver medal at the Rio 2016 Olympics.", a:true, c:"Sports"},
+  {s:"Saina Nehwal is a tennis player.", a:false, c:"Sports"},
+  {s:"Saina Nehwal is a badminton player.", a:true, c:"Sports"},
+  {s:"Hockey is the national sport of India, as per popular belief.", a:true, c:"Sports"},
+  {s:"Dhyan Chand is known as the wizard of hockey.", a:true, c:"Sports"},
+  {s:"Dhyan Chand's birthday on 29 August is observed as National Sports Day in India.", a:true, c:"Sports"},
+  {s:"Leander Paes has won multiple Grand Slam doubles titles.", a:true, c:"Sports"},
+  {s:"Mary Kom is a boxer from Manipur.", a:true, c:"Sports"},
+  {s:"Mary Kom won an Olympic bronze medal at London 2012.", a:true, c:"Sports"},
+  {s:"Viswanathan Anand is a grandmaster in chess.", a:true, c:"Sports"},
+  {s:"Viswanathan Anand has been a world chess champion.", a:true, c:"Sports"},
+  {s:"Virat Kohli has captained the Indian cricket team.", a:true, c:"Sports"},
+  {s:"A cricket Test match is played over five days.", a:true, c:"Sports"},
+  {s:"A One Day International (ODI) has 50 overs per side.", a:true, c:"Sports"},
+  {s:"A T20 cricket match has 20 overs per side.", a:true, c:"Sports"},
+  {s:"The Indian Premier League (IPL) was launched in 2008.", a:true, c:"Sports"},
+  {s:"Mumbai Indians have won multiple IPL titles.", a:true, c:"Sports"},
+  {s:"The FIFA World Cup is held every four years.", a:true, c:"Sports"},
+  {s:"Brazil has won the FIFA World Cup five times.", a:true, c:"Sports"},
+  {s:"Football is played between two teams of 11 players each.", a:true, c:"Sports"},
+  {s:"A tennis Grand Slam consists of four major tournaments.", a:true, c:"Sports"},
+  {s:"Wimbledon is played on grass courts.", a:true, c:"Sports"},
+  {s:"The French Open is played on clay courts.", a:true, c:"Sports"},
+  {s:"The modern Olympic Games were revived in 1896.", a:true, c:"Sports"},
+  {s:"The Olympic Games are held every 4 years.", a:true, c:"Sports"},
+  {s:"Kabaddi is a team sport that originated in India.", a:true, c:"Sports"},
+  {s:"Sania Mirza is a tennis player.", a:true, c:"Sports"},
+  {s:"Milkha Singh was known as the Flying Sikh.", a:true, c:"Sports"},
+  {s:"Sunil Chhetri is a well-known Indian footballer.", a:true, c:"Sports"}
+];
+
+// ============ STATE ============
+var DOM = {};
+var selectedCat = 'All';
+var activeStatements = [];
+var currentIdx = 0;
+var score = 0;
+var correctCount = 0;
+var wrongCount = 0;
+var streak = 0;
+var bestStreak = 0;
+var multiplierActive = false;
+var totalTime = 60;
+var timeLeft = 60;
+var questionTime = 10;
+var qTimeLeft = 10;
+var gameTimer = null;
+var qTimer = null;
+var gameRunning = false;
+var locked = false;
+
+// ============ HELPERS ============
+function $(id){return document.getElementById(id);}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function bestKey(cat){
+  if(cat==='All')return 'tf_best_all';
+  if(cat==='History')return 'tf_best_history';
+  if(cat==='Geography')return 'tf_best_geo';
+  if(cat==='Polity')return 'tf_best_polity';
+  if(cat==='Science')return 'tf_best_sci';
+  if(cat==='Sports')return 'tf_best_sports';
+  return 'tf_best_all';
+}
+function getBest(cat){
+  var v = lsGet(bestKey(cat));
+  return v ? parseInt(v,10)||0 : 0;
+}
+function setBest(cat,val){
+  lsSet(bestKey(cat), String(val));
+}
+function shortElId(cat){
+  if(cat==='All')return 'bestAll';
+  if(cat==='History')return 'bestHistory';
+  if(cat==='Geography')return 'bestGeography';
+  if(cat==='Polity')return 'bestPolity';
+  if(cat==='Science')return 'bestScience';
+  if(cat==='Sports')return 'bestSports';
+  return 'bestAll';
+}
+
+// ============ DOM CACHE ============
+function cacheDom(){
+  DOM.startScr = $('startScr');
+  DOM.gameScr = $('gameScr');
+  DOM.endScr = $('endScr');
+  DOM.catsGrid = $('catsGrid');
+  DOM.playBtn = $('playBtn');
+  DOM.bestLine = $('bestLine');
+  DOM.howtoHead = $('howtoHead');
+  DOM.howtoBody = $('howtoBody');
+  DOM.howtoArrow = $('howtoArrow');
+  DOM.gCat = $('gCat');
+  DOM.gTime = $('gTime');
+  DOM.gScore = $('gScore');
+  DOM.timerFill = $('timerFill');
+  DOM.streakBadge = $('streakBadge');
+  DOM.stmtCard = $('stmtCard');
+  DOM.stmtText = $('stmtText');
+  DOM.correctHint = $('correctHint');
+  DOM.penaltyPop = $('penaltyPop');
+  DOM.plusPop = $('plusPop');
+  DOM.qtimerFill = $('qtimerFill');
+  DOM.qtimeLbl = $('qtimeLbl');
+  DOM.btnTrue = $('btnTrue');
+  DOM.btnFalse = $('btnFalse');
+  DOM.endScore = $('endScore');
+  DOM.esCorrect = $('esCorrect');
+  DOM.esWrong = $('esWrong');
+  DOM.esAcc = $('esAcc');
+  DOM.esStreak = $('esStreak');
+  DOM.esCat = $('esCat');
+  DOM.endBest = $('endBest');
+  DOM.playAgainBtn = $('playAgainBtn');
+  DOM.homeBtn = $('homeBtn');
+  DOM.shareBtn = $('shareBtn');
+}
+
+// ============ SCREEN MANAGEMENT ============
+function showScreen(name){
+  DOM.startScr.classList.add('hidden');
+  DOM.gameScr.classList.add('hidden');
+  DOM.endScr.classList.add('hidden');
+  if(name==='start')DOM.startScr.classList.remove('hidden');
+  else if(name==='game')DOM.gameScr.classList.remove('hidden');
+  else if(name==='end')DOM.endScr.classList.remove('hidden');
+}
+
+// ============ START SCREEN ============
+function refreshStartScreen(){
+  var cats = ['All','History','Geography','Polity','Science','Sports'];
+  for(var i=0;i<cats.length;i++){
+    var el = $(shortElId(cats[i]));
+    if(el){
+      var b = getBest(cats[i]);
+      el.textContent = 'Best ' + b;
+    }
+  }
+  var cur = getBest(selectedCat);
+  DOM.bestLine.textContent = 'Best (' + selectedCat + '): ' + cur;
+}
+
+function handleCatClick(e){
+  var target = e.target.closest('.cat-btn');
+  if(!target) return;
+  e.stopPropagation(); e.preventDefault();
+  var cat = target.getAttribute('data-cat');
+  if(!cat) return;
+  selectedCat = cat;
+  var btns = DOM.catsGrid.querySelectorAll('.cat-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle('active', btns[i].getAttribute('data-cat')===cat);
+  }
+  var cur = getBest(selectedCat);
+  DOM.bestLine.textContent = 'Best (' + selectedCat + '): ' + cur;
+}
+
+function toggleHowto(e){
+  e.stopPropagation(); e.preventDefault();
+  var opened = DOM.howtoBody.classList.toggle('open');
+  DOM.howtoArrow.textContent = opened ? '-' : '+';
+}
+
+// ============ GAME ============
+function buildPool(){
+  var pool;
+  if(selectedCat==='All'){
+    pool = STATEMENTS.slice();
+  } else {
+    pool = [];
+    for(var i=0;i<STATEMENTS.length;i++){
+      if(STATEMENTS[i].c===selectedCat) pool.push(STATEMENTS[i]);
+    }
+  }
+  return shuffle(pool);
+}
+
+function startGame(){
+  activeStatements = buildPool();
+  currentIdx = 0;
+  score = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  streak = 0;
+  bestStreak = 0;
+  multiplierActive = false;
+  timeLeft = totalTime;
+  qTimeLeft = questionTime;
+  locked = false;
+  gameRunning = true;
+
+  DOM.gCat.textContent = selectedCat.toUpperCase();
+  updateHud();
+  updateStreakUi();
+  showStatement();
+  showScreen('game');
+
+  clearInterval(gameTimer);
+  gameTimer = setInterval(tickGame, 100);
+  startQuestionTimer();
+}
+
+function tickGame(){
+  if(!gameRunning) return;
+  timeLeft -= 0.1;
+  if(timeLeft <= 0){
+    timeLeft = 0;
+    endGame();
+    return;
+  }
+  updateHud();
+}
+
+function startQuestionTimer(){
+  clearInterval(qTimer);
+  qTimeLeft = questionTime;
+  updateQtimer();
+  qTimer = setInterval(tickQuestion, 100);
+}
+
+function tickQuestion(){
+  if(!gameRunning || locked) return;
+  qTimeLeft -= 0.1;
+  if(qTimeLeft <= 0){
+    qTimeLeft = 0;
+    updateQtimer();
+    autoSkip();
+    return;
+  }
+  updateQtimer();
+}
+
+function updateQtimer(){
+  var pct = Math.max(0, (qTimeLeft/questionTime)*100);
+  DOM.qtimerFill.style.width = pct + '%';
+  DOM.qtimeLbl.textContent = Math.max(0, qTimeLeft).toFixed(1) + 's per question';
+}
+
+function updateHud(){
+  DOM.gScore.textContent = score;
+  var tl = Math.max(0, timeLeft);
+  DOM.gTime.textContent = Math.ceil(tl) + 's';
+  DOM.gTime.classList.toggle('low', tl<=10);
+  var pct = Math.max(0,(tl/totalTime)*100);
+  DOM.timerFill.style.width = pct + '%';
+}
+
+function updateStreakUi(){
+  if(streak <= 1){
+    DOM.streakBadge.classList.remove('show','multi');
+    return;
+  }
+  DOM.streakBadge.classList.add('show');
+  if(multiplierActive){
+    DOM.streakBadge.classList.add('multi');
+    DOM.streakBadge.textContent = 'x2 BONUS NEXT!';
+  } else {
+    DOM.streakBadge.classList.remove('multi');
+    DOM.streakBadge.textContent = 'Streak ' + streak;
+  }
+}
+
+function showStatement(){
+  // if we've exhausted the pool, reshuffle fresh to keep rapid-fire going
+  if(currentIdx >= activeStatements.length){
+    activeStatements = buildPool();
+    currentIdx = 0;
+  }
+  var item = activeStatements[currentIdx];
+  DOM.stmtText.textContent = item.s;
+  DOM.correctHint.classList.remove('show','ok','no');
+  DOM.correctHint.textContent = '';
+  DOM.stmtCard.classList.remove('flash-true','flash-false','shake');
+  DOM.btnTrue.classList.remove('disabled');
+  DOM.btnFalse.classList.remove('disabled');
+  locked = false;
+}
+
+function handleAnswer(userAns){
+  if(!gameRunning || locked) return;
+  locked = true;
+  clearInterval(qTimer);
+
+  var item = activeStatements[currentIdx];
+  var isCorrect = (userAns === item.a);
+
+  if(isCorrect){
+    var pts = multiplierActive ? 2 : 1;
+    score += pts;
+    correctCount++;
+    streak++;
+    if(streak > bestStreak) bestStreak = streak;
+    // flash
+    DOM.stmtCard.classList.add('flash-true');
+    DOM.correctHint.textContent = (pts===2 ? '+2 (x2)' : '+1');
+    DOM.correctHint.classList.add('show','ok');
+    popPlus(pts);
+    // multiplier is consumed if it was active; otherwise check if streak reaches 5 to arm it
+    if(multiplierActive){
+      multiplierActive = false;
+    } else if(streak % 5 === 0){
+      multiplierActive = true;
+    }
+  } else {
+    wrongCount++;
+    streak = 0;
+    multiplierActive = false;
+    // time penalty
+    timeLeft -= 2;
+    if(timeLeft < 0) timeLeft = 0;
+    DOM.stmtCard.classList.add('flash-false','shake');
+    DOM.correctHint.textContent = 'Correct: ' + (item.a ? 'TRUE' : 'FALSE');
+    DOM.correctHint.classList.add('show','no');
+    popPenalty();
+  }
+
+  DOM.btnTrue.classList.add('disabled');
+  DOM.btnFalse.classList.add('disabled');
+  updateHud();
+  updateStreakUi();
+
+  var delay = isCorrect ? 300 : 700;
+  setTimeout(nextStatement, delay);
+}
+
+function autoSkip(){
+  if(!gameRunning || locked) return;
+  locked = true;
+  clearInterval(qTimer);
+  var item = activeStatements[currentIdx];
+  wrongCount++;
+  streak = 0;
+  multiplierActive = false;
+  timeLeft -= 2;
+  if(timeLeft < 0) timeLeft = 0;
+  DOM.stmtCard.classList.add('flash-false','shake');
+  DOM.correctHint.textContent = 'Time up! Was: ' + (item.a ? 'TRUE' : 'FALSE');
+  DOM.correctHint.classList.add('show','no');
+  popPenalty();
+  DOM.btnTrue.classList.add('disabled');
+  DOM.btnFalse.classList.add('disabled');
+  updateHud();
+  updateStreakUi();
+  setTimeout(nextStatement, 700);
+}
+
+function nextStatement(){
+  if(!gameRunning) return;
+  if(timeLeft <= 0){
+    endGame();
+    return;
+  }
+  currentIdx++;
+  showStatement();
+  startQuestionTimer();
+}
+
+function popPenalty(){
+  DOM.penaltyPop.classList.remove('show');
+  void DOM.penaltyPop.offsetWidth; // reflow to restart animation
+  DOM.penaltyPop.classList.add('show');
+}
+
+function popPlus(pts){
+  DOM.plusPop.textContent = '+' + pts;
+  DOM.plusPop.classList.remove('show');
+  void DOM.plusPop.offsetWidth;
+  DOM.plusPop.classList.add('show');
+}
+
+function endGame(){
+  if(!gameRunning) return;
+  gameRunning = false;
+  clearInterval(gameTimer);
+  clearInterval(qTimer);
+
+  // update best
+  var prevBest = getBest(selectedCat);
+  var newBest = prevBest;
+  if(score > prevBest){
+    setBest(selectedCat, score);
+    newBest = score;
+  }
+  // also update "All" best when individual category played higher than overall
+  if(selectedCat !== 'All'){
+    var allPrev = getBest('All');
+    if(score > allPrev) setBest('All', score);
+  }
+
+  DOM.endScore.textContent = score;
+  DOM.esCorrect.textContent = correctCount;
+  DOM.esWrong.textContent = wrongCount;
+  var tot = correctCount + wrongCount;
+  var acc = tot===0 ? 0 : Math.round((correctCount/tot)*100);
+  DOM.esAcc.textContent = acc + '%';
+  DOM.esStreak.textContent = bestStreak;
+  DOM.esCat.textContent = selectedCat;
+  var newBadge = (score>prevBest && score>0) ? ' (NEW!)' : '';
+  DOM.endBest.textContent = 'Best (' + selectedCat + '): ' + newBest + newBadge;
+
+  showScreen('end');
+}
+
+// ============ SHARE ============
+function shareScore(e){
+  e.stopPropagation(); e.preventDefault();
+  var msg = 'I scored ' + score + ' on True or False (' + selectedCat + ') at fun5games.us — can you beat it?';
+  var didCopy = false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(msg);
+      didCopy = true;
+    }
+  }catch(err){}
+  if(!didCopy){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = msg; ta.style.position='absolute'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      didCopy = true;
+    }catch(err2){}
+  }
+  DOM.shareBtn.classList.add('copied');
+  DOM.shareBtn.textContent = didCopy ? 'COPIED!' : 'COPY FAILED';
+  setTimeout(function(){
+    DOM.shareBtn.classList.remove('copied');
+    DOM.shareBtn.textContent = 'Share Score';
+  }, 1600);
+}
+
+// ============ EVENT BINDING ============
+function bindEvents(){
+  DOM.catsGrid.addEventListener('pointerdown', handleCatClick);
+  DOM.playBtn.addEventListener('pointerdown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    startGame();
+  });
+  DOM.howtoHead.addEventListener('pointerdown', toggleHowto);
+
+  DOM.btnTrue.addEventListener('pointerdown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    handleAnswer(true);
+  });
+  DOM.btnFalse.addEventListener('pointerdown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    handleAnswer(false);
+  });
+
+  DOM.playAgainBtn.addEventListener('pointerdown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    startGame();
+  });
+  DOM.homeBtn.addEventListener('pointerdown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    refreshStartScreen();
+    showScreen('start');
+  });
+  DOM.shareBtn.addEventListener('pointerdown', shareScore);
+
+  // Keyboard support
+  document.addEventListener('keydown', function(e){
+    if(!gameRunning && !DOM.startScr.classList.contains('hidden')){
+      if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        startGame();
+      }
+      return;
+    }
+    if(!gameRunning && !DOM.endScr.classList.contains('hidden')){
+      if(e.key==='Enter'){
+        e.preventDefault();
+        startGame();
+      }
+      return;
+    }
+    if(!gameRunning || locked) return;
+    if(e.key==='t' || e.key==='T' || e.key==='ArrowLeft'){
+      e.preventDefault();
+      handleAnswer(true);
+    } else if(e.key==='f' || e.key==='F' || e.key==='ArrowRight'){
+      e.preventDefault();
+      handleAnswer(false);
+    }
+  });
+}
+
+// ============ INIT ============
+function init(){
+  cacheDom();
+  bindEvents();
+  refreshStartScreen();
+  showScreen('start');
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+</body>
+</html>

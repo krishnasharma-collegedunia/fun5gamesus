@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mini Crossword</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#f6f3ec}
+body{display:flex;flex-direction:column;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#1a1a1a}
+.wrap{width:100%;max-width:520px;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+/* ============== HEADER ============== */
+.head{width:100%;padding:8px 10px 4px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px solid #d9d4c8}
+.sb{background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:4px 8px;text-align:center;min-width:58px;flex:1;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sl{color:#8a8a8a;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}
+.sv{color:#1a1a1a;font-size:14px;font-weight:800;line-height:1.1}
+.sv.warn{color:#dc2626}
+.sv.ok{color:#16a34a}
+
+/* ============== GAME AREA ============== */
+.bw{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;padding:4px 8px 0;min-height:0;overflow:hidden}
+.grid-wrap{width:100%;display:flex;justify-content:center;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);width:min(84vw,320px);aspect-ratio:1;background:#1a1a1a;border:3px solid #1a1a1a;border-radius:4px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.cell{background:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5.2vw,28px);font-weight:700;color:#1a1a1a;position:relative;cursor:pointer;border:1px solid #1a1a1a;transition:background .12s}
+.cell.bk{background:#1a1a1a;cursor:default}
+.cell.sel{background:#fbbf24!important}
+.cell.dir{background:#bfdbfe}
+.cell.err{color:#dc2626!important;animation:shake .25s}
+.cell.rev{color:#2563eb!important;font-style:italic}
+.cell.ok{background:#bbf7d0!important}
+.cell .num{position:absolute;top:1px;left:2px;font-size:clamp(8px,1.8vw,10px);font-weight:700;color:#555;line-height:1}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+
+/* ============== CLUE BAR ============== */
+.cluebar{width:min(92vw,460px);margin:6px auto 0;background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:8px 10px;min-height:50px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.clue-num{font-size:14px;font-weight:900;color:#2563eb;min-width:34px;text-align:center;background:#eff6ff;padding:3px 6px;border-radius:6px}
+.clue-num.dn{color:#dc2626;background:#fef2f2}
+.clue-txt{font-size:13px;color:#1a1a1a;font-weight:500;line-height:1.35;flex:1}
+.clue-nav{display:flex;flex-direction:column;gap:2px}
+.clue-nav button{background:#f3f0e8;border:1px solid #d4d0c8;width:26px;height:20px;border-radius:5px;cursor:pointer;font-size:11px;color:#555;font-family:inherit;padding:0;touch-action:manipulation;-webkit-appearance:none}
+.clue-nav button:active{background:#e5e1d5}
+
+/* ============== CLUE LIST (expandable) ============== */
+.clues-panel{width:min(92vw,460px);margin:6px auto 0;background:#fff;border:1px solid #d4d0c8;border-radius:8px;overflow:hidden;flex-shrink:0}
+.clues-panel.hidden{display:none}
+.clues-cols{display:grid;grid-template-columns:1fr 1fr;gap:0;max-height:150px;overflow-y:auto}
+.clues-col{padding:6px 8px}
+.clues-col.ac{border-right:1px solid #e5e1d5}
+.clues-col h4{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#555;margin-bottom:4px}
+.clues-col h4.ac-h{color:#2563eb}
+.clues-col h4.dn-h{color:#dc2626}
+.clues-col .ci{font-size:11px;color:#333;padding:3px 4px;border-radius:4px;cursor:pointer;line-height:1.3;display:flex;gap:4px}
+.clues-col .ci:active{background:#f3f0e8}
+.clues-col .ci.act{background:#fef3c7}
+.clues-col .ci.done{color:#888;text-decoration:line-through}
+.clues-col .ci .n{font-weight:800;min-width:14px}
+
+/* ============== ACTION BUTTONS ============== */
+.acts{width:min(92vw,460px);margin:6px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.ab{background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:6px 4px;font-size:10px;font-weight:700;color:#444;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ab:active{transform:scale(.95);background:#f0ecdf}
+.ab .ic{font-size:14px;line-height:1}
+.ab .lbl{font-size:9px;letter-spacing:.5px}
+.ab.danger{color:#dc2626}
+.ab.dim{opacity:.4;pointer-events:none}
+
+/* ============== KEYBOARD ============== */
+.kb{width:100%;padding:4px 4px 6px;background:#d9d4c8;display:flex;flex-direction:column;gap:4px;margin-top:auto}
+.kbrow{display:flex;gap:3px;justify-content:center;padding:0 2px}
+.key{background:#fff;border:1px solid #b5afa0;border-radius:5px;flex:1;min-height:36px;max-width:36px;font-size:14px;font-weight:700;color:#1a1a1a;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-family:inherit;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 1px rgba(0,0,0,.2)}
+.key:active{background:#e5e1d5;transform:translateY(1px)}
+.key.wide{max-width:60px;flex:1.6;font-size:11px;background:#b5afa0;color:#1a1a1a}
+.key.wide:active{background:#a09a8a}
+.key.xwide{max-width:80px;flex:2;font-size:11px;background:#b5afa0}
+.key.dir{background:#2563eb;color:#fff;border-color:#1e40af}
+.key.dir:active{background:#1e40af}
+
+/* ============== OVERLAYS ============== */
+.ob{position:absolute;inset:0;background:rgba(246,243,236,.97);z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;z-index:20;padding:14px 14px 20px;text-align:center;overflow-y:auto}
+.ov.hidden,.ob.hidden{display:none}
+.ov h1{font-size:clamp(36px,10vw,56px);color:#1a1a1a;letter-spacing:-1px;line-height:.95;font-weight:900;margin-top:14px}
+.ov h2{font-size:clamp(26px,7vw,40px);color:#1a1a1a;letter-spacing:-.5px;line-height:1;font-weight:900}
+.ov h1 .accent{color:#2563eb}
+.tag{color:#555;font-size:clamp(12px,3.2vw,15px);letter-spacing:.5px;margin-top:-2px;font-weight:600}
+.datebox{background:#fff;border:2px solid #1a1a1a;border-radius:10px;padding:10px 18px;display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:4px}
+.datebox .pn{font-size:11px;color:#888;letter-spacing:2px;font-weight:700}
+.datebox .dt{font-size:16px;color:#1a1a1a;font-weight:900;letter-spacing:.5px}
+.btn{background:linear-gradient(180deg,#1a1a1a,#000);color:#fff;border:none;padding:13px 44px;font:900 clamp(14px,3.8vw,18px) inherit;border-radius:10px;letter-spacing:3px;box-shadow:0 4px 14px rgba(0,0,0,.25);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn.alt{background:linear-gradient(180deg,#fff,#f0ecdf);color:#1a1a1a;border:2px solid #1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.btn.ghost{background:transparent;color:#666;border:1.5px solid #bbb;box-shadow:none;padding:9px 22px;font-size:12px;letter-spacing:1px}
+.bests{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:min(86vw,360px);margin-top:4px}
+.bests .bc{flex:1;min-width:70px;background:#fff;border:1px solid #d4d0c8;border-radius:8px;padding:6px}
+.bests .bc .bl{font-size:9px;color:#888;letter-spacing:1px;font-weight:700}
+.bests .bc .bv{font-size:13px;color:#1a1a1a;font-weight:800;margin-top:1px}
+.howto{background:#fff;border:1px solid #d4d0c8;border-radius:10px;width:min(86vw,360px);overflow:hidden}
+.howto-h{padding:10px 14px;font-size:11px;font-weight:800;color:#444;letter-spacing:1.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.howto-h .ar{transition:transform .2s}
+.howto.open .ar{transform:rotate(90deg)}
+.howto-b{display:none;padding:4px 14px 12px;font-size:12px;color:#555;line-height:1.6;text-align:left}
+.howto.open .howto-b{display:block}
+.howto-b b{color:#1a1a1a}
+.ad-slot{border:1px dashed #555;background:rgba(255,255,255,0.35);color:#777;font-size:11px;padding:10px;text-align:center;margin:6px 0;width:min(86vw,360px);border-radius:6px;letter-spacing:1px;font-weight:600}
+.end-stats{background:#fff;border:2px solid #16a34a;border-radius:14px;padding:14px 20px;width:min(86vw,360px);box-shadow:0 4px 14px rgba(22,163,74,.15)}
+.end-stats .row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0ecdf;font-size:13px}
+.end-stats .row:last-child{border-bottom:none}
+.end-stats .k{color:#666;font-weight:600}
+.end-stats .v{color:#1a1a1a;font-weight:900}
+.end-stats .v.hl{color:#16a34a;font-size:16px}
+.msg{position:absolute;top:54px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:1px;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none;opacity:0;transition:opacity .2s}
+.msg.show{opacity:1}
+.msg.err{background:#dc2626}
+.msg.ok{background:#16a34a}
+.confetti{position:absolute;width:8px;height:12px;top:-14px;z-index:25;pointer-events:none;animation:fall 2.5s linear forwards}
+@keyframes fall{0%{top:-14px;transform:rotate(0)}100%{top:110%;transform:rotate(540deg)}}
+.puzzlepick{width:min(86vw,360px);display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:6px}
+.pp{background:#fff;border:1px solid #d4d0c8;border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#1a1a1a;cursor:pointer;font-family:inherit;padding:0}
+.pp.done{background:#bbf7d0;border-color:#16a34a;color:#166534}
+.pp.active{background:#fbbf24;border-color:#1a1a1a}
+.pp:active{transform:scale(.92)}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+<!-- Header -->
+<div class="head" id="gameHead" style="display:none">
+<div class="sb"><div class="sl">Time</div><div class="sv" id="sTime">00:00</div></div>
+<div class="sb"><div class="sl">Puzzle</div><div class="sv" id="sPuz">#1</div></div>
+<div class="sb"><div class="sl">Filled</div><div class="sv" id="sFill">0/25</div></div>
+<div class="sb"><div class="sl">Reveals</div><div class="sv" id="sRev">3</div></div>
+</div>
+
+<!-- Game Area -->
+<div class="bw" id="gameArea" style="display:none">
+<div class="grid-wrap"><div class="grid" id="grid"></div></div>
+<div class="cluebar" id="clueBar">
+<div class="clue-num" id="clueNum">1A</div>
+<div class="clue-txt" id="clueTxt">Tap a cell to start</div>
+<div class="clue-nav"><button id="btPrev" ontouchstart="">&#9650;</button><button id="btNext" ontouchstart="">&#9660;</button></div>
+</div>
+<div class="clues-panel hidden" id="cluesPanel">
+<div class="clues-cols">
+<div class="clues-col ac"><h4 class="ac-h">ACROSS</h4><div id="acList"></div></div>
+<div class="clues-col dn"><h4 class="dn-h">DOWN</h4><div id="dnList"></div></div>
+</div>
+</div>
+<div class="acts">
+<button class="ab" id="btCheck" ontouchstart=""><span class="ic">&#10003;</span><span class="lbl">CHECK</span></button>
+<button class="ab" id="btReveal" ontouchstart=""><span class="ic">&#128161;</span><span class="lbl">REVEAL</span></button>
+<button class="ab" id="btList" ontouchstart=""><span class="ic">&#9776;</span><span class="lbl">CLUES</span></button>
+<button class="ab danger" id="btQuit" ontouchstart=""><span class="ic">&#10005;</span><span class="lbl">QUIT</span></button>
+</div>
+</div>
+
+<!-- Keyboard -->
+<div class="kb" id="kb" style="display:none">
+<div class="kbrow"><button class="key" data-k="Q">Q</button><button class="key" data-k="W">W</button><button class="key" data-k="E">E</button><button class="key" data-k="R">R</button><button class="key" data-k="T">T</button><button class="key" data-k="Y">Y</button><button class="key" data-k="U">U</button><button class="key" data-k="I">I</button><button class="key" data-k="O">O</button><button class="key" data-k="P">P</button></div>
+<div class="kbrow"><button class="key" data-k="A">A</button><button class="key" data-k="S">S</button><button class="key" data-k="D">D</button><button class="key" data-k="F">F</button><button class="key" data-k="G">G</button><button class="key" data-k="H">H</button><button class="key" data-k="J">J</button><button class="key" data-k="K">K</button><button class="key" data-k="L">L</button></div>
+<div class="kbrow"><button class="key wide" data-k="DIR">&#8644; DIR</button><button class="key" data-k="Z">Z</button><button class="key" data-k="X">X</button><button class="key" data-k="C">C</button><button class="key" data-k="V">V</button><button class="key" data-k="B">B</button><button class="key" data-k="N">N</button><button class="key" data-k="M">M</button><button class="key wide" data-k="BACK">&#9003;</button></div>
+</div>
+
+<!-- Start Overlay -->
+<div class="ob" id="obStart"></div>
+<div class="ov" id="ovStart">
+<h1>Mini<br><span class="accent">Crossword</span></h1>
+<div class="tag">DAILY 5&times;5 &middot; INDIAN GK + VOCAB</div>
+<div class="datebox"><div class="pn" id="ppnum">PUZZLE #1</div><div class="dt" id="pdt">APR 24</div></div>
+<div class="ad-slot">Advertisement</div>
+<button class="btn" id="btPlay" ontouchstart="">PLAY</button>
+<div class="bests">
+<div class="bc"><div class="bl">BEST TIME</div><div class="bv" id="bvBest">&mdash;</div></div>
+<div class="bc"><div class="bl">SOLVED</div><div class="bv" id="bvSolved">0</div></div>
+<div class="bc"><div class="bl">STREAK</div><div class="bv" id="bvStreak">0</div></div>
+</div>
+<div class="puzzlepick" id="puzzlePick"></div>
+<div class="howto" id="howto">
+<div class="howto-h" id="howtoH"><span>HOW TO PLAY</span><span class="ar">&#9654;</span></div>
+<div class="howto-b">
+<b>Goal:</b> Fill all 5&times;5 cells with letters. Each row (Across) and column (Down) forms a word matching the clue.<br><br>
+<b>Controls:</b> Tap any cell to select it. A keyboard appears &mdash; type letters. The current word highlights in blue. Type <b>DIR</b> to switch between Across and Down. Tap a clue to jump there.<br><br>
+<b>Buttons:</b> <b>Check</b> shows wrong letters in red. <b>Reveal</b> fills the selected cell (3 per puzzle). <b>Clues</b> shows the full clue list.<br><br>
+<b>Win:</b> Complete all letters correctly. Beat your best time!
+</div>
+</div>
+</div>
+
+<!-- Win Overlay -->
+<div class="ob hidden" id="obWin"></div>
+<div class="ov hidden" id="ovWin">
+<h2>SOLVED!</h2>
+<div class="tag" id="winTag">Puzzle complete</div>
+<div class="end-stats">
+<div class="row"><span class="k">Time</span><span class="v hl" id="wTime">00:00</span></div>
+<div class="row"><span class="k">Best Time</span><span class="v" id="wBest">&mdash;</span></div>
+<div class="row"><span class="k">Reveals Used</span><span class="v" id="wRev">0</span></div>
+<div class="row"><span class="k">Puzzle</span><span class="v" id="wPuz">#1</span></div>
+</div>
+<div class="ad-slot">Advertisement</div>
+<button class="btn" id="btNextPuz" ontouchstart="">NEXT PUZZLE</button>
+<button class="btn alt" id="btShare" ontouchstart="">SHARE SCORE</button>
+<button class="btn ghost" id="btHome" ontouchstart="">HOME</button>
+</div>
+
+<!-- Toast message -->
+<div class="msg" id="msg"></div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ============================================================
+// PUZZLE DATA — 15 hand-crafted 5x5 word-squares
+// Every row is a valid word. Every column is a valid word.
+// Clues lean on Indian exam GK + general vocab.
+// ============================================================
+var PUZZLES = [
+  {
+    id:1, theme:'Ocean Song',
+    grid:[
+      ['O','C','E','A','N'],
+      ['C','E','L','L','O'],
+      ['E','L','D','E','R'],
+      ['A','L','E','R','T'],
+      ['N','O','R','T','H']
+    ],
+    across:[
+      {n:1, c:'Vast salt-water body',            a:'OCEAN'},
+      {n:6, c:'Large stringed instrument',       a:'CELLO'},
+      {n:7, c:'Senior person, respected one',    a:'ELDER'},
+      {n:8, c:'Warning, watchful',               a:'ALERT'},
+      {n:9, c:'Direction opposite to South',     a:'NORTH'}
+    ],
+    down:[
+      {n:1, c:'Indian Ocean is one',             a:'OCEAN'},
+      {n:2, c:'Bowed instrument (bigger than violin)', a:'CELLO'},
+      {n:3, c:'Village panchayat head (respectful)', a:'ELDER'},
+      {n:4, c:'On high-readiness',               a:'ALERT'},
+      {n:5, c:'Kashmir\u2019s compass point',   a:'NORTH'}
+    ]
+  },
+
+  {
+    id:2, theme:'Arena',
+    grid:[
+      ['H','A','B','I','T'],
+      ['A','R','E','N','A'],
+      ['B','E','E','P','S'],
+      ['I','N','P','U','T'],
+      ['T','A','S','T','E']
+    ],
+    across:[
+      {n:1, c:'A daily routine',                 a:'HABIT'},
+      {n:6, c:'Sports stadium field',            a:'ARENA'},
+      {n:7, c:'Short electronic sounds',         a:'BEEPS'},
+      {n:8, c:'Data fed into a system',          a:'INPUT'},
+      {n:9, c:'Flavour sensed by the tongue',    a:'TASTE'}
+    ],
+    down:[
+      {n:1, c:'Regular practice',                a:'HABIT'},
+      {n:2, c:'Delhi\u2019s Kotla is a cricket ___', a:'ARENA'},
+      {n:3, c:'Sounds a microwave makes',        a:'BEEPS'},
+      {n:4, c:'Opposite of output',              a:'INPUT'},
+      {n:5, c:'Sweet, salt, sour, etc.',         a:'TASTE'}
+    ]
+  },
+
+  {
+    id:3, theme:'Number Three',
+    grid:[
+      ['B','L','A','S','T'],
+      ['L','U','N','C','H'],
+      ['A','N','G','E','R'],
+      ['S','C','E','N','E'],
+      ['T','H','R','E','E']
+    ],
+    across:[
+      {n:1, c:'Loud explosion',                  a:'BLAST'},
+      {n:6, c:'Midday meal',                     a:'LUNCH'},
+      {n:7, c:'Krodh in Hindi',                  a:'ANGER'},
+      {n:8, c:'Setting of a play or film',       a:'SCENE'},
+      {n:9, c:'One more than two',               a:'THREE'}
+    ],
+    down:[
+      {n:1, c:'Big bang',                        a:'BLAST'},
+      {n:2, c:'Dabba meal',                      a:'LUNCH'},
+      {n:3, c:'Rage, fury',                      a:'ANGER'},
+      {n:4, c:'Place of action',                 a:'SCENE'},
+      {n:5, c:'Tri-colour count',                a:'THREE'}
+    ]
+  },
+
+  {
+    id:4, theme:'Classroom',
+    grid:[
+      ['B','E','A','T','S'],
+      ['E','I','G','H','T'],
+      ['A','G','R','E','E'],
+      ['T','H','E','M','E'],
+      ['S','T','E','E','L']
+    ],
+    across:[
+      {n:1, c:'Music rhythms',                   a:'BEATS'},
+      {n:6, c:'2 + 6',                           a:'EIGHT'},
+      {n:7, c:'Say yes, concur',                 a:'AGREE'},
+      {n:8, c:'Central topic of essay',          a:'THEME'},
+      {n:9, c:'Jamshedpur\u2019s famous industry', a:'STEEL'}
+    ],
+    down:[
+      {n:1, c:'Defeats (a rival)',               a:'BEATS'},
+      {n:2, c:'Number after seven',              a:'EIGHT'},
+      {n:3, c:'Sign the treaty',                 a:'AGREE'},
+      {n:4, c:'Main subject',                    a:'THEME'},
+      {n:5, c:'TATA\u2019s core product',        a:'STEEL'}
+    ]
+  },
+
+  {
+    id:5, theme:'Headlines',
+    grid:[
+      ['C','A','M','P','S'],
+      ['A','L','E','R','T'],
+      ['M','E','D','I','A'],
+      ['P','R','I','N','T'],
+      ['S','T','A','T','E']
+    ],
+    across:[
+      {n:1, c:'Army tents settlements',          a:'CAMPS'},
+      {n:6, c:'Heightened vigilance',            a:'ALERT'},
+      {n:7, c:'Press, TV and online news',       a:'MEDIA'},
+      {n:8, c:'Newspaper format',                a:'PRINT'},
+      {n:9, c:'UP, Bihar, etc.',                 a:'STATE'}
+    ],
+    down:[
+      {n:1, c:'Refugee shelters',                a:'CAMPS'},
+      {n:2, c:'Red-code warning',                a:'ALERT'},
+      {n:3, c:'Fourth estate',                   a:'MEDIA'},
+      {n:4, c:'Ink on paper',                    a:'PRINT'},
+      {n:5, c:'Official declaration',            a:'STATE'}
+    ]
+  },
+
+  {
+    id:6, theme:'Morning Routine',
+    grid:[
+      ['C','A','R','D','S'],
+      ['A','L','A','R','M'],
+      ['R','A','D','I','O'],
+      ['D','R','I','N','K'],
+      ['S','M','O','K','E']
+    ],
+    across:[
+      {n:1, c:'Aadhaar, PAN, Voter ID',          a:'CARDS'},
+      {n:6, c:'Morning clock noise',             a:'ALARM'},
+      {n:7, c:'AIR broadcasts on this',          a:'RADIO'},
+      {n:8, c:'Paani piyo',                      a:'DRINK'},
+      {n:9, c:'From a burning fire',             a:'SMOKE'}
+    ],
+    down:[
+      {n:1, c:'Playing ___ (teen-patti tools)',  a:'CARDS'},
+      {n:2, c:'Fire siren',                      a:'ALARM'},
+      {n:3, c:'Vividh Bharati medium',           a:'RADIO'},
+      {n:4, c:'Gulp of water',                   a:'DRINK'},
+      {n:5, c:'Diwali pollutant',                a:'SMOKE'}
+    ]
+  },
+
+  {
+    id:7, theme:'Wild Kingdom',
+    grid:[
+      ['C','O','B','R','A'],
+      ['O','C','E','A','N'],
+      ['B','E','I','N','G'],
+      ['R','A','N','G','E'],
+      ['A','N','G','E','L']
+    ],
+    across:[
+      {n:1, c:'Snake deity of Shiva',            a:'COBRA'},
+      {n:6, c:'Indian ___ (body of water)',      a:'OCEAN'},
+      {n:7, c:'Human ___ (person)',              a:'BEING'},
+      {n:8, c:'Himalayan mountain ___',          a:'RANGE'},
+      {n:9, c:'Winged heavenly figure',          a:'ANGEL'}
+    ],
+    down:[
+      {n:1, c:'Nagraj / Cobra',                  a:'COBRA'},
+      {n:2, c:'Arabian Sea bigger cousin',       a:'OCEAN'},
+      {n:3, c:'State of existence',              a:'BEING'},
+      {n:4, c:'Shooting ___ (target practice)',  a:'RANGE'},
+      {n:5, c:'Heavenly guardian',               a:'ANGEL'}
+    ]
+  },
+
+  {
+    id:8, theme:'Quick Draw',
+    grid:[
+      ['D','R','A','W','S'],
+      ['R','I','G','H','T'],
+      ['A','G','R','E','E'],
+      ['W','H','E','R','E'],
+      ['S','T','E','E','L']
+    ],
+    across:[
+      {n:1, c:'Makes sketches',                  a:'DRAWS'},
+      {n:6, c:'Correct, accurate',               a:'RIGHT'},
+      {n:7, c:'Nod in support',                  a:'AGREE'},
+      {n:8, c:'Location question word',          a:'WHERE'},
+      {n:9, c:'Bhilai\u2019s main product',      a:'STEEL'}
+    ],
+    down:[
+      {n:1, c:'Lottery pulls',                   a:'DRAWS'},
+      {n:2, c:'Fundamental ___ (constitutional)',a:'RIGHT'},
+      {n:3, c:'Give consent',                    a:'AGREE'},
+      {n:4, c:'Place query',                     a:'WHERE'},
+      {n:5, c:'SAIL\u2019s output',              a:'STEEL'}
+    ]
+  },
+
+  {
+    id:9, theme:'Spy Thriller',
+    grid:[
+      ['A','B','A','S','E'],
+      ['B','E','G','I','N'],
+      ['A','G','E','N','T'],
+      ['S','I','N','C','E'],
+      ['E','N','T','E','R']
+    ],
+    across:[
+      {n:1, c:'Humiliate, humble',               a:'ABASE'},
+      {n:6, c:'Start; shuru karna',              a:'BEGIN'},
+      {n:7, c:'RAW officer',                     a:'AGENT'},
+      {n:8, c:'From a point in time',            a:'SINCE'},
+      {n:9, c:'Go in (keyboard key)',            a:'ENTER'}
+    ],
+    down:[
+      {n:1, c:'Lower in status',                 a:'ABASE'},
+      {n:2, c:'Commence',                        a:'BEGIN'},
+      {n:3, c:'Travel ___ (booking helper)',     a:'AGENT'},
+      {n:4, c:'Because of',                      a:'SINCE'},
+      {n:5, c:'Walk into a room',                a:'ENTER'}
+    ]
+  },
+
+  {
+    id:10, theme:'Hidden Stash',
+    grid:[
+      ['C','A','C','H','E'],
+      ['A','S','H','E','N'],
+      ['C','H','A','N','T'],
+      ['H','E','N','C','E'],
+      ['E','N','T','E','R']
+    ],
+    across:[
+      {n:1, c:'Secret stockpile',                a:'CACHE'},
+      {n:6, c:'Pale, ash-coloured',              a:'ASHEN'},
+      {n:7, c:'Bhajan or mantra recital',        a:'CHANT'},
+      {n:8, c:'Therefore',                       a:'HENCE'},
+      {n:9, c:'Come inside',                     a:'ENTER'}
+    ],
+    down:[
+      {n:1, c:'Browser memory store',            a:'CACHE'},
+      {n:2, c:'Colour of a scared face',         a:'ASHEN'},
+      {n:3, c:'Temple rhythmic singing',         a:'CHANT'},
+      {n:4, c:'For that reason',                 a:'HENCE'},
+      {n:5, c:'Key to submit a form',            a:'ENTER'}
+    ]
+  },
+
+  {
+    id:11, theme:'Movie Chat',
+    grid:[
+      ['C','H','A','T','S'],
+      ['H','A','B','I','T'],
+      ['A','B','A','T','E'],
+      ['T','I','T','L','E'],
+      ['S','T','E','E','L']
+    ],
+    across:[
+      {n:1, c:'Online messages (WhatsApp)',      a:'CHATS'},
+      {n:6, c:'Chai-pine ki aadat',              a:'HABIT'},
+      {n:7, c:'Lessen or reduce',                a:'ABATE'},
+      {n:8, c:'Name of a film or book',          a:'TITLE'},
+      {n:9, c:'Burnpur\u2019s famous industry',  a:'STEEL'}
+    ],
+    down:[
+      {n:1, c:'Informal talks',                  a:'CHATS'},
+      {n:2, c:'Sadhu\u2019s saffron ___',        a:'HABIT'},
+      {n:3, c:'To moderate',                     a:'ABATE'},
+      {n:4, c:'Heading of a document',           a:'TITLE'},
+      {n:5, c:'Alloy of iron + carbon',          a:'STEEL'}
+    ]
+  },
+
+  {
+    id:12, theme:'Wild Ride',
+    grid:[
+      ['C','H','E','A','T'],
+      ['H','O','R','S','E'],
+      ['E','R','A','S','E'],
+      ['A','S','S','E','T'],
+      ['T','E','E','T','H']
+    ],
+    across:[
+      {n:1, c:'Copy in an exam (banned!)',       a:'CHEAT'},
+      {n:6, c:'Ashwa, ghoda',                    a:'HORSE'},
+      {n:7, c:'Rub out with a rubber',           a:'ERASE'},
+      {n:8, c:'Valuable possession',             a:'ASSET'},
+      {n:9, c:'Enamel-coated biters',            a:'TEETH'}
+    ],
+    down:[
+      {n:1, c:'Deceive',                         a:'CHEAT'},
+      {n:2, c:'Rana Pratap\u2019s Chetak',       a:'HORSE'},
+      {n:3, c:'Delete',                          a:'ERASE'},
+      {n:4, c:'Property worth money',            a:'ASSET'},
+      {n:5, c:'Dentist\u2019s patients',         a:'TEETH'}
+    ]
+  },
+
+  {
+    id:13, theme:'Secret Society',
+    grid:[
+      ['C','A','B','A','L'],
+      ['A','R','E','N','A'],
+      ['B','E','A','K','S'],
+      ['A','N','K','L','E'],
+      ['L','A','S','E','R'],
+    ],
+    across:[
+      {n:1, c:'Small secret group/clique',       a:'CABAL'},
+      {n:6, c:'Mumbai Wankhede is one',          a:'ARENA'},
+      {n:7, c:'Bird mouths',                     a:'BEAKS'},
+      {n:8, c:'Foot-leg joint',                  a:'ANKLE'},
+      {n:9, c:'Coherent light beam',             a:'LASER'}
+    ],
+    down:[
+      {n:1, c:'Plotter\u2019s gang',             a:'CABAL'},
+      {n:2, c:'Battle ground',                   a:'ARENA'},
+      {n:3, c:'Sharp eagle mouths',              a:'BEAKS'},
+      {n:4, c:'Just above the foot',             a:'ANKLE'},
+      {n:5, c:'Eye-surgery tool',                a:'LASER'}
+    ]
+  },
+
+  {
+    id:14, theme:'Royal Guard',
+    grid:[
+      ['B','U','G','L','E'],
+      ['U','S','U','A','L'],
+      ['G','U','A','R','D'],
+      ['L','A','R','G','E'],
+      ['E','L','D','E','R']
+    ],
+    across:[
+      {n:1, c:'Military brass trumpet',          a:'BUGLE'},
+      {n:6, c:'Normal, routine',                 a:'USUAL'},
+      {n:7, c:'Sentry, watchman',                a:'GUARD'},
+      {n:8, c:'Big in size',                     a:'LARGE'},
+      {n:9, c:'Senior (uncle-ji, for ex.)',      a:'ELDER'}
+    ],
+    down:[
+      {n:1, c:'Reveille instrument',             a:'BUGLE'},
+      {n:2, c:'Regular, as always',              a:'USUAL'},
+      {n:3, c:'Parliament security',             a:'GUARD'},
+      {n:4, c:'Huge or extensive',               a:'LARGE'},
+      {n:5, c:'Panchayat chief',                 a:'ELDER'}
+    ]
+  },
+
+  {
+    id:15, theme:'Loud Signal',
+    grid:[
+      ['B','L','A','R','E'],
+      ['L','O','C','A','L'],
+      ['A','C','R','I','D'],
+      ['R','A','I','S','E'],
+      ['E','L','D','E','R']
+    ],
+    across:[
+      {n:1, c:'Loud horn sound',                 a:'BLARE'},
+      {n:6, c:'Neighbourhood, nearby',           a:'LOCAL'},
+      {n:7, c:'Harsh, bitter (smoke, taste)',    a:'ACRID'},
+      {n:8, c:'Lift up; increase',               a:'RAISE'},
+      {n:9, c:'Senior family member',            a:'ELDER'}
+    ],
+    down:[
+      {n:1, c:'Speakers ___ (play loud)',        a:'BLARE'},
+      {n:2, c:'Mumbai ___ train',                a:'LOCAL'},
+      {n:3, c:'Sharp and pungent',               a:'ACRID'},
+      {n:4, c:'Salary hike',                     a:'RAISE'},
+      {n:5, c:'Wise old person',                 a:'ELDER'}
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+var SIZE = 5;
+var state = {
+  puzzleIdx: 0,
+  grid: null,          // 5x5 answer grid
+  userGrid: null,      // 5x5 user entries
+  revealed: null,      // 5x5 bool of revealed cells
+  checked: null,       // 5x5 bool of cells currently flagged wrong
+  selR: 0,
+  selC: 0,
+  dir: 'A',            // 'A' across | 'D' down
+  startTime: 0,
+  elapsed: 0,
+  timerId: null,
+  revealsLeft: 3,
+  finished: false
+};
+
+// ============================================================
+// STORAGE
+// ============================================================
+function lsGet(k, d){
+  try{ var v = localStorage.getItem(k); return v === null ? d : v; }
+  catch(e){ return d; }
+}
+function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+
+function getCompletedIds(){
+  var s = lsGet('mc_completed', '[]');
+  try{ var arr = JSON.parse(s); return Array.isArray(arr) ? arr : []; }
+  catch(e){ return []; }
+}
+function addCompleted(id){
+  var arr = getCompletedIds();
+  if(arr.indexOf(id) === -1){ arr.push(id); lsSet('mc_completed', JSON.stringify(arr)); }
+}
+function getBestTime(){
+  var v = lsGet('mc_best_time', '');
+  if(!v) return 0;
+  var n = parseInt(v, 10);
+  return isNaN(n) ? 0 : n;
+}
+function saveBestTime(sec){
+  var b = getBestTime();
+  if(b === 0 || sec < b){ lsSet('mc_best_time', String(sec)); return true; }
+  return false;
+}
+function getStreak(){
+  var v = lsGet('mc_streak', '0');
+  var n = parseInt(v, 10);
+  return isNaN(n) ? 0 : n;
+}
+function setStreak(n){ lsSet('mc_streak', String(n)); }
+
+// ============================================================
+// UTILS
+// ============================================================
+function fmtTime(s){
+  var m = Math.floor(s / 60), ss = s % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (ss < 10 ? '0' : '') + ss;
+}
+function $(id){ return document.getElementById(id); }
+function each(list, fn){ for(var i = 0; i < list.length; i++){ fn(list[i], i); } }
+function todayStr(){
+  var d = new Date();
+  var M = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return M[d.getMonth()] + ' ' + d.getDate();
+}
+function showMsg(text, kind){
+  var m = $('msg');
+  m.textContent = text;
+  m.className = 'msg show' + (kind ? ' ' + kind : '');
+  setTimeout(function(){ m.className = 'msg'; }, 1500);
+}
+
+// ============================================================
+// PUZZLE LIFECYCLE
+// ============================================================
+function pickPuzzle(idx){
+  state.puzzleIdx = idx;
+  var p = PUZZLES[idx];
+  // Copy answer grid
+  state.grid = [];
+  state.userGrid = [];
+  state.revealed = [];
+  state.checked = [];
+  for(var r = 0; r < SIZE; r++){
+    state.grid.push(p.grid[r].slice());
+    state.userGrid.push(['','','','','']);
+    state.revealed.push([false,false,false,false,false]);
+    state.checked.push([false,false,false,false,false]);
+  }
+  state.selR = 0;
+  state.selC = 0;
+  state.dir = 'A';
+  state.revealsLeft = 3;
+  state.elapsed = 0;
+  state.finished = false;
+}
+
+function startTimer(){
+  state.startTime = Date.now() - state.elapsed * 1000;
+  if(state.timerId) clearInterval(state.timerId);
+  state.timerId = setInterval(tickTimer, 1000);
+}
+function stopTimer(){
+  if(state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+}
+function tickTimer(){
+  state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  $('sTime').textContent = fmtTime(state.elapsed);
+}
+
+// ============================================================
+// NUMBERING — classic crossword numbering
+// For a no-black-square 5x5: row 0 has 5 across-starts (numbered 1-5),
+// column starts in row 0 share the same numbers (1A/1D, 2D, 3D, 4D, 5D).
+// Subsequent rows get numbers for their across starts.
+// ============================================================
+function buildNumbering(){
+  // In a full 5x5 (no black squares): each row starts an "across" at col 0,
+  // each column starts a "down" at row 0.
+  // Numbering: top row gets 1..5 (cell 0,0 = 1; 0,1 = 2; 0,2 = 3; 0,3 = 4; 0,4 = 5).
+  // Rows 1..4 col 0 get numbers 6..9 for across starts.
+  var nums = [];
+  for(var r = 0; r < SIZE; r++){
+    nums.push([0,0,0,0,0]);
+  }
+  // Top row: each cell starts a DOWN word, cell (0,0) also starts ACROSS
+  nums[0][0] = 1;
+  nums[0][1] = 2;
+  nums[0][2] = 3;
+  nums[0][3] = 4;
+  nums[0][4] = 5;
+  // Remaining across starts at col 0
+  nums[1][0] = 6;
+  nums[2][0] = 7;
+  nums[3][0] = 8;
+  nums[4][0] = 9;
+  return nums;
+}
+
+// ============================================================
+// RENDER GRID
+// ============================================================
+var NUMS = null;
+function renderGrid(){
+  NUMS = buildNumbering();
+  var g = $('grid');
+  g.innerHTML = '';
+  for(var r = 0; r < SIZE; r++){
+    for(var c = 0; c < SIZE; c++){
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.setAttribute('data-r', r);
+      cell.setAttribute('data-c', c);
+      if(NUMS[r][c] > 0){
+        var num = document.createElement('span');
+        num.className = 'num';
+        num.textContent = NUMS[r][c];
+        cell.appendChild(num);
+      }
+      var letter = document.createElement('span');
+      letter.className = 'ltr';
+      cell.appendChild(letter);
+      (function(rr, cc){
+        cell.addEventListener('pointerdown', function(e){
+          e.stopPropagation();
+          e.preventDefault();
+          onCellTap(rr, cc);
+        });
+      })(r, c);
+      g.appendChild(cell);
+    }
+  }
+  paintAll();
+}
+
+// ============================================================
+// PAINT — update cell visuals based on state
+// ============================================================
+function paintAll(){
+  var cells = $('grid').querySelectorAll('.cell');
+  for(var i = 0; i < cells.length; i++){
+    var cell = cells[i];
+    var r = parseInt(cell.getAttribute('data-r'), 10);
+    var c = parseInt(cell.getAttribute('data-c'), 10);
+    var letter = cell.querySelector('.ltr');
+    letter.textContent = state.userGrid[r][c] || '';
+    // Reset classes
+    cell.classList.remove('sel', 'dir', 'err', 'rev', 'ok');
+    if(state.revealed[r][c]){ cell.classList.add('rev'); }
+    if(state.checked[r][c]){ cell.classList.add('err'); }
+    // Direction highlight: same row (A) or same col (D) as selection
+    if(state.dir === 'A' && r === state.selR && !(r === state.selR && c === state.selC)){
+      cell.classList.add('dir');
+    }
+    if(state.dir === 'D' && c === state.selC && !(r === state.selR && c === state.selC)){
+      cell.classList.add('dir');
+    }
+    if(r === state.selR && c === state.selC){
+      cell.classList.add('sel');
+    }
+    if(state.finished){
+      cell.classList.remove('sel','dir','err');
+      cell.classList.add('ok');
+    }
+  }
+  // Update filled count
+  var filled = 0;
+  for(var rr = 0; rr < SIZE; rr++){
+    for(var cc = 0; cc < SIZE; cc++){
+      if(state.userGrid[rr][cc]) filled++;
+    }
+  }
+  $('sFill').textContent = filled + '/25';
+  $('sRev').textContent = state.revealsLeft;
+  updateClueBar();
+  updateCluesListHighlights();
+}
+
+// ============================================================
+// CELL TAP
+// ============================================================
+function onCellTap(r, c){
+  if(state.finished) return;
+  // If same cell, toggle direction
+  if(state.selR === r && state.selC === c){
+    state.dir = (state.dir === 'A') ? 'D' : 'A';
+  }
+  state.selR = r;
+  state.selC = c;
+  paintAll();
+}
+
+// ============================================================
+// CLUE BAR
+// ============================================================
+function getClueFor(r, c, dir){
+  var p = PUZZLES[state.puzzleIdx];
+  // For our 5x5 no-black-square: each row is one across word, each column is one down word.
+  if(dir === 'A'){
+    return p.across[r];
+  } else {
+    return p.down[c];
+  }
+}
+function updateClueBar(){
+  var r = state.selR, c = state.selC;
+  var clue = getClueFor(r, c, state.dir);
+  if(!clue){ $('clueTxt').textContent = 'Tap a cell'; return; }
+  var n = $('clueNum');
+  n.textContent = clue.n + (state.dir === 'A' ? 'A' : 'D');
+  n.className = 'clue-num' + (state.dir === 'D' ? ' dn' : '');
+  $('clueTxt').innerHTML = clue.c;
+}
+
+// ============================================================
+// CLUES PANEL
+// ============================================================
+function renderCluesList(){
+  var p = PUZZLES[state.puzzleIdx];
+  var ac = $('acList'), dn = $('dnList');
+  ac.innerHTML = '';
+  dn.innerHTML = '';
+  each(p.across, function(cl, idx){
+    var d = document.createElement('div');
+    d.className = 'ci';
+    d.setAttribute('data-dir','A');
+    d.setAttribute('data-idx', idx);
+    d.innerHTML = '<span class="n">' + cl.n + '</span><span>' + cl.c + '</span>';
+    (function(rIdx){
+      d.addEventListener('pointerdown', function(e){
+        e.stopPropagation(); e.preventDefault();
+        state.selR = rIdx; state.selC = 0; state.dir = 'A';
+        hideCluesPanel();
+        paintAll();
+      });
+    })(idx);
+    ac.appendChild(d);
+  });
+  each(p.down, function(cl, idx){
+    var d = document.createElement('div');
+    d.className = 'ci';
+    d.setAttribute('data-dir','D');
+    d.setAttribute('data-idx', idx);
+    d.innerHTML = '<span class="n">' + cl.n + '</span><span>' + cl.c + '</span>';
+    (function(cIdx){
+      d.addEventListener('pointerdown', function(e){
+        e.stopPropagation(); e.preventDefault();
+        state.selR = 0; state.selC = cIdx; state.dir = 'D';
+        hideCluesPanel();
+        paintAll();
+      });
+    })(idx);
+    dn.appendChild(d);
+  });
+  updateCluesListHighlights();
+}
+
+function updateCluesListHighlights(){
+  var acCells = $('acList').children;
+  var dnCells = $('dnList').children;
+  for(var i = 0; i < acCells.length; i++){
+    acCells[i].classList.remove('act','done');
+    if(state.dir === 'A' && i === state.selR) acCells[i].classList.add('act');
+    if(rowComplete(i)) acCells[i].classList.add('done');
+  }
+  for(var j = 0; j < dnCells.length; j++){
+    dnCells[j].classList.remove('act','done');
+    if(state.dir === 'D' && j === state.selC) dnCells[j].classList.add('act');
+    if(colComplete(j)) dnCells[j].classList.add('done');
+  }
+}
+
+function rowComplete(r){
+  for(var c = 0; c < SIZE; c++){
+    if(state.userGrid[r][c] !== state.grid[r][c]) return false;
+  }
+  return true;
+}
+function colComplete(c){
+  for(var r = 0; r < SIZE; r++){
+    if(state.userGrid[r][c] !== state.grid[r][c]) return false;
+  }
+  return true;
+}
+
+function toggleCluesPanel(){
+  $('cluesPanel').classList.toggle('hidden');
+}
+function hideCluesPanel(){
+  $('cluesPanel').classList.add('hidden');
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+function onLetter(ch){
+  if(state.finished) return;
+  ch = ch.toUpperCase();
+  // Clear any check flag on this cell
+  state.checked[state.selR][state.selC] = false;
+  state.userGrid[state.selR][state.selC] = ch;
+  advanceCursor();
+  paintAll();
+  checkWin();
+}
+function onBackspace(){
+  if(state.finished) return;
+  if(state.userGrid[state.selR][state.selC]){
+    state.userGrid[state.selR][state.selC] = '';
+    state.checked[state.selR][state.selC] = false;
+  } else {
+    retreatCursor();
+    state.userGrid[state.selR][state.selC] = '';
+    state.checked[state.selR][state.selC] = false;
+  }
+  paintAll();
+}
+function onDir(){
+  if(state.finished) return;
+  state.dir = (state.dir === 'A') ? 'D' : 'A';
+  paintAll();
+}
+function advanceCursor(){
+  if(state.dir === 'A'){
+    if(state.selC < SIZE - 1) state.selC++;
+    else {
+      // wrap to next row first empty, or stay
+      if(state.selR < SIZE - 1){ state.selR++; state.selC = 0; }
+    }
+    // Skip revealed? no — allow overwrite via reveal. Just advance.
+  } else {
+    if(state.selR < SIZE - 1) state.selR++;
+    else {
+      if(state.selC < SIZE - 1){ state.selC++; state.selR = 0; }
+    }
+  }
+}
+function retreatCursor(){
+  if(state.dir === 'A'){
+    if(state.selC > 0) state.selC--;
+    else if(state.selR > 0){ state.selR--; state.selC = SIZE - 1; }
+  } else {
+    if(state.selR > 0) state.selR--;
+    else if(state.selC > 0){ state.selC--; state.selR = SIZE - 1; }
+  }
+}
+
+// ============================================================
+// CHECK & REVEAL
+// ============================================================
+function onCheck(){
+  if(state.finished) return;
+  var wrong = 0, filled = 0;
+  for(var r = 0; r < SIZE; r++){
+    for(var c = 0; c < SIZE; c++){
+      var u = state.userGrid[r][c];
+      if(u){
+        filled++;
+        if(u !== state.grid[r][c]){
+          state.checked[r][c] = true;
+          wrong++;
+        } else {
+          state.checked[r][c] = false;
+        }
+      }
+    }
+  }
+  paintAll();
+  if(filled === 0){
+    showMsg('Fill in letters first', 'err');
+  } else if(wrong === 0){
+    showMsg('All correct so far!', 'ok');
+  } else {
+    showMsg(wrong + ' wrong letter' + (wrong === 1 ? '' : 's'), 'err');
+  }
+  // Auto-clear error flags after 2.5s
+  setTimeout(function(){
+    for(var r = 0; r < SIZE; r++){
+      for(var c = 0; c < SIZE; c++){
+        state.checked[r][c] = false;
+      }
+    }
+    paintAll();
+  }, 2500);
+}
+
+function onReveal(){
+  if(state.finished) return;
+  if(state.revealsLeft <= 0){
+    showMsg('No reveals left', 'err');
+    return;
+  }
+  var r = state.selR, c = state.selC;
+  if(state.userGrid[r][c] === state.grid[r][c]){
+    showMsg('Already correct', 'ok');
+    return;
+  }
+  state.userGrid[r][c] = state.grid[r][c];
+  state.revealed[r][c] = true;
+  state.checked[r][c] = false;
+  state.revealsLeft--;
+  paintAll();
+  checkWin();
+}
+
+// ============================================================
+// WIN
+// ============================================================
+function checkWin(){
+  for(var r = 0; r < SIZE; r++){
+    for(var c = 0; c < SIZE; c++){
+      if(state.userGrid[r][c] !== state.grid[r][c]) return;
+    }
+  }
+  // WIN
+  state.finished = true;
+  stopTimer();
+  var id = PUZZLES[state.puzzleIdx].id;
+  addCompleted(id);
+  var isBest = saveBestTime(state.elapsed);
+  setStreak(getStreak() + 1);
+  paintAll();
+  launchConfetti();
+  setTimeout(function(){ showWinScreen(isBest); }, 900);
+}
+
+function launchConfetti(){
+  var colors = ['#ef4444','#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899','#fbbf24'];
+  var wrap = $('wrap');
+  for(var i = 0; i < 40; i++){
+    var c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.background = colors[i % colors.length];
+    c.style.left = (Math.random() * 100) + '%';
+    c.style.animationDelay = (Math.random() * 0.8) + 's';
+    c.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+    wrap.appendChild(c);
+    (function(el){ setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 4000); })(c);
+  }
+}
+
+function showWinScreen(isBest){
+  $('wTime').textContent = fmtTime(state.elapsed);
+  var bt = getBestTime();
+  $('wBest').textContent = bt > 0 ? fmtTime(bt) + (isBest ? ' (NEW!)' : '') : '—';
+  $('wRev').textContent = (3 - state.revealsLeft);
+  $('wPuz').textContent = '#' + PUZZLES[state.puzzleIdx].id;
+  $('winTag').textContent = PUZZLES[state.puzzleIdx].theme + ' — nicely done!';
+  $('obWin').classList.remove('hidden');
+  $('ovWin').classList.remove('hidden');
+  $('gameHead').style.display = 'none';
+  $('gameArea').style.display = 'none';
+  $('kb').style.display = 'none';
+}
+
+// ============================================================
+// START / NAVIGATION
+// ============================================================
+function showStart(){
+  // Refresh stats
+  var bt = getBestTime();
+  $('bvBest').textContent = bt > 0 ? fmtTime(bt) : '—';
+  $('bvSolved').textContent = getCompletedIds().length;
+  $('bvStreak').textContent = getStreak();
+  $('pdt').textContent = todayStr();
+  // Default daily puzzle: rotate by date
+  var d = new Date();
+  var dayIdx = (d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % PUZZLES.length;
+  state.puzzleIdx = dayIdx;
+  $('ppnum').textContent = 'PUZZLE #' + PUZZLES[dayIdx].id;
+  renderPuzzlePicker();
+  $('obStart').classList.remove('hidden');
+  $('ovStart').classList.remove('hidden');
+  $('obWin').classList.add('hidden');
+  $('ovWin').classList.add('hidden');
+  $('gameHead').style.display = 'none';
+  $('gameArea').style.display = 'none';
+  $('kb').style.display = 'none';
+}
+
+function renderPuzzlePicker(){
+  var pick = $('puzzlePick');
+  pick.innerHTML = '';
+  var completed = getCompletedIds();
+  for(var i = 0; i < PUZZLES.length; i++){
+    var b = document.createElement('button');
+    b.className = 'pp' + (completed.indexOf(PUZZLES[i].id) !== -1 ? ' done' : '') + (i === state.puzzleIdx ? ' active' : '');
+    b.textContent = PUZZLES[i].id;
+    b.ontouchstart = function(){};
+    (function(idx){
+      b.addEventListener('pointerdown', function(e){
+        e.stopPropagation(); e.preventDefault();
+        state.puzzleIdx = idx;
+        $('ppnum').textContent = 'PUZZLE #' + PUZZLES[idx].id;
+        renderPuzzlePicker();
+      });
+    })(i);
+    pick.appendChild(b);
+  }
+}
+
+function beginGame(){
+  pickPuzzle(state.puzzleIdx);
+  $('sPuz').textContent = '#' + PUZZLES[state.puzzleIdx].id;
+  $('obStart').classList.add('hidden');
+  $('ovStart').classList.add('hidden');
+  $('obWin').classList.add('hidden');
+  $('ovWin').classList.add('hidden');
+  $('gameHead').style.display = 'flex';
+  $('gameArea').style.display = 'flex';
+  $('kb').style.display = 'flex';
+  renderGrid();
+  renderCluesList();
+  hideCluesPanel();
+  startTimer();
+}
+
+function nextPuzzle(){
+  var nextIdx = (state.puzzleIdx + 1) % PUZZLES.length;
+  state.puzzleIdx = nextIdx;
+  beginGame();
+}
+
+function quitToStart(){
+  stopTimer();
+  showStart();
+}
+
+function shareScore(){
+  var txt = 'I solved Mini Crossword #' + PUZZLES[state.puzzleIdx].id + ' in ' + fmtTime(state.elapsed) + ' on fun5games.us — can you beat it?';
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt);
+      showMsg('Copied to clipboard!', 'ok');
+    } else {
+      // Fallback
+      var t = document.createElement('textarea');
+      t.value = txt; document.body.appendChild(t); t.select();
+      try{ document.execCommand('copy'); showMsg('Copied!', 'ok'); }catch(e){ showMsg('Copy failed','err'); }
+      document.body.removeChild(t);
+    }
+  }catch(e){ showMsg('Copy failed','err'); }
+}
+
+// ============================================================
+// EVENT BINDINGS
+// ============================================================
+function bindEvents(){
+  // Keyboard buttons
+  var keys = document.querySelectorAll('.key');
+  each(keys, function(k){
+    k.setAttribute('ontouchstart', '');
+    k.addEventListener('pointerdown', function(e){
+      e.stopPropagation(); e.preventDefault();
+      var ch = k.getAttribute('data-k');
+      if(ch === 'BACK'){ onBackspace(); }
+      else if(ch === 'DIR'){ onDir(); }
+      else { onLetter(ch); }
+    });
+  });
+
+  // Action buttons
+  $('btCheck').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); onCheck(); });
+  $('btReveal').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); onReveal(); });
+  $('btList').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); toggleCluesPanel(); });
+  $('btQuit').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); quitToStart(); });
+
+  // Clue nav arrows
+  $('btPrev').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); clueArrow(-1); });
+  $('btNext').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); clueArrow(1); });
+
+  // Start overlay
+  $('btPlay').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); beginGame(); });
+  $('howtoH').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); $('howto').classList.toggle('open'); });
+
+  // Win overlay
+  $('btNextPuz').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); nextPuzzle(); });
+  $('btShare').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); shareScore(); });
+  $('btHome').addEventListener('pointerdown', function(e){ e.stopPropagation(); e.preventDefault(); showStart(); });
+
+  // Physical keyboard
+  document.addEventListener('keydown', function(e){
+    if($('ovStart') && !$('ovStart').classList.contains('hidden')){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); beginGame(); }
+      return;
+    }
+    if($('ovWin') && !$('ovWin').classList.contains('hidden')){
+      if(e.key === 'Enter'){ e.preventDefault(); nextPuzzle(); }
+      return;
+    }
+    if(state.finished) return;
+    var k = e.key;
+    if(k === 'Backspace'){ e.preventDefault(); onBackspace(); return; }
+    if(k === ' ' || k === 'Tab'){ e.preventDefault(); onDir(); return; }
+    if(k === 'Escape'){ e.preventDefault(); quitToStart(); return; }
+    if(k === 'ArrowLeft'){ e.preventDefault(); moveSel(0, -1); return; }
+    if(k === 'ArrowRight'){ e.preventDefault(); moveSel(0, 1); return; }
+    if(k === 'ArrowUp'){ e.preventDefault(); moveSel(-1, 0); return; }
+    if(k === 'ArrowDown'){ e.preventDefault(); moveSel(1, 0); return; }
+    if(/^[a-zA-Z]$/.test(k)){ e.preventDefault(); onLetter(k); return; }
+  });
+
+  // Disable touch scroll globally (required per spec)
+  document.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive:false});
+}
+
+function moveSel(dr, dc){
+  var r = state.selR + dr, c = state.selC + dc;
+  if(r < 0 || r >= SIZE || c < 0 || c >= SIZE) return;
+  state.selR = r; state.selC = c;
+  // Also set dir based on movement
+  if(dr !== 0) state.dir = 'D';
+  if(dc !== 0) state.dir = 'A';
+  paintAll();
+}
+
+function clueArrow(delta){
+  // Cycle to next/prev clue in current dir, wrapping
+  if(state.dir === 'A'){
+    state.selR = (state.selR + delta + SIZE) % SIZE;
+    state.selC = 0;
+  } else {
+    state.selC = (state.selC + delta + SIZE) % SIZE;
+    state.selR = 0;
+  }
+  paintAll();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  bindEvents();
+  showStart();
+}
+
+// Kick off after DOM ready
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+</body>
+</html>

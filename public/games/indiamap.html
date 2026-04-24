@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>India Map Master</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#fef7e0;color:#2d1a0a;position:relative;height:100vh}
+#app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
+.hidden{display:none !important}
+
+/* Indian flag top bar */
+.flagbar{height:5px;display:flex;flex-shrink:0}
+.flagbar .saff{flex:1;background:#ff9933}
+.flagbar .wht{flex:1;background:#fff;position:relative}
+.flagbar .wht::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:3px;border-radius:50%;background:#000080}
+.flagbar .grn{flex:1;background:#138808}
+
+/* ====== START SCREEN ====== */
+#start{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px;overflow-y:auto;background:linear-gradient(180deg,#fef7e0 0%,#fff2c7 100%)}
+#start h1{font-size:34px;text-align:center;font-weight:900;letter-spacing:2px;margin-top:10px;background:linear-gradient(90deg,#ff9933 0%,#138808 100%);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+#start .tag{text-align:center;color:#6e4a1c;font-size:13px;margin-top:6px;font-weight:600}
+.ad{border:1px dashed #555;background:rgba(255,255,255,0.05);color:#777;font-size:11px;padding:12px;text-align:center;margin:8px 0;border-radius:6px}
+.sec-title{font-size:11px;letter-spacing:2px;color:#6e4a1c;font-weight:800;margin:12px 0 6px;text-align:center}
+
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.mode-card{background:#fff;border:3px solid #e8d4a0;border-radius:14px;padding:12px 10px;text-align:center;cursor:pointer;transition:transform .1s,border-color .15s,background .15s;font-weight:700;min-height:96px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px}
+.mode-card.selected{border-color:#ff9933;background:#fff5e1;transform:scale(1.02);box-shadow:0 4px 12px rgba(255,153,51,0.25)}
+.mode-card:active{transform:scale(0.97)}
+.mode-card .mi{font-size:26px;line-height:1}
+.mode-card .mn{font-size:13px;font-weight:900;color:#2d1a0a;letter-spacing:1px}
+.mode-card .md{font-size:10px;color:#7a5a2a;font-weight:600;line-height:1.25}
+.mode-card .mb{font-size:9px;color:#b88633;margin-top:2px}
+
+.play-btn{width:100%;background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);color:#fff;border:none;padding:16px;font-size:20px;font-weight:900;letter-spacing:3px;border-radius:12px;cursor:pointer;margin-top:14px;box-shadow:0 4px 0 #c06a10;transition:transform .08s,box-shadow .08s}
+.play-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #c06a10}
+
+.howto{background:#fff;border:2px solid #e8d4a0;border-radius:10px;margin-top:12px;overflow:hidden}
+.howto-head{padding:10px 12px;font-weight:800;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#fff8e5;color:#5a3e15}
+.howto-body{padding:10px 14px 14px;font-size:12px;line-height:1.6;color:#4a2f10;border-top:1px solid #e8d4a0}
+.howto-body ul{padding-left:16px}
+.howto-body li{margin-bottom:3px}
+.howto .arr{transition:transform .2s}
+.howto.open .arr{transform:rotate(180deg)}
+
+.scores-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:10px}
+.score-cell{background:#fff;border:2px solid #e8d4a0;border-radius:8px;padding:8px 4px;text-align:center}
+.score-cell .sl{font-size:9px;color:#7a5a2a;font-weight:700;letter-spacing:1px}
+.score-cell .sv{font-size:16px;color:#ff7711;font-weight:900;margin-top:2px}
+
+/* ====== GAME SCREEN ====== */
+#game{position:absolute;inset:0;display:flex;flex-direction:column;background:#fef7e0}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fff;border-bottom:2px solid #e8d4a0;flex-shrink:0}
+.hud .cell{display:flex;flex-direction:column;align-items:center;min-width:60px}
+.hud .lbl{font-size:9px;color:#7a5a2a;font-weight:700;letter-spacing:1px}
+.hud .val{font-size:18px;font-weight:900;color:#2d1a0a;line-height:1}
+.hud .val.warn{color:#d32f2f}
+.hud .lives{font-size:17px;letter-spacing:2px;color:#d32f2f}
+.hud .back{background:#fff;border:1.5px solid #c9ad74;color:#5a3e15;font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;cursor:pointer}
+.hud .back:active{background:#e8d4a0}
+
+.qbox{padding:10px 12px;text-align:center;background:#fff;border-bottom:2px solid #e8d4a0}
+.qbox .qlbl{font-size:10px;color:#7a5a2a;font-weight:700;letter-spacing:1.5px}
+.qbox .qtxt{font-size:17px;font-weight:800;color:#2d1a0a;margin-top:3px;line-height:1.3}
+.qbox .qtxt .hl{color:#ff7711}
+
+.timer-bar{height:4px;background:#e8d4a0;position:relative;overflow:hidden;flex-shrink:0}
+.timer-fill{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#138808 0%,#ffd54f 50%,#d32f2f 100%);width:100%;transition:width .2s linear}
+
+.feedback{padding:8px 12px;text-align:center;font-size:13px;font-weight:800;min-height:36px;flex-shrink:0;display:flex;justify-content:center;align-items:center}
+.feedback.ok{background:#c8e6c9;color:#1b5e20}
+.feedback.bad{background:#ffcdd2;color:#b71c1c}
+.feedback.idle{background:transparent;color:#7a5a2a}
+
+.board{flex:1;overflow-y:auto;padding:10px 8px;display:flex;flex-direction:column}
+.board::-webkit-scrollbar{width:5px}
+.board::-webkit-scrollbar-thumb{background:#c9ad74;border-radius:3px}
+
+/* STATE GRID — 3 columns */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px 2px}
+.gcell{background:#fff;border:2px solid #e8d4a0;border-radius:8px;padding:8px 4px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;min-height:46px;display:flex;align-items:center;justify-content:center;line-height:1.15;transition:transform .08s,background .15s,border-color .15s;color:#2d1a0a}
+.gcell:active{transform:scale(0.94)}
+.gcell.r-north{background:#ffe0b2;border-color:#ffb74d}
+.gcell.r-south{background:#c8e6c9;border-color:#81c784}
+.gcell.r-east{background:#bbdefb;border-color:#64b5f6}
+.gcell.r-west{background:#e1bee7;border-color:#ba68c8}
+.gcell.r-northeast{background:#f8bbd0;border-color:#f06292}
+.gcell.r-central{background:#fff9c4;border-color:#fff176}
+.gcell.r-ut{background:#cfd8dc;border-color:#90a4ae}
+
+.gcell.correct{background:#4caf50 !important;border-color:#2e7d32 !important;color:#fff;animation:pop .4s}
+.gcell.wrong{background:#ef5350 !important;border-color:#c62828 !important;color:#fff;animation:shake .35s}
+.gcell.hint{background:#ffd54f !important;border-color:#f9a825 !important;color:#2d1a0a;animation:pop .4s}
+.gcell.selected{background:#ffd54f;border-color:#f9a825;transform:scale(1.05)}
+.gcell.disabled{pointer-events:none;opacity:0.55}
+
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* MCQ OPTIONS (Capitals / Neighbors) */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.opt{background:#fff;border:3px solid #e8d4a0;border-radius:12px;padding:18px 10px;text-align:center;font-size:14px;font-weight:800;cursor:pointer;min-height:70px;display:flex;align-items:center;justify-content:center;line-height:1.2;color:#2d1a0a;transition:transform .08s,background .15s,border-color .15s}
+.opt:active{transform:scale(0.96)}
+.opt.correct{background:#4caf50;border-color:#2e7d32;color:#fff;animation:pop .4s}
+.opt.wrong{background:#ef5350;border-color:#c62828;color:#fff;animation:shake .35s}
+.opt.disabled{pointer-events:none;opacity:0.55}
+
+/* NEIGHBORS mode — multi-pick */
+.multi-instr{font-size:11px;color:#7a5a2a;font-weight:700;text-align:center;padding:5px;font-style:italic}
+.submit-btn{background:linear-gradient(135deg,#138808 0%,#0a5a05 100%);color:#fff;border:none;padding:13px;font-size:15px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;margin:8px 10px 10px;box-shadow:0 3px 0 #0a5a05}
+.submit-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #0a5a05}
+.submit-btn:disabled{background:#bdbdbd;box-shadow:0 3px 0 #9e9e9e;cursor:not-allowed}
+
+/* ====== END SCREEN ====== */
+#end{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px;overflow-y:auto;background:linear-gradient(180deg,#fef7e0 0%,#ffe0b2 100%);text-align:center}
+#end h2{font-size:28px;font-weight:900;margin-top:14px;background:linear-gradient(90deg,#ff9933 0%,#138808 100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:2px}
+#end .emoji{font-size:52px;margin-top:8px}
+.result-box{background:#fff;border:3px solid #e8d4a0;border-radius:14px;padding:16px;margin-top:14px}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0e0b8}
+.result-row:last-child{border-bottom:none}
+.result-row .rl{font-size:12px;font-weight:700;color:#7a5a2a;letter-spacing:1px}
+.result-row .rv{font-size:20px;font-weight:900;color:#2d1a0a}
+.result-row .rv.best{color:#ff7711}
+.result-row .rv.new{color:#138808;animation:pulse 0.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+.end-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.end-btn{padding:14px;font-size:14px;font-weight:900;letter-spacing:1.5px;border:none;border-radius:10px;cursor:pointer;color:#fff}
+.end-btn.again{background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);box-shadow:0 3px 0 #c06a10}
+.end-btn.share{background:linear-gradient(135deg,#138808 0%,#0a5a05 100%);box-shadow:0 3px 0 #0a5a05}
+.end-btn.home{grid-column:1/-1;background:#5a3e15;box-shadow:0 3px 0 #3e2a0d}
+.end-btn:active{transform:translateY(2px)}
+
+.toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#2d1a0a;color:#fff;padding:9px 18px;border-radius:20px;font-size:12px;font-weight:700;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1}
+
+@media (max-width:340px){
+  .gcell{font-size:9px;padding:6px 2px;min-height:42px}
+  .mode-card .mn{font-size:12px}
+  #start h1{font-size:28px}
+}
+@media (min-height:700px){
+  .gcell{min-height:50px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="flagbar"><div class="saff"></div><div class="wht"></div><div class="grn"></div></div>
+
+  <!-- START SCREEN -->
+  <div id="start">
+    <h1>INDIA MAP<br>MASTER</h1>
+    <div class="tag">Master Indian Geography</div>
+
+    <div class="ad">Advertisement</div>
+
+    <div class="sec-title">CHOOSE MODE</div>
+    <div class="modes">
+      <div class="mode-card selected" data-mode="states" ontouchstart="">
+        <div class="mi">🗺️</div>
+        <div class="mn">STATES</div>
+        <div class="md">Identify states from clues</div>
+        <div class="mb">Best: <span id="b-states">0</span></div>
+      </div>
+      <div class="mode-card" data-mode="capitals" ontouchstart="">
+        <div class="mi">🏛️</div>
+        <div class="mn">CAPITALS</div>
+        <div class="md">Match state to capital</div>
+        <div class="mb">Best: <span id="b-capitals">0</span></div>
+      </div>
+      <div class="mode-card" data-mode="rivers" ontouchstart="">
+        <div class="mi">🌊</div>
+        <div class="mn">RIVERS</div>
+        <div class="md">Where does it flow?</div>
+        <div class="mb">Best: <span id="b-rivers">0</span></div>
+      </div>
+      <div class="mode-card" data-mode="neighbors" ontouchstart="">
+        <div class="mi">🌐</div>
+        <div class="mn">NEIGHBORS</div>
+        <div class="md">Identify border nations</div>
+        <div class="mb">Best: <span id="b-neighbors">0</span></div>
+      </div>
+    </div>
+
+    <button class="play-btn" id="play" ontouchstart="">PLAY</button>
+
+    <div class="howto" id="howto">
+      <div class="howto-head" ontouchstart="">
+        <span>HOW TO PLAY</span>
+        <span class="arr">▾</span>
+      </div>
+      <div class="howto-body hidden">
+        <ul>
+          <li>Choose a mode and tap PLAY</li>
+          <li>Answer 10 questions within 20s each</li>
+          <li>Correct answer: +1 point</li>
+          <li>Wrong answer: lose a life (3 lives)</li>
+          <li><b>STATES</b>: Identify state from landmark/clue</li>
+          <li><b>CAPITALS</b>: Pick the correct capital city</li>
+          <li><b>RIVERS</b>: Tap state the river flows through</li>
+          <li><b>NEIGHBORS</b>: Pick bordering states/countries</li>
+          <li>State buttons color-coded by region</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sec-title">YOUR BEST SCORES</div>
+    <div class="scores-row">
+      <div class="score-cell"><div class="sl">STATE</div><div class="sv" id="bs-states">0</div></div>
+      <div class="score-cell"><div class="sl">CAP</div><div class="sv" id="bs-capitals">0</div></div>
+      <div class="score-cell"><div class="sl">RIVER</div><div class="sv" id="bs-rivers">0</div></div>
+      <div class="score-cell"><div class="sl">NBR</div><div class="sv" id="bs-neighbors">0</div></div>
+    </div>
+
+    <div class="ad">Advertisement</div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game" class="hidden">
+    <div class="hud">
+      <button class="back" id="back" ontouchstart="">BACK</button>
+      <div class="cell"><div class="lbl">Q</div><div class="val" id="qnum">1/10</div></div>
+      <div class="cell"><div class="lbl">SCORE</div><div class="val" id="score">0</div></div>
+      <div class="cell"><div class="lbl">LIVES</div><div class="val lives" id="lives">♥♥♥</div></div>
+      <div class="cell"><div class="lbl">TIME</div><div class="val" id="time">20</div></div>
+    </div>
+    <div class="timer-bar"><div class="timer-fill" id="tfill"></div></div>
+    <div class="qbox">
+      <div class="qlbl" id="qlbl">QUESTION</div>
+      <div class="qtxt" id="qtxt">Loading...</div>
+    </div>
+    <div class="feedback idle" id="fb">Tap your answer</div>
+    <div class="board" id="board"></div>
+    <button class="submit-btn hidden" id="submit" ontouchstart="">SUBMIT</button>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="end" class="hidden">
+    <div class="emoji" id="end-emoji">🎯</div>
+    <h2 id="end-title">ROUND COMPLETE</h2>
+    <div class="tag" id="end-sub">Great effort!</div>
+    <div class="ad">Advertisement</div>
+    <div class="result-box">
+      <div class="result-row"><span class="rl">MODE</span><span class="rv" id="r-mode">—</span></div>
+      <div class="result-row"><span class="rl">SCORE</span><span class="rv" id="r-score">0</span></div>
+      <div class="result-row"><span class="rl">ACCURACY</span><span class="rv" id="r-acc">0%</span></div>
+      <div class="result-row"><span class="rl">BEST</span><span class="rv best" id="r-best">0</span></div>
+    </div>
+    <div class="end-btns">
+      <button class="end-btn again" id="again" ontouchstart="">PLAY AGAIN</button>
+      <button class="end-btn share" id="share" ontouchstart="">SHARE</button>
+      <button class="end-btn home" id="home" ontouchstart="">CHANGE MODE</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+  // ====== DATA ======
+  var STATES = [
+    {name:"JAMMU AND KASHMIR", capital:"SRINAGAR", region:"north"},
+    {name:"HIMACHAL PRADESH", capital:"SHIMLA", region:"north"},
+    {name:"PUNJAB", capital:"CHANDIGARH", region:"north"},
+    {name:"HARYANA", capital:"CHANDIGARH", region:"north"},
+    {name:"UTTARAKHAND", capital:"DEHRADUN", region:"north"},
+    {name:"UTTAR PRADESH", capital:"LUCKNOW", region:"north"},
+    {name:"DELHI", capital:"NEW DELHI", region:"north"},
+    {name:"RAJASTHAN", capital:"JAIPUR", region:"west"},
+    {name:"GUJARAT", capital:"GANDHINAGAR", region:"west"},
+    {name:"MAHARASHTRA", capital:"MUMBAI", region:"west"},
+    {name:"GOA", capital:"PANAJI", region:"west"},
+    {name:"MADHYA PRADESH", capital:"BHOPAL", region:"central"},
+    {name:"CHHATTISGARH", capital:"RAIPUR", region:"central"},
+    {name:"BIHAR", capital:"PATNA", region:"east"},
+    {name:"JHARKHAND", capital:"RANCHI", region:"east"},
+    {name:"WEST BENGAL", capital:"KOLKATA", region:"east"},
+    {name:"ODISHA", capital:"BHUBANESWAR", region:"east"},
+    {name:"SIKKIM", capital:"GANGTOK", region:"northeast"},
+    {name:"ASSAM", capital:"DISPUR", region:"northeast"},
+    {name:"ARUNACHAL PRADESH", capital:"ITANAGAR", region:"northeast"},
+    {name:"NAGALAND", capital:"KOHIMA", region:"northeast"},
+    {name:"MANIPUR", capital:"IMPHAL", region:"northeast"},
+    {name:"MIZORAM", capital:"AIZAWL", region:"northeast"},
+    {name:"TRIPURA", capital:"AGARTALA", region:"northeast"},
+    {name:"MEGHALAYA", capital:"SHILLONG", region:"northeast"},
+    {name:"ANDHRA PRADESH", capital:"AMARAVATI", region:"south"},
+    {name:"TELANGANA", capital:"HYDERABAD", region:"south"},
+    {name:"KARNATAKA", capital:"BENGALURU", region:"south"},
+    {name:"KERALA", capital:"THIRUVANANTHAPURAM", region:"south"},
+    {name:"TAMIL NADU", capital:"CHENNAI", region:"south"},
+    {name:"PUDUCHERRY", capital:"PUDUCHERRY", region:"ut"},
+    {name:"LAKSHADWEEP", capital:"KAVARATTI", region:"ut"},
+    {name:"ANDAMAN & NICOBAR", capital:"PORT BLAIR", region:"ut"},
+    {name:"LADAKH", capital:"LEH", region:"ut"},
+    {name:"DADRA & DNH-DD", capital:"DAMAN", region:"ut"},
+    {name:"CHANDIGARH", capital:"CHANDIGARH", region:"ut"}
+  ];
+
+  var RIVERS = [
+    {name:"GANGA", states:["UTTARAKHAND","UTTAR PRADESH","BIHAR","WEST BENGAL","JHARKHAND"]},
+    {name:"YAMUNA", states:["UTTARAKHAND","UTTAR PRADESH","DELHI","HARYANA"]},
+    {name:"KAVERI", states:["KARNATAKA","TAMIL NADU"]},
+    {name:"GODAVARI", states:["MAHARASHTRA","TELANGANA","ANDHRA PRADESH"]},
+    {name:"NARMADA", states:["MADHYA PRADESH","GUJARAT","MAHARASHTRA"]},
+    {name:"BRAHMAPUTRA", states:["ARUNACHAL PRADESH","ASSAM"]},
+    {name:"KRISHNA", states:["MAHARASHTRA","KARNATAKA","TELANGANA","ANDHRA PRADESH"]},
+    {name:"TAPI", states:["MADHYA PRADESH","MAHARASHTRA","GUJARAT"]},
+    {name:"MAHANADI", states:["CHHATTISGARH","ODISHA"]},
+    {name:"CHAMBAL", states:["MADHYA PRADESH","RAJASTHAN","UTTAR PRADESH"]},
+    {name:"BEAS", states:["HIMACHAL PRADESH","PUNJAB"]},
+    {name:"SUTLEJ", states:["HIMACHAL PRADESH","PUNJAB"]},
+    {name:"RAVI", states:["HIMACHAL PRADESH","PUNJAB"]},
+    {name:"JHELUM", states:["JAMMU AND KASHMIR"]},
+    {name:"TUNGABHADRA", states:["KARNATAKA","ANDHRA PRADESH","TELANGANA"]},
+    {name:"PERIYAR", states:["KERALA"]},
+    {name:"GHAGHARA", states:["UTTAR PRADESH","BIHAR"]},
+    {name:"SON", states:["MADHYA PRADESH","UTTAR PRADESH","BIHAR","JHARKHAND"]},
+    {name:"GANDAK", states:["BIHAR","UTTAR PRADESH"]},
+    {name:"TEESTA", states:["SIKKIM","WEST BENGAL"]}
+  ];
+
+  var CLUES = [
+    {clue:"Home of the Taj Mahal", state:"UTTAR PRADESH"},
+    {clue:"Hawa Mahal and the Pink City", state:"RAJASTHAN"},
+    {clue:"Backwaters and houseboats", state:"KERALA"},
+    {clue:"Bollywood film industry hub", state:"MAHARASHTRA"},
+    {clue:"Gateway of India landmark", state:"MAHARASHTRA"},
+    {clue:"Silicon Valley of India", state:"KARNATAKA"},
+    {clue:"Charminar and biryani capital", state:"TELANGANA"},
+    {clue:"Kaziranga National Park (rhinos)", state:"ASSAM"},
+    {clue:"Meenakshi Temple in Madurai", state:"TAMIL NADU"},
+    {clue:"Statue of Unity — world's tallest", state:"GUJARAT"},
+    {clue:"Khajuraho temples UNESCO site", state:"MADHYA PRADESH"},
+    {clue:"Sun Temple at Konark", state:"ODISHA"},
+    {clue:"Howrah Bridge and Durga Puja", state:"WEST BENGAL"},
+    {clue:"Gir forest — Asiatic lions", state:"GUJARAT"},
+    {clue:"Golden Temple at Amritsar", state:"PUNJAB"},
+    {clue:"Bodh Gaya where Buddha attained", state:"BIHAR"},
+    {clue:"Mahabodhi and Nalanda University ruins", state:"BIHAR"},
+    {clue:"Char Dham pilgrimage in the Himalayas", state:"UTTARAKHAND"},
+    {clue:"Rohtang Pass and Manali hill station", state:"HIMACHAL PRADESH"},
+    {clue:"Living root bridges of Cherrapunji", state:"MEGHALAYA"},
+    {clue:"Loktak — India's largest freshwater lake", state:"MANIPUR"},
+    {clue:"Hornbill Festival of tribes", state:"NAGALAND"},
+    {clue:"Tawang Monastery in the Himalayas", state:"ARUNACHAL PRADESH"},
+    {clue:"Cellular Jail — Kala Pani", state:"ANDAMAN & NICOBAR"},
+    {clue:"Pangong Lake at 4,350m altitude", state:"LADAKH"},
+    {clue:"Dal Lake and Mughal gardens", state:"JAMMU AND KASHMIR"},
+    {clue:"Goa's neighbour, home of Udupi cuisine", state:"KARNATAKA"},
+    {clue:"Tirupati Balaji temple", state:"ANDHRA PRADESH"},
+    {clue:"Sariska Tiger Reserve", state:"RAJASTHAN"},
+    {clue:"Ajanta and Ellora cave paintings", state:"MAHARASHTRA"},
+    {clue:"Ranthambore tiger reserve and forts", state:"RAJASTHAN"},
+    {clue:"Formerly Portuguese — beaches of Anjuna", state:"GOA"},
+    {clue:"Gangtok, Kanchenjunga views", state:"SIKKIM"},
+    {clue:"India Gate and Red Fort", state:"DELHI"},
+    {clue:"Bastar tribal region, iron ore belt", state:"CHHATTISGARH"},
+    {clue:"Jharia coalfields", state:"JHARKHAND"},
+    {clue:"Aravalli range runs across this state", state:"RAJASTHAN"},
+    {clue:"Wagah Border ceremony", state:"PUNJAB"},
+    {clue:"Ajmer Sharif Dargah", state:"RAJASTHAN"},
+    {clue:"Sabarimala temple", state:"KERALA"}
+  ];
+
+  var NEIGHBORS = {
+    "PAKISTAN":["GUJARAT","RAJASTHAN","PUNJAB","JAMMU AND KASHMIR","LADAKH"],
+    "NEPAL":["UTTARAKHAND","UTTAR PRADESH","BIHAR","WEST BENGAL","SIKKIM"],
+    "BHUTAN":["SIKKIM","WEST BENGAL","ASSAM","ARUNACHAL PRADESH"],
+    "CHINA":["LADAKH","HIMACHAL PRADESH","UTTARAKHAND","SIKKIM","ARUNACHAL PRADESH"],
+    "BANGLADESH":["WEST BENGAL","ASSAM","MEGHALAYA","TRIPURA","MIZORAM"],
+    "MYANMAR":["ARUNACHAL PRADESH","NAGALAND","MANIPUR","MIZORAM"],
+    "AFGHANISTAN":["LADAKH"],
+    "SRI LANKA":["TAMIL NADU"]
+  };
+
+  var COUNTRIES = ["PAKISTAN","NEPAL","BHUTAN","CHINA","BANGLADESH","MYANMAR","AFGHANISTAN","SRI LANKA"];
+
+  // ====== STATE ======
+  var state = {
+    mode:"states",
+    qIndex:0,
+    score:0,
+    lives:3,
+    total:10,
+    timeLeft:20,
+    timer:null,
+    correct:0,
+    currentQ:null,
+    selectedMulti:[],
+    locked:false
+  };
+
+  var BEST_KEYS = {
+    states:"im_best_states",
+    capitals:"im_best_capitals",
+    rivers:"im_best_rivers",
+    neighbors:"im_best_neighbors"
+  };
+
+  // ====== HELPERS ======
+  function $(id){return document.getElementById(id);}
+  function rand(n){return Math.floor(Math.random()*n);}
+  function shuffle(a){
+    var arr = a.slice();
+    for (var i=arr.length-1;i>0;i--){
+      var j=rand(i+1);
+      var t=arr[i];arr[i]=arr[j];arr[j]=t;
+    }
+    return arr;
+  }
+  function pick(a){return a[rand(a.length)];}
+  function getBest(mode){
+    try{ return parseInt(localStorage.getItem(BEST_KEYS[mode])||"0",10)||0; }
+    catch(e){ return 0; }
+  }
+  function setBest(mode,v){
+    try{ localStorage.setItem(BEST_KEYS[mode],String(v)); }catch(e){}
+  }
+  function findState(name){
+    for (var i=0;i<STATES.length;i++) if (STATES[i].name===name) return STATES[i];
+    return null;
+  }
+  function toast(msg){
+    var t=$("toast");
+    t.textContent=msg;
+    t.classList.add("show");
+    setTimeout(function(){t.classList.remove("show");},1500);
+  }
+
+  // ====== START SCREEN ======
+  function refreshBests(){
+    $("b-states").textContent = getBest("states");
+    $("b-capitals").textContent = getBest("capitals");
+    $("b-rivers").textContent = getBest("rivers");
+    $("b-neighbors").textContent = getBest("neighbors");
+    $("bs-states").textContent = getBest("states");
+    $("bs-capitals").textContent = getBest("capitals");
+    $("bs-rivers").textContent = getBest("rivers");
+    $("bs-neighbors").textContent = getBest("neighbors");
+  }
+
+  function bindModeCards(){
+    var cards = document.querySelectorAll(".mode-card");
+    for (var i=0;i<cards.length;i++){
+      (function(c){
+        c.addEventListener("pointerdown", function(e){
+          e.stopPropagation(); e.preventDefault();
+          for (var j=0;j<cards.length;j++) cards[j].classList.remove("selected");
+          c.classList.add("selected");
+          state.mode = c.getAttribute("data-mode");
+        });
+      })(cards[i]);
+    }
+  }
+
+  function bindHowto(){
+    var howto = $("howto");
+    var head = howto.querySelector(".howto-head");
+    var body = howto.querySelector(".howto-body");
+    head.addEventListener("pointerdown", function(e){
+      e.stopPropagation(); e.preventDefault();
+      howto.classList.toggle("open");
+      body.classList.toggle("hidden");
+    });
+  }
+
+  // ====== GAME ENGINE ======
+  function startGame(){
+    state.qIndex = 0;
+    state.score = 0;
+    state.lives = 3;
+    state.correct = 0;
+    state.locked = false;
+    $("start").classList.add("hidden");
+    $("end").classList.add("hidden");
+    $("game").classList.remove("hidden");
+    updateHud();
+    nextQuestion();
+  }
+
+  function endGame(){
+    stopTimer();
+    var best = getBest(state.mode);
+    var isNew = state.score > best;
+    if (isNew) setBest(state.mode, state.score);
+
+    $("game").classList.add("hidden");
+    $("end").classList.remove("hidden");
+
+    var emoji, title, sub;
+    if (state.score >= 9){ emoji="🏆"; title="GEOGRAPHY MASTER"; sub="Outstanding knowledge!"; }
+    else if (state.score >= 7){ emoji="🎯"; title="WELL DONE"; sub="Strong command of the map!"; }
+    else if (state.score >= 5){ emoji="📚"; title="NOT BAD"; sub="Revise and try again!"; }
+    else { emoji="🗺️"; title="KEEP LEARNING"; sub="Every expert started here!"; }
+
+    $("end-emoji").textContent = emoji;
+    $("end-title").textContent = title;
+    $("end-sub").textContent = sub;
+    $("r-mode").textContent = state.mode.toUpperCase();
+    $("r-score").textContent = state.score + " / " + state.total;
+    var acc = state.total ? Math.round((state.correct/state.total)*100) : 0;
+    $("r-acc").textContent = acc + "%";
+    var bestEl = $("r-best");
+    bestEl.textContent = getBest(state.mode);
+    bestEl.classList.toggle("new", isNew);
+    refreshBests();
+  }
+
+  function updateHud(){
+    $("qnum").textContent = (Math.min(state.qIndex+1,state.total)) + "/" + state.total;
+    $("score").textContent = state.score;
+    var hearts = "";
+    for (var i=0;i<state.lives;i++) hearts += "♥";
+    for (var j=state.lives;j<3;j++) hearts += "♡";
+    $("lives").textContent = hearts;
+  }
+
+  function startTimer(){
+    state.timeLeft = 20;
+    $("time").textContent = "20";
+    $("time").classList.remove("warn");
+    $("tfill").style.width = "100%";
+    stopTimer();
+    var startTs = Date.now();
+    state.timer = setInterval(function(){
+      var elapsed = (Date.now() - startTs) / 1000;
+      var left = Math.max(0, 20 - elapsed);
+      state.timeLeft = left;
+      $("time").textContent = Math.ceil(left);
+      if (left <= 5) $("time").classList.add("warn");
+      else $("time").classList.remove("warn");
+      $("tfill").style.width = (left/20*100) + "%";
+      if (left <= 0){
+        stopTimer();
+        handleTimeout();
+      }
+    }, 100);
+  }
+
+  function stopTimer(){
+    if (state.timer){ clearInterval(state.timer); state.timer=null; }
+  }
+
+  function handleTimeout(){
+    if (state.locked) return;
+    state.locked = true;
+    state.lives--;
+    updateHud();
+    showFeedback("⏱ Time's up!", false);
+    revealAnswer();
+    setTimeout(proceed, 1800);
+  }
+
+  function showFeedback(txt, ok){
+    var fb = $("fb");
+    fb.textContent = txt;
+    fb.className = "feedback " + (ok ? "ok" : "bad");
+  }
+
+  function resetFeedback(){
+    $("fb").className = "feedback idle";
+    $("fb").textContent = "Tap your answer";
+  }
+
+  function proceed(){
+    if (state.lives <= 0 || state.qIndex+1 >= state.total){
+      state.qIndex++;
+      endGame();
+      return;
+    }
+    state.qIndex++;
+    state.locked = false;
+    nextQuestion();
+  }
+
+  // ====== QUESTION GENERATION ======
+  function nextQuestion(){
+    state.selectedMulti = [];
+    state.locked = false;
+    $("submit").classList.add("hidden");
+    resetFeedback();
+    updateHud();
+
+    if (state.mode === "states") buildStatesQ();
+    else if (state.mode === "capitals") buildCapitalsQ();
+    else if (state.mode === "rivers") buildRiversQ();
+    else if (state.mode === "neighbors") buildNeighborsQ();
+
+    startTimer();
+  }
+
+  // STATES mode: clue -> pick state from grid of 12
+  function buildStatesQ(){
+    var clue = pick(CLUES);
+    state.currentQ = { kind:"states", answer: clue.state, clue: clue.clue };
+    $("qlbl").textContent = "IDENTIFY THE STATE";
+    $("qtxt").innerHTML = '"' + clue.clue + '"';
+    // 12 options: correct + 11 distractors
+    var pool = STATES.filter(function(s){ return s.name !== clue.state; });
+    var distr = shuffle(pool).slice(0,11);
+    var opts = shuffle(distr.concat([findState(clue.state)]));
+    renderGrid(opts, function(el, s){
+      handleGridPick(s.name, clue.state, el);
+    });
+  }
+
+  // CAPITALS: "Capital of X?" -> 4 options
+  function buildCapitalsQ(){
+    var s = pick(STATES.filter(function(x){return x.region!=="ut";}));
+    var correct = s.capital;
+    state.currentQ = { kind:"capitals", answer: correct, state: s.name };
+    $("qlbl").textContent = "CAPITAL OF";
+    $("qtxt").innerHTML = '<span class="hl">' + s.name + '</span>';
+
+    var otherCaps = {};
+    for (var i=0;i<STATES.length;i++){
+      if (STATES[i].capital !== correct) otherCaps[STATES[i].capital] = true;
+    }
+    var distr = shuffle(Object.keys(otherCaps)).slice(0,3);
+    var opts = shuffle(distr.concat([correct]));
+    renderOptions(opts, function(el, val){
+      handleOptPick(val, correct, el);
+    });
+  }
+
+  // RIVERS: "X flows through which state?" -> 4 options
+  function buildRiversQ(){
+    var r = pick(RIVERS);
+    var correct = pick(r.states);
+    state.currentQ = { kind:"rivers", answer: correct, river: r.name, flowStates: r.states };
+    $("qlbl").textContent = "RIVER COURSE";
+    $("qtxt").innerHTML = 'Which state does <span class="hl">' + r.name + '</span> flow through?';
+
+    var pool = STATES.filter(function(s){
+      return r.states.indexOf(s.name) === -1 && s.region !== "ut";
+    });
+    var distr = shuffle(pool).slice(0,3).map(function(s){return s.name;});
+    var opts = shuffle(distr.concat([correct]));
+    renderOptions(opts, function(el, val){
+      // Accept ANY state in the river's flow as correct
+      var isRight = (r.states.indexOf(val) !== -1);
+      handleOptPickFlex(val, isRight, correct, el);
+    });
+  }
+
+  // NEIGHBORS: "Which states border X country?" -> multi-pick 4 options
+  function buildNeighborsQ(){
+    var country = pick(COUNTRIES);
+    var correctSet = NEIGHBORS[country];
+    var correctPick = shuffle(correctSet).slice(0, Math.min(2, correctSet.length));
+    state.currentQ = { kind:"neighbors", answer: correctPick, country: country, allCorrect: correctSet };
+    $("qlbl").textContent = "BORDER IDENTIFICATION";
+    $("qtxt").innerHTML = 'Which state borders <span class="hl">' + country + '</span>?';
+
+    var pool = STATES.filter(function(s){
+      return correctSet.indexOf(s.name) === -1 && s.region !== "ut";
+    });
+    var distr = shuffle(pool).slice(0,3).map(function(s){return s.name;});
+    var oneCorrect = pick(correctSet);
+    var opts = shuffle(distr.concat([oneCorrect]));
+    renderOptions(opts, function(el, val){
+      var isRight = (correctSet.indexOf(val) !== -1);
+      handleOptPickFlex(val, isRight, oneCorrect, el);
+    });
+  }
+
+  // ====== RENDER HELPERS ======
+  function renderGrid(stateList, onPick){
+    var board = $("board");
+    board.innerHTML = "";
+    var grid = document.createElement("div");
+    grid.className = "grid";
+    for (var i=0;i<stateList.length;i++){
+      (function(s){
+        var cell = document.createElement("div");
+        cell.className = "gcell r-" + s.region;
+        cell.textContent = s.name;
+        cell.setAttribute("ontouchstart","");
+        cell.addEventListener("pointerdown", function(e){
+          e.stopPropagation(); e.preventDefault();
+          if (state.locked) return;
+          onPick(cell, s);
+        });
+        grid.appendChild(cell);
+      })(stateList[i]);
+    }
+    board.appendChild(grid);
+  }
+
+  function renderOptions(vals, onPick){
+    var board = $("board");
+    board.innerHTML = "";
+    var opts = document.createElement("div");
+    opts.className = "opts";
+    for (var i=0;i<vals.length;i++){
+      (function(v){
+        var opt = document.createElement("div");
+        opt.className = "opt";
+        opt.textContent = v;
+        opt.setAttribute("ontouchstart","");
+        opt.addEventListener("pointerdown", function(e){
+          e.stopPropagation(); e.preventDefault();
+          if (state.locked) return;
+          onPick(opt, v);
+        });
+        opts.appendChild(opt);
+      })(vals[i]);
+    }
+    board.appendChild(opts);
+  }
+
+  // ====== PICK HANDLERS ======
+  function lockAll(){
+    state.locked = true;
+    var cells = document.querySelectorAll(".gcell, .opt");
+    for (var i=0;i<cells.length;i++) cells[i].classList.add("disabled");
+  }
+
+  function handleGridPick(val, correct, el){
+    stopTimer();
+    lockAll();
+    if (val === correct){
+      el.classList.add("correct");
+      state.score++;
+      state.correct++;
+      showFeedback("✓ Correct!", true);
+    } else {
+      el.classList.add("wrong");
+      state.lives--;
+      showFeedback("✗ Answer: " + correct, false);
+      revealAnswer();
+    }
+    updateHud();
+    setTimeout(proceed, val === correct ? 900 : 1800);
+  }
+
+  function handleOptPick(val, correct, el){
+    stopTimer();
+    lockAll();
+    if (val === correct){
+      el.classList.add("correct");
+      state.score++;
+      state.correct++;
+      showFeedback("✓ Correct!", true);
+    } else {
+      el.classList.add("wrong");
+      state.lives--;
+      showFeedback("✗ Answer: " + correct, false);
+      revealCorrectOption(correct);
+    }
+    updateHud();
+    setTimeout(proceed, val === correct ? 900 : 1800);
+  }
+
+  function handleOptPickFlex(val, isRight, displayCorrect, el){
+    stopTimer();
+    lockAll();
+    if (isRight){
+      el.classList.add("correct");
+      state.score++;
+      state.correct++;
+      showFeedback("✓ Correct!", true);
+    } else {
+      el.classList.add("wrong");
+      state.lives--;
+      showFeedback("✗ Answer: " + displayCorrect, false);
+      revealCorrectOption(displayCorrect);
+    }
+    updateHud();
+    setTimeout(proceed, isRight ? 900 : 1800);
+  }
+
+  function revealAnswer(){
+    if (!state.currentQ) return;
+    var ans = state.currentQ.answer;
+    var cells = document.querySelectorAll(".gcell");
+    for (var i=0;i<cells.length;i++){
+      if (cells[i].textContent === ans) cells[i].classList.add("hint");
+    }
+    revealCorrectOption(ans);
+  }
+
+  function revealCorrectOption(val){
+    var opts = document.querySelectorAll(".opt");
+    for (var i=0;i<opts.length;i++){
+      if (opts[i].textContent === val) opts[i].classList.add("hint");
+    }
+  }
+
+  // ====== BUTTONS / EVENTS ======
+  function bindEvents(){
+    $("play").addEventListener("pointerdown", function(e){
+      e.stopPropagation(); e.preventDefault();
+      startGame();
+    });
+    $("back").addEventListener("pointerdown", function(e){
+      e.stopPropagation(); e.preventDefault();
+      stopTimer();
+      $("game").classList.add("hidden");
+      $("end").classList.add("hidden");
+      $("start").classList.remove("hidden");
+    });
+    $("again").addEventListener("pointerdown", function(e){
+      e.stopPropagation(); e.preventDefault();
+      startGame();
+    });
+    $("home").addEventListener("pointerdown", function(e){
+      e.stopPropagation(); e.preventDefault();
+      $("end").classList.add("hidden");
+      $("start").classList.remove("hidden");
+      refreshBests();
+    });
+    $("share").addEventListener("pointerdown", function(e){
+      e.stopPropagation(); e.preventDefault();
+      shareScore();
+    });
+
+    // Keyboard
+    document.addEventListener("keydown", function(e){
+      if (!$("game").classList.contains("hidden")){
+        if (e.key === "Escape"){
+          stopTimer();
+          $("game").classList.add("hidden");
+          $("start").classList.remove("hidden");
+        }
+        // 1-4 to pick option
+        var n = parseInt(e.key, 10);
+        if (n >= 1 && n <= 4 && !state.locked){
+          var opts = document.querySelectorAll(".opt");
+          if (opts[n-1]){
+            var ev = new Event("pointerdown");
+            ev.stopPropagation = function(){};
+            ev.preventDefault = function(){};
+            opts[n-1].dispatchEvent(ev);
+          }
+        }
+      } else if (!$("start").classList.contains("hidden")){
+        if (e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          startGame();
+        }
+      } else if (!$("end").classList.contains("hidden")){
+        if (e.key === "Enter"){ e.preventDefault(); startGame(); }
+      }
+    });
+  }
+
+  function shareScore(){
+    var modeName = {
+      states:"STATES",
+      capitals:"CAPITALS",
+      rivers:"RIVERS",
+      neighbors:"NEIGHBORS"
+    }[state.mode];
+    var txt = "I scored " + state.score + "/" + state.total + " on India Map Master (" + modeName + ") at fun5games.us — can you beat it?";
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){
+          toast("Score copied!");
+        }).catch(function(){
+          fallbackCopy(txt);
+        });
+      } else {
+        fallbackCopy(txt);
+      }
+    } catch(e){ fallbackCopy(txt); }
+  }
+
+  function fallbackCopy(txt){
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      toast("Score copied!");
+    } catch(e){
+      toast("Copy unavailable");
+    }
+  }
+
+  // ====== INIT ======
+  function init(){
+    bindModeCards();
+    bindHowto();
+    bindEvents();
+    refreshBests();
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>

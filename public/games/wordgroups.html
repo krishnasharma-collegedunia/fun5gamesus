@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1e1e28">
+<title>Word Groups</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#1e1e28;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#fff}
+body{display:flex;flex-direction:column;align-items:center;height:100dvh;position:relative}
+.wrap{width:100%;max-width:560px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:12px 12px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.scr.hidden{display:none}
+
+/* Start screen */
+.title{font-size:clamp(36px,10vw,58px);font-weight:900;letter-spacing:3px;text-align:center;background:linear-gradient(180deg,#facc15 0%,#f59e0b 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-top:14px}
+.tag{font-size:clamp(11px,3vw,14px);text-align:center;color:rgba(255,255,255,.65);margin-top:8px;letter-spacing:1px;padding:0 6px}
+.ad-slot{border:1px dashed #555;background:rgba(255,255,255,0.05);color:#777;font-size:11px;padding:12px;text-align:center;margin:14px 4px;border-radius:6px;letter-spacing:2px}
+.sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(250,204,21,.85);margin:14px 4px 8px;font-weight:bold}
+.diff-row{display:flex;gap:8px;padding:0 4px}
+.diff-btn{flex:1;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);color:#fff;padding:12px 6px;font-size:12px;font-weight:bold;font-family:inherit;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-align:center;text-transform:uppercase}
+.diff-btn.active{background:linear-gradient(180deg,#facc15,#f59e0b);color:#1e1e28;border-color:#fff;box-shadow:0 4px 18px rgba(250,204,21,.4)}
+.diff-desc{font-size:11px;color:rgba(255,255,255,.5);padding:0 4px;margin-top:6px;text-align:center}
+.play-btn{display:block;margin:18px auto 6px;background:linear-gradient(180deg,#a855f7,#7e22ce);color:#fff;border:3px solid rgba(255,255,255,.4);padding:16px 54px;font:900 clamp(18px,5vw,24px) inherit;border-radius:50px;letter-spacing:4px;box-shadow:0 8px 28px rgba(168,85,247,.5);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.play-btn:active{transform:scale(.96)}
+.best-line{text-align:center;font-size:12px;color:rgba(250,204,21,.9);margin-top:6px;letter-spacing:1px}
+.best-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 4px;margin-top:10px}
+.best-cell{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 4px;text-align:center}
+.best-num{font-size:clamp(18px,5vw,22px);font-weight:900;color:#facc15}
+.best-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px}
+.howto-box{margin:12px 4px 8px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(0,0,0,.25);overflow:hidden}
+.howto-head{padding:10px 14px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(250,204,21,.9);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.howto-body{padding:0 14px 12px;font-size:12px;line-height:1.7;color:rgba(255,255,255,.75);display:none}
+.howto-body.open{display:block}
+.howto-body ul{list-style:none;padding:0}
+.howto-body li{padding:2px 0}
+.howto-body li:before{content:"• ";color:#facc15;margin-right:4px}
+
+/* Game screen */
+.g-head{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 10px;gap:8px}
+.g-title{font-size:15px;font-weight:900;letter-spacing:2px;color:#facc15;text-transform:uppercase}
+.hearts{display:flex;gap:3px;align-items:center}
+.heart{width:18px;height:18px;display:inline-block;position:relative}
+.heart:before,.heart:after{content:"";position:absolute;width:10px;height:16px;background:#ef4444;border-radius:10px 10px 0 0;top:0;left:4px;transform:rotate(-45deg);transform-origin:0 100%}
+.heart:after{left:0;transform:rotate(45deg);transform-origin:100% 100%}
+.heart.gone:before,.heart.gone:after{background:rgba(255,255,255,.15)}
+.mistake-lbl{font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,.6);margin-right:4px;text-transform:uppercase}
+
+.instruct{text-align:center;font-size:13px;color:rgba(255,255,255,.75);margin:2px 0 12px;letter-spacing:.5px;font-weight:500}
+
+/* Solved group bar */
+.solved-area{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;padding:0 2px}
+.solved-bar{padding:10px 10px;border-radius:8px;text-align:center;font-weight:800;color:#1e1e28;animation:revealIn .5s ease}
+.solved-bar .theme-name{font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:900}
+.solved-bar .theme-words{font-size:11px;letter-spacing:1px;margin-top:2px;opacity:.85;font-weight:600}
+
+@keyframes revealIn{
+  0%{transform:scale(.8);opacity:0}
+  60%{transform:scale(1.03);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 2px;margin-bottom:10px}
+.cell{background:#313136;border:2px solid transparent;color:#fff;padding:10px 2px;border-radius:7px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-family:inherit;font-size:clamp(10px,2.8vw,13px);font-weight:800;letter-spacing:.5px;text-transform:uppercase;line-height:1.15;min-height:58px;display:flex;align-items:center;justify-content:center;text-align:center;word-break:break-word;transition:transform .15s,background .15s,color .15s,border-color .15s}
+.cell:active{transform:scale(.94)}
+.cell.sel{background:#5a5a63;color:#fff;border-color:#fff}
+.cell.shake{animation:shake .5s}
+.cell.pop{animation:pop .3s ease}
+
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-6px)}
+  80%{transform:translateX(6px)}
+}
+@keyframes pop{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+
+/* Action buttons */
+.act-row{display:flex;gap:8px;padding:0 2px;margin-top:6px}
+.act-btn{flex:1;background:transparent;border:1.5px solid rgba(255,255,255,.45);color:#fff;padding:12px 6px;font-size:12px;font-weight:700;font-family:inherit;border-radius:22px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1.5px;text-transform:uppercase}
+.act-btn:active{transform:scale(.96)}
+.act-btn.prime{background:#fff;color:#1e1e28;border-color:#fff;font-weight:900}
+.act-btn.prime:disabled,.act-btn:disabled{opacity:.35;pointer-events:none}
+
+/* One away banner */
+.banner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:#fff;color:#1e1e28;padding:10px 22px;border-radius:4px;font-weight:900;letter-spacing:2px;font-size:13px;text-transform:uppercase;z-index:40;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.banner.show{animation:banshow 1.8s ease}
+@keyframes banshow{
+  0%{transform:translate(-50%,-50%) scale(0)}
+  15%{transform:translate(-50%,-50%) scale(1.08)}
+  30%{transform:translate(-50%,-50%) scale(1)}
+  80%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(.95);opacity:0}
+}
+
+/* End screen */
+.end-wrap{text-align:center;padding-top:14px}
+.end-emoji{font-size:56px;line-height:1;margin-bottom:6px}
+.end-title{font-size:clamp(30px,8vw,48px);font-weight:900;letter-spacing:2px;line-height:1;margin-bottom:6px}
+.end-title.win{background:linear-gradient(180deg,#22c55e 0%,#15803d 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.end-title.lose{background:linear-gradient(180deg,#ef4444 0%,#b91c1c 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.end-sub{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:14px;letter-spacing:1px}
+.solved-summary{display:flex;flex-direction:column;gap:5px;padding:0 2px;margin-bottom:12px}
+.emoji-grid{font-family:"Segoe UI Emoji","Apple Color Emoji",sans-serif;font-size:22px;letter-spacing:2px;line-height:1.25;text-align:center;padding:10px 4px;background:rgba(0,0,0,.3);border-radius:8px;margin:8px 4px 0}
+.end-stats{display:flex;gap:8px;padding:0 4px;margin-top:12px}
+.end-stat{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:9px 4px;text-align:center}
+.es-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(250,204,21,.8);font-weight:bold}
+.es-val{font-size:clamp(18px,5vw,22px);font-weight:900;color:#fff;margin-top:2px}
+.end-btns{display:flex;gap:8px;padding:0 4px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.e-btn{flex:1;min-width:130px;background:linear-gradient(180deg,#a855f7,#7e22ce);color:#fff;border:2px solid rgba(255,255,255,.4);padding:13px 14px;font:900 13px inherit;border-radius:24px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.e-btn.alt{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+.e-btn:active{transform:scale(.96)}
+.share-btn{display:block;margin:10px auto 0;background:rgba(250,204,21,.15);border:1px solid rgba(250,204,21,.4);color:#facc15;padding:10px 26px;font:bold 12px inherit;border-radius:22px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.share-btn.copied{background:rgba(34,197,94,.3);border-color:#22c55e;color:#fff}
+
+/* Small screens */
+@media (max-width:360px){
+  .cell{font-size:10px;padding:8px 1px;min-height:52px}
+  .grid{gap:4px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Start Screen -->
+  <div class="scr" id="startScr">
+    <h1 class="title">WORD GROUPS</h1>
+    <div class="tag">GROUP 16 WORDS INTO 4 THEMED CATEGORIES</div>
+
+    <div class="ad-slot">Advertisement</div>
+
+    <div class="sec-label">Difficulty</div>
+    <div class="diff-row">
+      <button class="diff-btn active" data-diff="easy" ontouchstart="">Easy</button>
+      <button class="diff-btn" data-diff="medium" ontouchstart="">Medium</button>
+      <button class="diff-btn" data-diff="hard" ontouchstart="">Hard</button>
+    </div>
+    <div class="diff-desc" id="diffDesc">Familiar themes · 4 mistakes allowed</div>
+
+    <button class="play-btn" id="playBtn" ontouchstart="">PLAY</button>
+
+    <div class="sec-label">Stats</div>
+    <div class="best-grid">
+      <div class="best-cell"><div class="best-num" id="bestN">0</div><div class="best-lbl">Best Score</div></div>
+      <div class="best-cell"><div class="best-num" id="winsN">0</div><div class="best-lbl">Wins</div></div>
+      <div class="best-cell"><div class="best-num" id="streakN">0</div><div class="best-lbl">Streak</div></div>
+    </div>
+
+    <div class="howto-box">
+      <div class="howto-head" id="howtoHead" ontouchstart="">HOW TO PLAY <span id="howtoArrow">+</span></div>
+      <div class="howto-body" id="howtoBody">
+        <ul>
+          <li>You'll see 16 words in a 4x4 grid</li>
+          <li>Tap words to select up to 4 at once</li>
+          <li>Find 4 words that share a common theme</li>
+          <li>Tap SUBMIT when you have 4 selected</li>
+          <li>Correct: group reveals with its theme</li>
+          <li>Wrong: you lose a heart (4 mistakes max)</li>
+          <li>"One Away!" hint if 3 of 4 belong together</li>
+          <li>Solve all 4 groups to win</li>
+          <li>Themes cover Indian history, geography, grammar, science & more</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ad-slot">Advertisement</div>
+  </div>
+
+  <!-- Game Screen -->
+  <div class="scr hidden" id="gameScr">
+    <div class="g-head">
+      <div class="g-title" id="pzId">Puzzle #1</div>
+      <div class="hearts">
+        <span class="mistake-lbl">Mistakes</span>
+        <span class="heart" id="h0"></span>
+        <span class="heart" id="h1"></span>
+        <span class="heart" id="h2"></span>
+        <span class="heart" id="h3"></span>
+      </div>
+    </div>
+    <div class="instruct">Create 4 groups of 4</div>
+
+    <div class="solved-area" id="solvedArea"></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="act-row">
+      <button class="act-btn" id="shuffleBtn" ontouchstart="">Shuffle</button>
+      <button class="act-btn" id="deselectBtn" ontouchstart="">Deselect All</button>
+      <button class="act-btn prime" id="submitBtn" ontouchstart="" disabled>Submit</button>
+    </div>
+
+    <div class="banner" id="banner">ONE AWAY!</div>
+  </div>
+
+  <!-- End Screen -->
+  <div class="scr hidden" id="endScr">
+    <div class="end-wrap">
+      <div class="end-emoji" id="endEmoji">🎯</div>
+      <div class="end-title win" id="endTitle">SOLVED!</div>
+      <div class="end-sub" id="endSub">Great work — you found all 4 groups</div>
+    </div>
+    <div class="sec-label">Your Groups</div>
+    <div class="solved-summary" id="solvedSummary"></div>
+    <div class="emoji-grid" id="emojiGrid"></div>
+
+    <div class="end-stats">
+      <div class="end-stat"><div class="es-lbl">Score</div><div class="es-val" id="endScoreV">0</div></div>
+      <div class="end-stat"><div class="es-lbl">Mistakes</div><div class="es-val" id="endMissV">0</div></div>
+      <div class="end-stat"><div class="es-lbl">Best</div><div class="es-val" id="endBestV">0</div></div>
+    </div>
+
+    <div class="ad-slot">Advertisement</div>
+
+    <div class="end-btns">
+      <button class="e-btn" id="againBtn" ontouchstart="">Next Puzzle</button>
+      <button class="e-btn alt" id="homeBtn" ontouchstart="">Home</button>
+    </div>
+    <button class="share-btn" id="shareBtn" ontouchstart="">Share Result</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+// ========== PUZZLES ==========
+// Color palette for group themes
+var C_YELLOW = "#f9df6d";
+var C_GREEN  = "#a0c35a";
+var C_BLUE   = "#b0c4ef";
+var C_PURPLE = "#ba81c5";
+var C_ORANGE = "#f5a623";
+var C_TEAL   = "#7cc4b8";
+var C_PINK   = "#e89ecd";
+var C_RED    = "#e47474";
+
+var PUZZLES = [
+  // 1 - Synonyms + Capitals + Rivers + Mughals
+  { diff:"easy", groups:[
+    { theme:"Synonyms for Happy",  words:["ELATED","JOYFUL","CHEERFUL","GLAD"],         color:C_YELLOW },
+    { theme:"Capital Cities",       words:["DELHI","TOKYO","PARIS","LONDON"],           color:C_BLUE },
+    { theme:"Rivers of India",      words:["GANGA","YAMUNA","KAVERI","GODAVARI"],       color:C_GREEN },
+    { theme:"Mughal Emperors",      words:["AKBAR","BABUR","JAHANGIR","SHAHJAHAN"],     color:C_PURPLE }
+  ]},
+  // 2 - Parts of speech + PMs + Physics units + Elements
+  { diff:"easy", groups:[
+    { theme:"Parts of Speech",      words:["NOUN","VERB","ADJECTIVE","ADVERB"],         color:C_YELLOW },
+    { theme:"Indian Prime Ministers",words:["MODI","NEHRU","INDIRA","VAJPAYEE"],        color:C_PURPLE },
+    { theme:"Physics Units",        words:["JOULE","NEWTON","WATT","PASCAL"],           color:C_BLUE },
+    { theme:"Chemical Elements",    words:["GOLD","SILVER","IRON","COPPER"],            color:C_GREEN }
+  ]},
+  // 3 - Fundamental Rights + Dance + Instruments + Grammar
+  { diff:"medium", groups:[
+    { theme:"Fundamental Rights",   words:["EQUALITY","FREEDOM","RELIGION","EDUCATION"],color:C_ORANGE },
+    { theme:"Indian Dance Forms",   words:["BHARATNATYAM","KATHAK","ODISSI","KUCHIPUDI"],color:C_PINK },
+    { theme:"Indian Instruments",   words:["TABLA","SITAR","FLUTE","HARMONIUM"],        color:C_TEAL },
+    { theme:"Grammar Terms",        words:["TENSE","VOICE","CLAUSE","PHRASE"],          color:C_YELLOW }
+  ]},
+  // 4 - Synonyms for big + Continents + Seasons + Directions
+  { diff:"easy", groups:[
+    { theme:"Synonyms for Big",     words:["HUGE","LARGE","ENORMOUS","GIANT"],          color:C_YELLOW },
+    { theme:"Continents",           words:["ASIA","AFRICA","EUROPE","AUSTRALIA"],       color:C_BLUE },
+    { theme:"Seasons",              words:["SUMMER","WINTER","SPRING","AUTUMN"],        color:C_GREEN },
+    { theme:"Cardinal Directions",  words:["NORTH","SOUTH","EAST","WEST"],              color:C_PURPLE }
+  ]},
+  // 5 - One word substitutes + Indian states + SI units + Metals
+  { diff:"hard", groups:[
+    { theme:"One-Word Substitutes", words:["MISOGYNIST","PHILANTHROPIST","MISANTHROPE","PATRIOT"], color:C_PINK },
+    { theme:"Indian States",        words:["KERALA","PUNJAB","GUJARAT","BIHAR"],        color:C_GREEN },
+    { theme:"SI Base Units",        words:["METER","KILOGRAM","SECOND","AMPERE"],       color:C_BLUE },
+    { theme:"Precious Metals",      words:["PLATINUM","PALLADIUM","RHODIUM","OSMIUM"],  color:C_YELLOW }
+  ]},
+  // 6 - Synonyms for sad + Planets + Vedas + Shapes
+  { diff:"easy", groups:[
+    { theme:"Synonyms for Sad",     words:["GLOOMY","MOURNFUL","SORROWFUL","MELANCHOLY"],color:C_PURPLE },
+    { theme:"Planets",              words:["MERCURY","VENUS","MARS","JUPITER"],         color:C_ORANGE },
+    { theme:"The Four Vedas",       words:["RIGVEDA","SAMAVEDA","YAJURVEDA","ATHARVAVEDA"], color:C_YELLOW },
+    { theme:"Geometric Shapes",     words:["CIRCLE","SQUARE","TRIANGLE","HEXAGON"],     color:C_BLUE }
+  ]},
+  // 7 - Idioms for success + Presidents + Languages + Plays
+  { diff:"medium", groups:[
+    { theme:"Words for Success",    words:["TRIUMPH","VICTORY","ACHIEVEMENT","CONQUEST"],color:C_YELLOW },
+    { theme:"Indian Presidents",    words:["KALAM","KOVIND","MURMU","PRANAB"],          color:C_BLUE },
+    { theme:"Indian Languages",     words:["HINDI","TAMIL","BENGALI","MARATHI"],        color:C_GREEN },
+    { theme:"Shakespeare Plays",    words:["HAMLET","MACBETH","OTHELLO","TEMPEST"],     color:C_PURPLE }
+  ]},
+  // 8 - Synonyms brave + Gases + Freedom fighters + Currency
+  { diff:"medium", groups:[
+    { theme:"Synonyms for Brave",   words:["VALIANT","FEARLESS","COURAGEOUS","GALLANT"],color:C_ORANGE },
+    { theme:"Noble Gases",          words:["HELIUM","NEON","ARGON","KRYPTON"],          color:C_BLUE },
+    { theme:"Freedom Fighters",     words:["GANDHI","BHAGATSINGH","SUBHASH","TILAK"],   color:C_GREEN },
+    { theme:"World Currencies",     words:["RUPEE","DOLLAR","YEN","EURO"],              color:C_YELLOW }
+  ]},
+  // 9 - Quadrilaterals + Mountain ranges + Body organs + Synonyms wise
+  { diff:"medium", groups:[
+    { theme:"Quadrilaterals",       words:["SQUARE","RECTANGLE","RHOMBUS","TRAPEZIUM"], color:C_BLUE },
+    { theme:"Mountain Ranges",      words:["HIMALAYA","AARAVALLI","VINDHYA","SATPURA"], color:C_GREEN },
+    { theme:"Human Organs",         words:["HEART","LIVER","KIDNEY","LUNG"],            color:C_RED },
+    { theme:"Synonyms for Wise",    words:["PRUDENT","SAGE","SHREWD","SHARP"],          color:C_YELLOW }
+  ]},
+  // 10 - Tenses + Oceans + Dynasties + Primary colors
+  { diff:"easy", groups:[
+    { theme:"Grammar Tenses",       words:["PAST","PRESENT","FUTURE","PERFECT"],        color:C_YELLOW },
+    { theme:"Oceans",               words:["PACIFIC","ATLANTIC","INDIAN","ARCTIC"],     color:C_BLUE },
+    { theme:"Indian Dynasties",     words:["MAURYA","GUPTA","CHOLA","CHALUKYA"],        color:C_ORANGE },
+    { theme:"Primary Colors",       words:["RED","YELLOW","BLUE","GREEN"],              color:C_GREEN }
+  ]},
+  // 11 - Synonyms for angry + Vitamins + Festivals + Sports
+  { diff:"medium", groups:[
+    { theme:"Synonyms for Angry",   words:["FURIOUS","IRATE","ENRAGED","LIVID"],        color:C_RED },
+    { theme:"Vitamins",             words:["THIAMINE","RIBOFLAVIN","NIACIN","BIOTIN"],  color:C_YELLOW },
+    { theme:"Indian Festivals",     words:["DIWALI","HOLI","EID","ONAM"],               color:C_ORANGE },
+    { theme:"Olympic Sports",       words:["HOCKEY","CRICKET","TENNIS","ARCHERY"],      color:C_GREEN }
+  ]},
+  // 12 - Figures of speech + Clouds + Solvents + Abstract nouns
+  { diff:"hard", groups:[
+    { theme:"Figures of Speech",    words:["SIMILE","METAPHOR","IRONY","HYPERBOLE"],    color:C_PURPLE },
+    { theme:"Cloud Types",          words:["CIRRUS","STRATUS","CUMULUS","NIMBUS"],      color:C_BLUE },
+    { theme:"Common Solvents",      words:["WATER","ALCOHOL","ACETONE","BENZENE"],      color:C_TEAL },
+    { theme:"Abstract Nouns",       words:["HONESTY","WISDOM","COURAGE","PRIDE"],       color:C_YELLOW }
+  ]},
+  // 13 - Weather words + Religions + Geometry terms + Synonyms fast
+  { diff:"easy", groups:[
+    { theme:"Weather Words",        words:["RAIN","SNOW","STORM","FOG"],                color:C_BLUE },
+    { theme:"Major Religions",      words:["HINDU","ISLAM","SIKH","BUDDHIST"],          color:C_ORANGE },
+    { theme:"Geometry Terms",       words:["ANGLE","LINE","POINT","PLANE"],             color:C_YELLOW },
+    { theme:"Synonyms for Fast",    words:["QUICK","RAPID","SWIFT","SPEEDY"],           color:C_GREEN }
+  ]},
+  // 14 - Indian Nobels + Currencies of Asia + Root words + Types of sentences
+  { diff:"hard", groups:[
+    { theme:"Indian Nobel Winners", words:["TAGORE","RAMAN","SEN","MOTHERTERESA"],      color:C_PURPLE },
+    { theme:"Asian Currencies",     words:["YUAN","RINGGIT","TAKA","BAHT"],             color:C_YELLOW },
+    { theme:"Sentence Types",       words:["ASSERTIVE","INTERROGATIVE","IMPERATIVE","EXCLAMATORY"], color:C_BLUE },
+    { theme:"Root Word: Bio",       words:["BIOLOGY","BIOGRAPHY","BIOPIC","BIOSPHERE"], color:C_GREEN }
+  ]},
+  // 15 - Simple machines + Essays + Ways to walk + Angles
+  { diff:"medium", groups:[
+    { theme:"Simple Machines",      words:["LEVER","PULLEY","WEDGE","SCREW"],           color:C_BLUE },
+    { theme:"Types of Essays",      words:["NARRATIVE","DESCRIPTIVE","EXPOSITORY","PERSUASIVE"], color:C_PURPLE },
+    { theme:"Ways to Walk",         words:["STROLL","STRIDE","AMBLE","SAUNTER"],        color:C_YELLOW },
+    { theme:"Types of Angles",      words:["ACUTE","OBTUSE","RIGHT","REFLEX"],          color:C_GREEN }
+  ]},
+  // 16 - Parts of plant + Indian PMs (female) + Emotions + Indian wars
+  { diff:"medium", groups:[
+    { theme:"Parts of a Plant",     words:["ROOT","STEM","LEAF","FLOWER"],              color:C_GREEN },
+    { theme:"Human Emotions",       words:["JOY","ANGER","FEAR","SURPRISE"],            color:C_ORANGE },
+    { theme:"Famous Battles",       words:["PANIPAT","PLASSEY","BUXAR","HALDIGHATI"],   color:C_RED },
+    { theme:"Synonyms for Small",   words:["TINY","PETITE","MINUTE","LITTLE"],          color:C_YELLOW }
+  ]},
+  // 17 - Types of triangles + Acids + Tenses (cont) + Indian sports persons
+  { diff:"medium", groups:[
+    { theme:"Triangle Types",       words:["SCALENE","ISOSCELES","EQUILATERAL","RIGHT"],color:C_BLUE },
+    { theme:"Common Acids",         words:["SULPHURIC","NITRIC","ACETIC","CITRIC"],     color:C_YELLOW },
+    { theme:"Cricket Legends",      words:["TENDULKAR","DRAVID","DHONI","KOHLI"],       color:C_GREEN },
+    { theme:"Kinds of Nouns",       words:["PROPER","COMMON","ABSTRACT","COLLECTIVE"],  color:C_PURPLE }
+  ]},
+  // 18 - Animals - mammals + Invertebrates + Scientists + Ways to speak
+  { diff:"hard", groups:[
+    { theme:"Ways to Speak",        words:["WHISPER","SHOUT","MUMBLE","YELL"],          color:C_PURPLE },
+    { theme:"Indian Scientists",    words:["BHABHA","SARABHAI","BOSE","KALAM"],         color:C_BLUE },
+    { theme:"Mammals",              words:["ELEPHANT","TIGER","WHALE","BAT"],           color:C_GREEN },
+    { theme:"Computer Memory",      words:["RAM","ROM","CACHE","HARDDISK"],             color:C_YELLOW }
+  ]},
+  // 19 - Branches of Govt + Cricket terms + Sweets of India + Nouns-places
+  { diff:"easy", groups:[
+    { theme:"Branches of Government",words:["LEGISLATURE","EXECUTIVE","JUDICIARY","PRESIDENT"], color:C_ORANGE },
+    { theme:"Cricket Terms",        words:["BOWLER","BATSMAN","UMPIRE","WICKET"],       color:C_GREEN },
+    { theme:"Indian Sweets",        words:["LADOO","JALEBI","BARFI","RASMALAI"],        color:C_PINK },
+    { theme:"Prepositions",         words:["ABOVE","BELOW","BETWEEN","AMONG"],          color:C_YELLOW }
+  ]},
+  // 20 - Capital rivers states PMs
+  { diff:"easy", groups:[
+    { theme:"Indian Cities",        words:["MUMBAI","CHENNAI","KOLKATA","BANGALORE"],   color:C_BLUE },
+    { theme:"Hill Stations",        words:["SHIMLA","MANALI","DARJEELING","OOTY"],      color:C_GREEN },
+    { theme:"Indian Deserts/Areas", words:["THAR","KUTCH","LADAKH","SPITI"],            color:C_YELLOW },
+    { theme:"National Parks",       words:["JIMCORBETT","RANTHAMBORE","KAZIRANGA","SUNDARBAN"], color:C_ORANGE }
+  ]},
+  // 21 - Synonyms difficult + Blood groups + Constitution parts + Metals/Nonmetals
+  { diff:"hard", groups:[
+    { theme:"Synonyms for Difficult",words:["TOUGH","ARDUOUS","COMPLEX","CHALLENGING"], color:C_RED },
+    { theme:"Nonmetals",            words:["CARBON","OXYGEN","NITROGEN","SULFUR"],      color:C_BLUE },
+    { theme:"Constitution Parts",   words:["PREAMBLE","ARTICLE","SCHEDULE","AMENDMENT"],color:C_ORANGE },
+    { theme:"Types of Verbs",       words:["ACTION","LINKING","HELPING","MODAL"],       color:C_YELLOW }
+  ]},
+  // 22 - Antonyms + Blood terms + Freedom struggle events + States - names
+  { diff:"medium", groups:[
+    { theme:"Antonyms for Hot",     words:["COLD","FRIGID","CHILLY","ICY"],             color:C_BLUE },
+    { theme:"Parts of Blood",       words:["PLASMA","PLATELETS","ERYTHROCYTE","LEUKOCYTE"], color:C_RED },
+    { theme:"Freedom Movements",    words:["SWADESHI","SATYAGRAHA","DANDI","QUITINDIA"],color:C_ORANGE },
+    { theme:"Northeast States",     words:["ASSAM","MANIPUR","NAGALAND","MIZORAM"],     color:C_GREEN }
+  ]},
+  // 23 - Grammar voice + Lakes + Energy types + Synonyms for eat
+  { diff:"medium", groups:[
+    { theme:"Types of Voice",       words:["ACTIVE","PASSIVE","DIRECT","INDIRECT"],     color:C_YELLOW },
+    { theme:"Lakes of India",       words:["DAL","CHILIKA","WULAR","LOKTAK"],           color:C_BLUE },
+    { theme:"Types of Energy",      words:["KINETIC","POTENTIAL","THERMAL","NUCLEAR"],  color:C_ORANGE },
+    { theme:"Synonyms for Eat",     words:["CONSUME","DEVOUR","INGEST","GOBBLE"],       color:C_GREEN }
+  ]},
+  // 24 - Types of govt + Indian generals + Adjectives for size + Types of rocks
+  { diff:"hard", groups:[
+    { theme:"Forms of Government",  words:["DEMOCRACY","MONARCHY","OLIGARCHY","AUTOCRACY"], color:C_PURPLE },
+    { theme:"Army Field Marshals",  words:["MANEKSHAW","CARIAPPA","ROYBUCHER","THIMAYYA"], color:C_GREEN },
+    { theme:"Describing Size",      words:["TINY","AVERAGE","LARGE","GIGANTIC"],        color:C_YELLOW },
+    { theme:"Types of Rocks",       words:["IGNEOUS","SEDIMENTARY","METAMORPHIC","GRANITE"], color:C_ORANGE }
+  ]},
+  // 25 - Bollywood legends + Soil types + Conjunctions + Human senses
+  { diff:"medium", groups:[
+    { theme:"Bollywood Legends",    words:["AMITABH","RAJKAPOOR","DILIPKUMAR","SHAHRUKH"], color:C_PINK },
+    { theme:"Types of Soil",        words:["ALLUVIAL","BLACK","LATERITE","DESERT"],     color:C_ORANGE },
+    { theme:"Conjunctions",         words:["AND","BUT","OR","YET"],                     color:C_YELLOW },
+    { theme:"Five Senses",          words:["SIGHT","SOUND","SMELL","TOUCH"],            color:C_BLUE }
+  ]},
+  // 26 - Economic terms + Synonyms for pretty + Mountain peaks + Indian classical music
+  { diff:"hard", groups:[
+    { theme:"Economic Terms",       words:["INFLATION","DEFLATION","GDP","FISCAL"],     color:C_BLUE },
+    { theme:"Synonyms for Pretty",  words:["BEAUTIFUL","LOVELY","GORGEOUS","STUNNING"], color:C_PINK },
+    { theme:"Mountain Peaks",       words:["EVEREST","K2","KANCHENJUNGA","NANDADEVI"],  color:C_GREEN },
+    { theme:"Ragas & Talas",        words:["BHAIRAV","YAMAN","TEENTAL","EKTAL"],        color:C_PURPLE }
+  ]},
+  // 27 - Grammar articles/pronouns + Gases - more + Adj ending -ful + Famous temples
+  { diff:"medium", groups:[
+    { theme:"Pronouns",             words:["HE","SHE","THEY","WE"],                     color:C_YELLOW },
+    { theme:"Common Gases",         words:["HYDROGEN","OZONE","METHANE","CARBONDIOXIDE"],color:C_BLUE },
+    { theme:"Adjectives End -ful",  words:["BEAUTIFUL","WONDERFUL","HELPFUL","PEACEFUL"], color:C_GREEN },
+    { theme:"Famous Temples",       words:["SOMNATH","TIRUPATI","MEENAKSHI","JAGANNATH"], color:C_ORANGE }
+  ]},
+  // 28 - Birds + Trees + States of matter + Synonyms easy
+  { diff:"easy", groups:[
+    { theme:"Birds",                words:["EAGLE","PEACOCK","SPARROW","OWL"],          color:C_BLUE },
+    { theme:"Trees",                words:["BANYAN","NEEM","MANGO","TEAK"],             color:C_GREEN },
+    { theme:"States of Matter",     words:["SOLID","LIQUID","GAS","PLASMA"],            color:C_YELLOW },
+    { theme:"Synonyms for Easy",    words:["SIMPLE","EFFORTLESS","BASIC","STRAIGHTFORWARD"], color:C_ORANGE }
+  ]},
+  // 29 - Famous books + Indian monuments + Sports+trophies + Synonyms for begin
+  { diff:"hard", groups:[
+    { theme:"Famous Novels",        words:["GITANJALI","GODAN","MALGUDI","DISCOVERY"],  color:C_PURPLE },
+    { theme:"Indian Monuments",     words:["TAJMAHAL","REDFORT","QUTUBMINAR","GATEWAY"],color:C_ORANGE },
+    { theme:"Sports Trophies",      words:["RANJI","DURAND","DAVIS","RYDER"],           color:C_BLUE },
+    { theme:"Synonyms for Begin",   words:["START","COMMENCE","INITIATE","LAUNCH"],     color:C_YELLOW }
+  ]},
+  // 30 - Units of length + Idioms mean end + Indian cm + Bollywood actresses
+  { diff:"medium", groups:[
+    { theme:"Units of Length",      words:["METER","MILE","FOOT","INCH"],               color:C_BLUE },
+    { theme:"Synonyms for End",     words:["FINISH","CONCLUDE","TERMINATE","COMPLETE"], color:C_YELLOW },
+    { theme:"Indian Chief Ministers",words:["YOGI","KEJRIWAL","STALIN","MAMATA"],       color:C_GREEN },
+    { theme:"Bollywood Actresses",  words:["MADHURI","SRIDEVI","REKHA","DEEPIKA"],      color:C_PINK }
+  ]}
+];
+
+// ========== STATE ==========
+var state = {
+  diff: "easy",
+  puzzle: null,
+  puzzleIdx: 0,
+  selected: [],    // array of word strings
+  remaining: [],   // array of {word, themeIdx}
+  solved: [],      // array of group indices found in order
+  mistakes: 0,
+  maxMistakes: 4,
+  attempts: [],    // array of {correct, themeIdx or null} arrays (length=4) for emoji grid
+  gameOver: false
+};
+
+// ========== DOM REFS ==========
+var startScr = document.getElementById('startScr');
+var gameScr  = document.getElementById('gameScr');
+var endScr   = document.getElementById('endScr');
+var playBtn  = document.getElementById('playBtn');
+var gridEl   = document.getElementById('grid');
+var solvedArea = document.getElementById('solvedArea');
+var submitBtn = document.getElementById('submitBtn');
+var deselectBtn = document.getElementById('deselectBtn');
+var shuffleBtn = document.getElementById('shuffleBtn');
+var diffBtns = document.querySelectorAll('.diff-btn');
+var diffDesc = document.getElementById('diffDesc');
+var howtoHead = document.getElementById('howtoHead');
+var howtoBody = document.getElementById('howtoBody');
+var howtoArrow = document.getElementById('howtoArrow');
+var pzIdEl   = document.getElementById('pzId');
+var bannerEl = document.getElementById('banner');
+var bestNEl  = document.getElementById('bestN');
+var winsNEl  = document.getElementById('winsN');
+var streakNEl = document.getElementById('streakN');
+var againBtn = document.getElementById('againBtn');
+var homeBtn  = document.getElementById('homeBtn');
+var shareBtn = document.getElementById('shareBtn');
+var solvedSummary = document.getElementById('solvedSummary');
+var emojiGridEl = document.getElementById('emojiGrid');
+var endScoreV = document.getElementById('endScoreV');
+var endMissV  = document.getElementById('endMissV');
+var endBestV  = document.getElementById('endBestV');
+var endTitle  = document.getElementById('endTitle');
+var endSub    = document.getElementById('endSub');
+var endEmoji  = document.getElementById('endEmoji');
+
+// ========== STORAGE ==========
+function getLS(k, def){
+  try{
+    var v = localStorage.getItem(k);
+    if(v === null) return def;
+    var n = parseInt(v,10);
+    return isNaN(n) ? def : n;
+  }catch(e){return def;}
+}
+function setLS(k,v){
+  try{ localStorage.setItem(k, String(v)); }catch(e){}
+}
+var best   = getLS('wg_best', 0);
+var wins   = getLS('wg_wins', 0);
+var streak = getLS('wg_streak', 0);
+
+function renderStats(){
+  bestNEl.textContent = String(best);
+  winsNEl.textContent = String(wins);
+  streakNEl.textContent = String(streak);
+}
+renderStats();
+
+// ========== HELPERS ==========
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+
+function puzzlesFor(diff){
+  var arr = [];
+  for(var i=0;i<PUZZLES.length;i++){
+    if(PUZZLES[i].diff === diff) arr.push(i);
+  }
+  if(arr.length === 0){
+    // Fallback: all
+    for(var k=0;k<PUZZLES.length;k++) arr.push(k);
+  }
+  return arr;
+}
+
+function pickPuzzle(diff){
+  var list = puzzlesFor(diff);
+  var idx = list[Math.floor(Math.random()*list.length)];
+  return idx;
+}
+
+// ========== DIFFICULTY BINDING ==========
+function selectDiff(d){
+  state.diff = d;
+  for(var i=0;i<diffBtns.length;i++){
+    if(diffBtns[i].dataset.diff === d){
+      diffBtns[i].classList.add('active');
+    } else {
+      diffBtns[i].classList.remove('active');
+    }
+  }
+  if(d==="easy") diffDesc.textContent = "Familiar themes · 4 mistakes allowed";
+  else if(d==="medium") diffDesc.textContent = "Moderate themes · 4 mistakes allowed";
+  else diffDesc.textContent = "Tricky overlaps · 4 mistakes allowed";
+}
+for(var di=0; di<diffBtns.length; di++){
+  (function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation(); e.preventDefault();
+      selectDiff(btn.dataset.diff);
+    });
+  })(diffBtns[di]);
+}
+
+// ========== HOW TO PLAY ==========
+howtoHead.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  var open = howtoBody.classList.toggle('open');
+  howtoArrow.textContent = open ? "–" : "+";
+});
+
+// ========== START GAME ==========
+playBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  startNewGame();
+});
+
+function startNewGame(){
+  state.puzzleIdx = pickPuzzle(state.diff);
+  state.puzzle = PUZZLES[state.puzzleIdx];
+  state.selected = [];
+  state.remaining = [];
+  state.solved = [];
+  state.mistakes = 0;
+  state.attempts = [];
+  state.gameOver = false;
+
+  // Build word list with theme index
+  for(var g=0; g<state.puzzle.groups.length; g++){
+    var grp = state.puzzle.groups[g];
+    for(var w=0; w<grp.words.length; w++){
+      state.remaining.push({ word: grp.words[w], themeIdx: g });
+    }
+  }
+  state.remaining = shuffle(state.remaining);
+
+  pzIdEl.textContent = "Puzzle #" + (state.puzzleIdx + 1);
+  updateHearts();
+  solvedArea.innerHTML = "";
+  renderGrid();
+  updateSubmitState();
+
+  startScr.classList.add('hidden');
+  endScr.classList.add('hidden');
+  gameScr.classList.remove('hidden');
+}
+
+// ========== GRID ==========
+function renderGrid(){
+  gridEl.innerHTML = "";
+  for(var i=0; i<state.remaining.length; i++){
+    (function(idx){
+      var item = state.remaining[idx];
+      var btn = document.createElement('button');
+      btn.className = 'cell';
+      btn.setAttribute('ontouchstart','');
+      btn.textContent = item.word;
+      btn.dataset.word = item.word;
+      if(state.selected.indexOf(item.word) !== -1){
+        btn.classList.add('sel');
+      }
+      btn.addEventListener('click', function(e){
+        e.stopPropagation(); e.preventDefault();
+        toggleSelect(item.word, btn);
+      });
+      gridEl.appendChild(btn);
+    })(i);
+  }
+}
+
+function toggleSelect(word, btn){
+  if(state.gameOver) return;
+  var pos = state.selected.indexOf(word);
+  if(pos !== -1){
+    state.selected.splice(pos, 1);
+    btn.classList.remove('sel');
+  } else {
+    if(state.selected.length >= 4) return;
+    state.selected.push(word);
+    btn.classList.add('sel');
+    btn.classList.remove('pop');
+    // Force reflow to restart animation
+    void btn.offsetWidth;
+    btn.classList.add('pop');
+  }
+  updateSubmitState();
+}
+
+function updateSubmitState(){
+  submitBtn.disabled = (state.selected.length !== 4);
+  deselectBtn.disabled = (state.selected.length === 0);
+}
+
+// ========== ACTION BUTTONS ==========
+submitBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  if(state.selected.length !== 4) return;
+  submitSelection();
+});
+
+deselectBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  if(state.selected.length === 0) return;
+  state.selected = [];
+  // Clear all selected UI
+  var cells = gridEl.querySelectorAll('.cell');
+  for(var i=0;i<cells.length;i++) cells[i].classList.remove('sel');
+  updateSubmitState();
+});
+
+shuffleBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  state.remaining = shuffle(state.remaining);
+  renderGrid();
+});
+
+// ========== SUBMIT ==========
+function submitSelection(){
+  // Check if all 4 belong to same group
+  var themeCounts = {};
+  for(var i=0; i<state.selected.length; i++){
+    var word = state.selected[i];
+    for(var j=0; j<state.remaining.length; j++){
+      if(state.remaining[j].word === word){
+        var ti = state.remaining[j].themeIdx;
+        themeCounts[ti] = (themeCounts[ti]||0) + 1;
+        break;
+      }
+    }
+  }
+  // Find max count
+  var maxCount = 0, maxTheme = -1;
+  for(var t in themeCounts){
+    if(themeCounts[t] > maxCount){
+      maxCount = themeCounts[t];
+      maxTheme = parseInt(t,10);
+    }
+  }
+
+  if(maxCount === 4){
+    // Correct!
+    state.attempts.push({correct:true, themeIdx: maxTheme});
+    handleCorrect(maxTheme);
+  } else {
+    // Wrong - record the attempt
+    var attemptRec = {correct:false, words: state.selected.slice()};
+    state.attempts.push(attemptRec);
+    handleWrong(maxCount);
+  }
+}
+
+function handleCorrect(themeIdx){
+  var group = state.puzzle.groups[themeIdx];
+  // Add to solved
+  state.solved.push(themeIdx);
+
+  // Add solved bar
+  var bar = document.createElement('div');
+  bar.className = 'solved-bar';
+  bar.style.background = group.color;
+  var th = document.createElement('div');
+  th.className = 'theme-name';
+  th.textContent = group.theme;
+  var wds = document.createElement('div');
+  wds.className = 'theme-words';
+  wds.textContent = group.words.join(", ");
+  bar.appendChild(th); bar.appendChild(wds);
+  solvedArea.appendChild(bar);
+
+  // Remove from remaining
+  var newRem = [];
+  for(var i=0; i<state.remaining.length; i++){
+    if(state.remaining[i].themeIdx !== themeIdx){
+      newRem.push(state.remaining[i]);
+    }
+  }
+  state.remaining = shuffle(newRem);
+  state.selected = [];
+  renderGrid();
+  updateSubmitState();
+
+  // Win?
+  if(state.solved.length === 4){
+    setTimeout(function(){ endGame(true); }, 600);
+  }
+}
+
+function handleWrong(maxCount){
+  // Shake selected cells
+  var cells = gridEl.querySelectorAll('.cell.sel');
+  for(var i=0;i<cells.length;i++){
+    cells[i].classList.remove('shake');
+    void cells[i].offsetWidth;
+    cells[i].classList.add('shake');
+  }
+  // Remove shake after animation
+  setTimeout(function(){
+    for(var j=0;j<cells.length;j++) cells[j].classList.remove('shake');
+  }, 550);
+
+  state.mistakes++;
+  updateHearts();
+
+  // One away hint
+  if(maxCount === 3){
+    showBanner("ONE AWAY!");
+  }
+
+  // Clear selection after shake
+  setTimeout(function(){
+    state.selected = [];
+    var allSel = gridEl.querySelectorAll('.cell.sel');
+    for(var k=0;k<allSel.length;k++) allSel[k].classList.remove('sel');
+    updateSubmitState();
+  }, 560);
+
+  // Game over?
+  if(state.mistakes >= state.maxMistakes){
+    setTimeout(function(){ endGame(false); }, 900);
+  }
+}
+
+function updateHearts(){
+  for(var i=0; i<4; i++){
+    var el = document.getElementById('h'+i);
+    if(!el) continue;
+    if(i < (4 - state.mistakes)) el.classList.remove('gone');
+    else el.classList.add('gone');
+  }
+}
+
+function showBanner(txt){
+  bannerEl.textContent = txt;
+  bannerEl.classList.remove('show');
+  void bannerEl.offsetWidth;
+  bannerEl.classList.add('show');
+}
+
+// ========== END GAME ==========
+function endGame(won){
+  state.gameOver = true;
+
+  // Score: solved * 250 + bonus for unused mistakes * 100
+  var score = state.solved.length * 250 + (state.maxMistakes - state.mistakes) * 100;
+  if(won) score += 300; // completion bonus
+
+  // Stats
+  if(won){
+    wins++;
+    streak++;
+    setLS('wg_wins', wins);
+    setLS('wg_streak', streak);
+  } else {
+    streak = 0;
+    setLS('wg_streak', streak);
+  }
+  if(score > best){
+    best = score;
+    setLS('wg_best', best);
+  }
+  renderStats();
+
+  // If lost, reveal remaining groups in gray-ish
+  solvedSummary.innerHTML = "";
+
+  // Display solved groups (in solve order) + unsolved groups
+  // Solved groups: in order they were solved
+  var displayOrder = state.solved.slice();
+  // Unsolved groups: rest
+  for(var g=0; g<state.puzzle.groups.length; g++){
+    if(displayOrder.indexOf(g) === -1) displayOrder.push(g);
+  }
+
+  for(var i=0; i<displayOrder.length; i++){
+    var tIdx = displayOrder[i];
+    var grp = state.puzzle.groups[tIdx];
+    var solvedByPlayer = state.solved.indexOf(tIdx) !== -1;
+    var bar = document.createElement('div');
+    bar.className = 'solved-bar';
+    bar.style.background = solvedByPlayer ? grp.color : "#4a4a55";
+    bar.style.color = solvedByPlayer ? "#1e1e28" : "#fff";
+    if(!solvedByPlayer) bar.style.opacity = "0.8";
+
+    var th = document.createElement('div');
+    th.className = 'theme-name';
+    th.textContent = (solvedByPlayer ? "" : "") + grp.theme;
+    var wds = document.createElement('div');
+    wds.className = 'theme-words';
+    wds.textContent = grp.words.join(", ");
+    bar.appendChild(th); bar.appendChild(wds);
+    solvedSummary.appendChild(bar);
+  }
+
+  // Emoji grid of attempts
+  emojiGridEl.innerHTML = buildEmojiGrid();
+
+  endScoreV.textContent = String(score);
+  endMissV.textContent  = String(state.mistakes);
+  endBestV.textContent  = String(best);
+
+  if(won){
+    endTitle.textContent = "SOLVED!";
+    endTitle.className = "end-title win";
+    endEmoji.textContent = state.mistakes === 0 ? "🏆" : "🎯";
+    endSub.textContent = state.mistakes === 0 ? "Flawless victory!" : "Great work — you got them all";
+  } else {
+    endTitle.textContent = "GAME OVER";
+    endTitle.className = "end-title lose";
+    endEmoji.textContent = "💔";
+    endSub.textContent = "Solved " + state.solved.length + " of 4 groups";
+  }
+
+  state._lastScore = score;
+  state._lastWon = won;
+
+  gameScr.classList.add('hidden');
+  endScr.classList.remove('hidden');
+}
+
+function buildEmojiGrid(){
+  // Map theme index to color emoji based on position (solve order)
+  // Use: 🟨 🟩 🟦 🟪 ⬛ (for missing)
+  var THEME_EMOJI = ["🟨","🟩","🟦","🟪","🟧","🟥","🟫","⬜"];
+  var lines = [];
+  for(var i=0; i<state.attempts.length; i++){
+    var att = state.attempts[i];
+    var line = "";
+    if(att.correct){
+      var em = THEME_EMOJI[att.themeIdx] || "⬛";
+      line = em + em + em + em;
+    } else {
+      // For a wrong attempt: show the theme of each word
+      var words = att.words;
+      for(var w=0; w<words.length; w++){
+        var found = false;
+        for(var p=0; p<state.puzzle.groups.length; p++){
+          if(state.puzzle.groups[p].words.indexOf(words[w]) !== -1){
+            line += THEME_EMOJI[p] || "⬛";
+            found = true;
+            break;
+          }
+        }
+        if(!found) line += "⬛";
+      }
+    }
+    lines.push(line);
+  }
+  return lines.join("<br>");
+}
+
+// ========== END BUTTONS ==========
+againBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  startNewGame();
+});
+
+homeBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  endScr.classList.add('hidden');
+  gameScr.classList.add('hidden');
+  startScr.classList.remove('hidden');
+});
+
+shareBtn.addEventListener('click', function(e){
+  e.stopPropagation(); e.preventDefault();
+  var emojiText = buildEmojiGridPlain();
+  var outcome = state._lastWon ? ("solved with " + state.mistakes + " mistakes") : ("got " + state.solved.length + "/4 groups");
+  var txt = "Word Groups Puzzle #" + (state.puzzleIdx + 1) + " — " + outcome + "\n\n" + emojiText + "\n\nI scored " + (state._lastScore||0) + " on Word Groups at fun5games.us — can you beat it?";
+  copyText(txt);
+  shareBtn.classList.add('copied');
+  shareBtn.textContent = "COPIED!";
+  setTimeout(function(){
+    shareBtn.classList.remove('copied');
+    shareBtn.textContent = "Share Result";
+  }, 2000);
+});
+
+function buildEmojiGridPlain(){
+  var THEME_EMOJI = ["🟨","🟩","🟦","🟪","🟧","🟥","🟫","⬜"];
+  var lines = [];
+  for(var i=0; i<state.attempts.length; i++){
+    var att = state.attempts[i];
+    var line = "";
+    if(att.correct){
+      var em = THEME_EMOJI[att.themeIdx] || "⬛";
+      line = em+em+em+em;
+    } else {
+      var words = att.words;
+      for(var w=0; w<words.length; w++){
+        var found = false;
+        for(var p=0; p<state.puzzle.groups.length; p++){
+          if(state.puzzle.groups[p].words.indexOf(words[w]) !== -1){
+            line += THEME_EMOJI[p] || "⬛";
+            found = true;
+            break;
+          }
+        }
+        if(!found) line += "⬛";
+      }
+    }
+    lines.push(line);
+  }
+  return lines.join("\n");
+}
+
+function copyText(txt){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt);
+      return;
+    }
+  }catch(e){}
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'absolute';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }catch(e){}
+}
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', function(e){
+  if(!gameScr.classList.contains('hidden')){
+    if(e.key === 'Enter' && !submitBtn.disabled){
+      submitSelection();
+    } else if(e.key === 'Escape'){
+      // Deselect all
+      state.selected = [];
+      var cells = gridEl.querySelectorAll('.cell');
+      for(var i=0;i<cells.length;i++) cells[i].classList.remove('sel');
+      updateSubmitState();
+    } else if(e.key.toLowerCase() === 's'){
+      state.remaining = shuffle(state.remaining);
+      renderGrid();
+    }
+  } else if(!startScr.classList.contains('hidden')){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      startNewGame();
+    }
+  } else if(!endScr.classList.contains('hidden')){
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      startNewGame();
+    }
+  }
+});
+
+// Init
+selectDiff('easy');
+
+})();
+</script>
+</body>
+</html>

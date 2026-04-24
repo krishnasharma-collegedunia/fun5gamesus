@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f0f9ff">
+<title>DI Drill</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#0f172a;background:#f0f9ff;position:relative}
+
+/* ---------- STAGE ---------- */
+.stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:14px 14px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.stage.hidden{display:none}
+
+/* ---------- START SCREEN ---------- */
+.title{font-size:clamp(34px,9.5vw,52px);font-weight:900;letter-spacing:3px;color:#0369a1;text-align:center;margin-top:4vh;text-shadow:0 2px 8px rgba(3,105,161,.15);line-height:1}
+.tag{color:#475569;font-size:clamp(12px,3.5vw,15px);text-align:center;margin-top:10px;max-width:340px;line-height:1.5}
+
+.ad-slot{border:1px dashed #94a3b8;background:rgba(255,255,255,0.6);color:#64748b;font-size:11px;padding:12px;text-align:center;width:100%;max-width:380px;margin:14px 0;border-radius:6px;letter-spacing:1px}
+
+.how{width:100%;max-width:380px;background:#fff;border:1px solid #e0f2fe;border-radius:12px;margin-top:2px;overflow:hidden;box-shadow:0 2px 6px rgba(15,23,42,.04)}
+.how-hd{padding:12px 16px;font-size:13px;font-weight:bold;color:#0369a1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;letter-spacing:1px}
+.how-hd .arrow{transition:transform .25s}
+.how.open .how-hd .arrow{transform:rotate(180deg)}
+.how-bd{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:12.5px;color:#334155;line-height:1.7}
+.how.open .how-bd{max-height:320px}
+.how-bd ul{padding:4px 18px 14px 32px}
+.how-bd li{margin-bottom:2px}
+
+.sec-label{font-size:11px;color:#64748b;margin-top:18px;letter-spacing:2.5px;text-transform:uppercase;font-weight:bold}
+
+/* Mode selector */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:380px;margin-top:10px}
+.mode-btn{background:#fff;border:2px solid #e2e8f0;color:#334155;padding:10px 4px;border-radius:10px;font-family:inherit;font-size:12px;font-weight:bold;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;transition:all .15s;letter-spacing:.5px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mode-btn .icon{font-size:18px;line-height:1}
+.mode-btn.sel{background:#e0f2fe;border-color:#0369a1;color:#0369a1}
+.mode-btn:active{transform:scale(.97)}
+
+/* Difficulty selector */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:380px;margin-top:10px}
+.diff-btn{background:#fff;border:2px solid #e2e8f0;color:#334155;padding:11px 6px;border-radius:10px;font-family:inherit;font-size:12px;font-weight:bold;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;transition:all .15s;letter-spacing:.5px}
+.diff-btn .sub{display:block;font-size:9.5px;color:#94a3b8;font-weight:normal;margin-top:3px;letter-spacing:.3px}
+.diff-btn.sel{background:#fef3c7;border-color:#d97706;color:#b45309}
+.diff-btn.sel .sub{color:#d97706}
+.diff-btn:active{transform:scale(.97)}
+
+.best-row{font-size:13px;color:#64748b;margin-top:16px}
+.best-row b{color:#d97706;font-size:16px;font-weight:900}
+
+.play-btn{background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:none;padding:16px 64px;font-family:inherit;font-size:20px;font-weight:900;letter-spacing:4px;border-radius:14px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;box-shadow:0 6px 22px rgba(14,165,233,.35);margin-top:18px;min-width:230px}
+.play-btn:active{transform:scale(.96)}
+
+/* ---------- GAME SCREEN ---------- */
+.hud{width:100%;max-width:500px;display:flex;justify-content:space-between;align-items:center;padding:2px 4px;margin-top:2px;gap:8px}
+.hud-box{text-align:center;flex:1}
+.hud-lbl{font-size:9px;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;font-weight:bold}
+.hud-val{font-size:clamp(18px,5.2vw,24px);font-weight:900;color:#0369a1;line-height:1.1}
+.hud-val.score{color:#d97706}
+.hud-val.time-warn{color:#dc2626;animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+
+.tbar-wrap{width:100%;max-width:500px;height:6px;background:rgba(3,105,161,.12);border-radius:3px;margin-top:8px;overflow:hidden}
+.tbar{height:100%;width:100%;background:linear-gradient(90deg,#0ea5e9,#22c55e);border-radius:3px;transition:width .9s linear}
+.tbar.warn{background:linear-gradient(90deg,#dc2626,#f59e0b)}
+
+/* Chart card */
+.chart-card{width:100%;max-width:500px;background:#fff;border:1px solid #e0f2fe;border-radius:12px;padding:12px;margin-top:10px;box-shadow:0 3px 10px rgba(15,23,42,.06)}
+.chart-title{font-size:12px;font-weight:bold;color:#0f172a;text-align:center;letter-spacing:.5px;margin-bottom:6px;line-height:1.3}
+.chart-sub{font-size:10px;color:#64748b;text-align:center;margin-bottom:8px;letter-spacing:.3px}
+.chart-canvas{display:block;width:100%;height:auto;max-height:240px}
+
+/* Table rendering */
+.data-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0 6px}
+.data-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.data-tbl th,.data-tbl td{padding:6px 8px;border:1px solid #e0f2fe;text-align:center;font-weight:600}
+.data-tbl th{background:#e0f2fe;color:#0369a1;font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+.data-tbl th:first-child,.data-tbl td:first-child{text-align:left;background:#f0f9ff;color:#0f172a}
+.data-tbl tr:nth-child(even) td{background:#fafbfc}
+.data-tbl tr:nth-child(even) td:first-child{background:#f0f9ff}
+
+/* Chart legend */
+.legend{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;margin-top:6px;font-size:11px;color:#334155}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+/* Question card */
+.q-card{width:100%;max-width:500px;background:#fff;border:1px solid #fde68a;border-left:4px solid #d97706;border-radius:10px;padding:12px 14px;margin-top:10px;font-size:clamp(13px,3.7vw,15px);font-weight:600;color:#0f172a;line-height:1.45;box-shadow:0 2px 6px rgba(217,119,6,.08)}
+.q-meta{font-size:10px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-weight:bold}
+
+/* Options */
+.opts{width:100%;max-width:500px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.opt{background:#fff;border:2px solid #e2e8f0;color:#0f172a;padding:12px 8px;border-radius:10px;font-family:inherit;font-size:clamp(13px,3.6vw,15px);font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;display:flex;align-items:center;gap:8px;min-height:54px;transition:all .15s;text-align:left}
+.opt .ltr{font-size:11px;color:#64748b;font-weight:700;background:#f1f5f9;padding:3px 7px;border-radius:4px;min-width:22px;text-align:center;letter-spacing:.5px}
+.opt .val{flex:1}
+.opt:active{transform:scale(.98)}
+.opt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
+.opt.ok .ltr{background:#22c55e;color:#fff}
+.opt.bad{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.opt.bad .ltr{background:#ef4444;color:#fff}
+.opt[disabled]{pointer-events:none}
+
+/* Feedback hint */
+.feedback{height:24px;margin-top:8px;font-size:12px;text-align:center;opacity:0;transition:opacity .15s;font-weight:600;letter-spacing:.3px}
+.feedback.show{opacity:1}
+.feedback.ok{color:#15803d}
+.feedback.bad{color:#b91c1c}
+
+.btm-row{display:flex;gap:10px;margin-top:12px;justify-content:center}
+.quit{background:#fff;border:1px solid #cbd5e1;color:#64748b;padding:8px 20px;border-radius:8px;font-family:inherit;font-size:11px;font-weight:bold;cursor:pointer;-webkit-appearance:none;letter-spacing:1px}
+.quit:active{transform:scale(.96)}
+
+/* ---------- END SCREEN ---------- */
+.end-title{font-size:clamp(30px,8.5vw,42px);font-weight:900;color:#0369a1;letter-spacing:2px;margin-top:3vh;text-align:center;animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+.big-score{font-size:clamp(60px,18vw,92px);font-weight:900;color:#d97706;line-height:1;margin-top:8px;animation:pop .7s ease}
+.score-lbl{font-size:11px;color:#64748b;letter-spacing:3px;text-transform:uppercase;margin-top:4px;font-weight:bold}
+.total-lbl{font-size:13px;color:#475569;margin-top:4px}
+.stats{display:flex;gap:10px;margin-top:18px;width:100%;max-width:380px;justify-content:center;flex-wrap:wrap}
+.stat-box{background:#fff;border:1px solid #e0f2fe;border-radius:10px;padding:10px 14px;min-width:86px;text-align:center;box-shadow:0 2px 5px rgba(15,23,42,.05)}
+.stat-v{font-size:20px;font-weight:900;color:#0f172a}
+.stat-v.green{color:#16a34a}.stat-v.red{color:#dc2626}.stat-v.gold{color:#d97706}
+.stat-l{font-size:10px;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;font-weight:bold}
+.end-best{font-size:13px;color:#475569;margin-top:14px;text-align:center}
+.end-best b{color:#d97706;font-size:15px}
+.end-best .newbest{color:#16a34a;font-weight:bold;display:block;margin-top:4px;animation:pop .6s ease}
+
+.end-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center;width:100%;max-width:380px}
+.btn-sec{background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#fff;border:none;padding:14px 20px;font-family:inherit;font-size:13px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;-webkit-appearance:none;flex:1;min-width:130px}
+.btn-sec.alt{background:#fff;color:#0369a1;border:2px solid #0369a1}
+.btn-sec.share{background:linear-gradient(180deg,#22c55e,#15803d);color:#fff}
+.btn-sec:active{transform:scale(.96)}
+
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:#16a34a;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:bold;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;box-shadow:0 4px 14px rgba(22,163,74,.35)}
+.toast.show{opacity:1}
+
+.round-banner{position:absolute;inset:0;background:rgba(255,255,255,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:40;pointer-events:none;opacity:0;transition:opacity .3s}
+.round-banner.show{opacity:1}
+.rb-title{font-size:clamp(30px,8vw,44px);font-weight:900;color:#0369a1;letter-spacing:3px;animation:pop .6s ease}
+.rb-sub{font-size:13px;color:#64748b;margin-top:6px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}
+
+.q-counter{font-size:10px;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;font-weight:bold;text-align:center;margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div class="stage" id="scStart">
+  <div class="title">DI DRILL</div>
+  <div class="tag">Speed-drill Data Interpretation questions.<br>Bars, pies, tables, lines &mdash; exam speed.</div>
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="how" id="how">
+    <div class="how-hd" id="howHd" ontouchstart="">
+      <span>HOW TO PLAY</span>
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="how-bd">
+      <ul>
+        <li>Study the chart or table shown</li>
+        <li>Answer 3-5 questions about it</li>
+        <li>30 seconds per question</li>
+        <li>+1 for correct, 0 for wrong/timeout</li>
+        <li>5 rounds = 15-25 questions total</li>
+        <li>Pick a data type or try Mixed</li>
+        <li>Best score saved per chart type</li>
+        <li>Shortcuts: 1-4 or A-D to pick</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec-label">Chart Type</div>
+  <div class="mode-grid" id="modeGrid">
+    <button class="mode-btn sel" data-m="bar" ontouchstart=""><span class="icon">&#x1F4CA;</span>BAR</button>
+    <button class="mode-btn" data-m="pie" ontouchstart=""><span class="icon">&#x1F967;</span>PIE</button>
+    <button class="mode-btn" data-m="table" ontouchstart=""><span class="icon">&#x1F4CB;</span>TABLE</button>
+    <button class="mode-btn" data-m="line" ontouchstart=""><span class="icon">&#x1F4C8;</span>LINE</button>
+    <button class="mode-btn" data-m="mixed" ontouchstart=""><span class="icon">&#x1F500;</span>MIXED</button>
+  </div>
+
+  <div class="sec-label">Difficulty</div>
+  <div class="diff-grid" id="diffGrid">
+    <button class="diff-btn sel" data-d="easy" ontouchstart="">EASY<span class="sub">SSC CHSL</span></button>
+    <button class="diff-btn" data-d="med" ontouchstart="">MEDIUM<span class="sub">Bank PO</span></button>
+    <button class="diff-btn" data-d="hard" ontouchstart="">HARD<span class="sub">CAT / XAT</span></button>
+  </div>
+
+  <div class="best-row">Best: <b id="bestDisp">0</b></div>
+  <button class="play-btn" id="playBtn" ontouchstart="">PLAY</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="stage hidden" id="scGame">
+  <div class="hud">
+    <div class="hud-box"><div class="hud-lbl">Round</div><div class="hud-val" id="roundVal">1/5</div></div>
+    <div class="hud-box"><div class="hud-lbl">Question</div><div class="hud-val" id="qNumVal">1/3</div></div>
+    <div class="hud-box"><div class="hud-lbl">Score</div><div class="hud-val score" id="scoreVal">0</div></div>
+    <div class="hud-box"><div class="hud-lbl">Time</div><div class="hud-val" id="timeVal">30</div></div>
+  </div>
+  <div class="tbar-wrap"><div class="tbar" id="tbar"></div></div>
+
+  <div class="chart-card" id="chartCard">
+    <div class="chart-title" id="chartTitle">&nbsp;</div>
+    <div class="chart-sub" id="chartSub">&nbsp;</div>
+    <div id="chartBody"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="q-card" id="qCard">
+    <div class="q-meta" id="qMeta">QUESTION 1 OF 3</div>
+    <div id="qText">&nbsp;</div>
+  </div>
+
+  <div class="opts" id="opts">
+    <button class="opt" data-i="0" ontouchstart=""><span class="ltr">A</span><span class="val">0</span></button>
+    <button class="opt" data-i="1" ontouchstart=""><span class="ltr">B</span><span class="val">0</span></button>
+    <button class="opt" data-i="2" ontouchstart=""><span class="ltr">C</span><span class="val">0</span></button>
+    <button class="opt" data-i="3" ontouchstart=""><span class="ltr">D</span><span class="val">0</span></button>
+  </div>
+
+  <div class="feedback" id="feedback">&nbsp;</div>
+
+  <div class="btm-row">
+    <button class="quit" id="quitBtn" ontouchstart="">QUIT</button>
+  </div>
+
+  <div class="round-banner" id="roundBanner">
+    <div class="rb-title" id="rbTitle">ROUND 1</div>
+    <div class="rb-sub" id="rbSub">New Dataset</div>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div class="stage hidden" id="scEnd">
+  <div class="end-title">DRILL COMPLETE</div>
+  <div class="score-lbl">Final Score</div>
+  <div class="big-score" id="finalScore">0</div>
+  <div class="total-lbl" id="totalLbl">out of 0 questions</div>
+  <div class="stats">
+    <div class="stat-box"><div class="stat-v green" id="statCorrect">0</div><div class="stat-l">Correct</div></div>
+    <div class="stat-box"><div class="stat-v red" id="statWrong">0</div><div class="stat-l">Wrong</div></div>
+    <div class="stat-box"><div class="stat-v gold" id="statAcc">0%</div><div class="stat-l">Accuracy</div></div>
+  </div>
+  <div class="end-best" id="endBest">Best: <b>0</b></div>
+  <div class="ad-slot">Advertisement</div>
+  <div class="end-btns">
+    <button class="btn-sec share" id="shareBtn" ontouchstart="">SHARE</button>
+    <button class="btn-sec" id="againBtn" ontouchstart="">PLAY AGAIN</button>
+    <button class="btn-sec alt" id="changeBtn" ontouchstart="">CHANGE MODE</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+(function(){'use strict';
+
+/* ==================== DOM REFS ==================== */
+var scStart=document.getElementById('scStart');
+var scGame=document.getElementById('scGame');
+var scEnd=document.getElementById('scEnd');
+var bestDisp=document.getElementById('bestDisp');
+var roundVal=document.getElementById('roundVal');
+var qNumVal=document.getElementById('qNumVal');
+var scoreVal=document.getElementById('scoreVal');
+var timeVal=document.getElementById('timeVal');
+var tbar=document.getElementById('tbar');
+var chartTitle=document.getElementById('chartTitle');
+var chartSub=document.getElementById('chartSub');
+var chartBody=document.getElementById('chartBody');
+var legendEl=document.getElementById('legend');
+var qCard=document.getElementById('qCard');
+var qMeta=document.getElementById('qMeta');
+var qText=document.getElementById('qText');
+var optsWrap=document.getElementById('opts');
+var optBtns=optsWrap.querySelectorAll('.opt');
+var feedback=document.getElementById('feedback');
+var finalScore=document.getElementById('finalScore');
+var totalLbl=document.getElementById('totalLbl');
+var statCorrect=document.getElementById('statCorrect');
+var statWrong=document.getElementById('statWrong');
+var statAcc=document.getElementById('statAcc');
+var endBest=document.getElementById('endBest');
+var toast=document.getElementById('toast');
+var roundBanner=document.getElementById('roundBanner');
+var rbTitle=document.getElementById('rbTitle');
+var rbSub=document.getElementById('rbSub');
+
+/* ==================== STATE ==================== */
+var TOTAL_ROUNDS=5;
+var QUESTION_TIME=30;     // seconds per question
+var mode='bar';            // bar | pie | table | line | mixed
+var difficulty='easy';     // easy | med | hard
+var roundIdx=0;
+var currentDataset=null;
+var currentQuestions=[];
+var qIdx=0;
+var timeLeft=QUESTION_TIME;
+var score=0, correct=0, wrong=0;
+var acceptingInput=false;
+var tickHandle=null;
+var feedbackHandle=null;
+var bannerHandle=null;
+var totalQuestionsAsked=0;
+
+/* ==================== BEST SCORE ==================== */
+var bestKeys={
+  bar:'di_best_bar',
+  pie:'di_best_pie',
+  table:'di_best_table',
+  line:'di_best_line',
+  mixed:'di_best_mixed'
+};
+var modeLabels={bar:'Bar Chart',pie:'Pie Chart',table:'Table',line:'Line Graph',mixed:'Mixed'};
+var diffLabels={easy:'Easy',med:'Medium',hard:'Hard'};
+
+function loadBest(m){try{return parseInt(localStorage.getItem(bestKeys[m]))||0}catch(e){return 0}}
+function saveBest(m,v){try{localStorage.setItem(bestKeys[m],v)}catch(e){}}
+function refreshBestDisplay(){bestDisp.textContent=loadBest(mode)+' ('+modeLabels[mode]+')'}
+
+/* ==================== SCREEN ROUTING ==================== */
+function showScreen(el){scStart.classList.add('hidden');scGame.classList.add('hidden');scEnd.classList.add('hidden');el.classList.remove('hidden')}
+
+/* ==================== HELPERS ==================== */
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function shuffle(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t}return arr}
+function sum(arr){var s=0;for(var i=0;i<arr.length;i++)s+=arr[i];return s}
+function avg(arr){return sum(arr)/arr.length}
+function maxIdx(arr){var m=0;for(var i=1;i<arr.length;i++)if(arr[i]>arr[m])m=i;return m}
+function minIdx(arr){var m=0;for(var i=1;i<arr.length;i++)if(arr[i]<arr[m])m=i;return m}
+function fmt(n){
+  if(typeof n!=='number')return String(n);
+  if(Number.isInteger(n))return String(n);
+  var r=Math.round(n*100)/100;
+  if(Number.isInteger(r))return String(r);
+  return r.toFixed(2);
+}
+function fmtPct(n){
+  var r=Math.round(n*10)/10;
+  if(Number.isInteger(r))return String(r)+'%';
+  return r.toFixed(1)+'%';
+}
+function round1(n){return Math.round(n*10)/10}
+function roundToClean(n){
+  // Try integer first, else .5, else .25
+  if(Math.abs(n-Math.round(n))<0.01)return Math.round(n);
+  if(Math.abs(n*2-Math.round(n*2))<0.01)return Math.round(n*2)/2;
+  return Math.round(n*10)/10;
+}
+
+/* ==================== COLOR PALETTES ==================== */
+var PAL=[
+  '#0ea5e9','#d97706','#16a34a','#dc2626','#7c3aed',
+  '#db2777','#0891b2','#65a30d','#ea580c','#6366f1',
+  '#0284c7','#ca8a04','#059669','#b91c1c','#9333ea'
+];
+function pickColors(n){
+  var cols=[];
+  var used={};
+  while(cols.length<n){
+    var c=PAL[Math.floor(Math.random()*PAL.length)];
+    if(!used[c]){used[c]=1;cols.push(c)}
+    if(Object.keys(used).length>=PAL.length)break;
+  }
+  // pad
+  while(cols.length<n)cols.push(PAL[cols.length%PAL.length]);
+  return cols;
+}
+
+/* ==================== DATASET NAMES ==================== */
+var COMPANIES=['Alpha Corp','Beta Ltd','Gamma Inc','Delta Co','Epsilon','Zeta Industries','Omega LLC'];
+var PRODUCTS=['Product A','Product B','Product C','Product D','Product E','Product F'];
+var CITIES=['Delhi','Mumbai','Kolkata','Chennai','Bangalore','Hyderabad','Pune'];
+var DEPTS=['Sales','Marketing','Engineering','Finance','HR','Operations','R&D'];
+var SPORTS=['Cricket','Football','Hockey','Tennis','Badminton','Volleyball','Kabaddi'];
+var SUBJECTS=['English','Maths','Science','Hindi','Social','Computer'];
+var CATEGORIES=['Electronics','Apparel','Grocery','Furniture','Books','Toys'];
+var VEHICLES=['Cars','Bikes','Trucks','Buses','SUVs','Vans'];
+var SCHOOLS=['School X','School Y','School Z','School W','School V'];
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var YEARS2020=['2019','2020','2021','2022','2023','2024'];
+var QUARTERS=['Q1','Q2','Q3','Q4'];
+
+var DATASET_THEMES=[
+  {title:'Monthly Sales Report',sub:'Sales in &#8377; lakhs',rowSet:PRODUCTS,colSet:MONTHS,unit:'lakhs',colsLabel:'Month'},
+  {title:'Annual Revenue by Company',sub:'Revenue in &#8377; crores',rowSet:COMPANIES,colSet:YEARS2020,unit:'crores',colsLabel:'Year'},
+  {title:'City-wise Production',sub:'Production units (thousands)',rowSet:CITIES,colSet:YEARS2020,unit:'k units',colsLabel:'Year'},
+  {title:'Department Expenses',sub:'Expenses in &#8377; lakhs',rowSet:DEPTS,colSet:QUARTERS,unit:'lakhs',colsLabel:'Quarter'},
+  {title:'Students by School',sub:'Number of students',rowSet:SCHOOLS,colSet:YEARS2020,unit:'students',colsLabel:'Year'},
+  {title:'Category Sales Q1-Q4',sub:'Sales in &#8377; thousands',rowSet:CATEGORIES,colSet:QUARTERS,unit:'thousand',colsLabel:'Quarter'},
+  {title:'Vehicle Sales by Year',sub:'Units sold (thousands)',rowSet:VEHICLES,colSet:YEARS2020,unit:'k units',colsLabel:'Year'}
+];
+
+var PIE_THEMES=[
+  {title:'Budget Allocation',sub:'Share of total budget',items:['Salaries','Marketing','R&D','Rent','Utilities','Other']},
+  {title:'Market Share',sub:'Industry market share',items:['Alpha','Beta','Gamma','Delta','Others']},
+  {title:'Population by Region',sub:'Regional population split',items:['North','South','East','West','Central']},
+  {title:'Monthly Expenses',sub:'Household expense breakdown',items:['Food','Rent','Travel','Shopping','Savings','Bills']},
+  {title:'Vote Distribution',sub:'Votes received by party',items:['Party A','Party B','Party C','Party D','Others']},
+  {title:'Subject Marks',sub:'Weightage per subject',items:SUBJECTS.slice(0,5)},
+  {title:'Production by Plant',sub:'Production share of plants',items:['Plant 1','Plant 2','Plant 3','Plant 4','Plant 5']}
+];
+
+var LINE_THEMES=[
+  {title:'Monthly Temperature',sub:'Average temperature (&deg;C)',xSet:MONTHS.slice(0,8),unit:'&deg;C'},
+  {title:'Sales Trend',sub:'Sales over time (&#8377; lakhs)',xSet:QUARTERS,unit:'lakhs'},
+  {title:'Daily Visitors',sub:'Website visitors (thousands)',xSet:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],unit:'k'},
+  {title:'Revenue Growth',sub:'Yearly revenue (&#8377; cr)',xSet:YEARS2020,unit:'cr'},
+  {title:'Stock Price',sub:'Closing price (&#8377;)',xSet:MONTHS.slice(0,6),unit:'&#8377;'},
+  {title:'Production Output',sub:'Units produced (thousands)',xSet:MONTHS.slice(0,8),unit:'k'}
+];
+
+/* ==================== DATA GENERATION ==================== */
+function genBarData(){
+  var theme=pick(DATASET_THEMES);
+  var labels=shuffle(theme.rowSet.slice()).slice(0,rnd(4,6));
+  var values=[];
+  var minV, maxV;
+  if(difficulty==='easy'){minV=20;maxV=200}
+  else if(difficulty==='med'){minV=50;maxV=500}
+  else{minV=80;maxV=900}
+  for(var i=0;i<labels.length;i++){
+    values.push(rnd(minV,maxV));
+  }
+  return {
+    kind:'bar',
+    title:theme.title,
+    sub:theme.sub,
+    labels:labels,
+    values:values,
+    unit:theme.unit,
+    colors:pickColors(labels.length)
+  };
+}
+
+function genPieData(){
+  var theme=pick(PIE_THEMES);
+  var items=shuffle(theme.items.slice()).slice(0,rnd(4,6));
+  // Generate clean percentages that sum to 100
+  var pcts=[];
+  var remaining=100;
+  var base;
+  if(difficulty==='easy')base=5;
+  else if(difficulty==='med')base=5;
+  else base=1;
+  // Divide 100 into n parts with each being multiple of base
+  var n=items.length;
+  var units=100/base;
+  var assign=new Array(n);
+  for(var i=0;i<n;i++)assign[i]=1;
+  var left=units-n;
+  while(left>0){
+    var k=rnd(0,n-1);
+    assign[k]++;
+    left--;
+  }
+  for(var i=0;i<n;i++)pcts.push(assign[i]*base);
+  // Total value — a number that makes percentages give clean integer values
+  var total;
+  if(difficulty==='easy'){total=pick([1000,2000,4000,5000,10000,20000])}
+  else if(difficulty==='med'){total=pick([1500,2500,3000,6000,7500,12000,15000,24000,30000])}
+  else{total=pick([1800,2400,3600,4800,7200,8400,9600,13500,16800])}
+  return {
+    kind:'pie',
+    title:theme.title,
+    sub:theme.sub+' (Total: '+total+')',
+    labels:items,
+    pcts:pcts,
+    total:total,
+    colors:pickColors(items.length)
+  };
+}
+
+function genTableData(){
+  var theme=pick(DATASET_THEMES);
+  var rowN=rnd(3,5);
+  var colN=rnd(3,5);
+  var rows=shuffle(theme.rowSet.slice()).slice(0,rowN);
+  var cols=shuffle(theme.colSet.slice()).slice(0,colN).sort(function(a,b){
+    // Try numeric sort for years, else leave
+    var na=parseFloat(a),nb=parseFloat(b);
+    if(!isNaN(na)&&!isNaN(nb))return na-nb;
+    return 0;
+  });
+  var minV, maxV;
+  if(difficulty==='easy'){minV=40;maxV=250}
+  else if(difficulty==='med'){minV=50;maxV=600}
+  else{minV=80;maxV=950}
+  var matrix=[];
+  for(var i=0;i<rowN;i++){
+    var row=[];
+    for(var j=0;j<colN;j++){
+      row.push(rnd(minV,maxV));
+    }
+    matrix.push(row);
+  }
+  return {
+    kind:'table',
+    title:theme.title,
+    sub:theme.sub,
+    rows:rows,
+    cols:cols,
+    colsLabel:theme.colsLabel,
+    matrix:matrix,
+    unit:theme.unit
+  };
+}
+
+function genLineData(){
+  var theme=pick(LINE_THEMES);
+  var x=theme.xSet.slice(0,rnd(5,8));
+  var numSeries;
+  if(difficulty==='easy')numSeries=1;
+  else if(difficulty==='med')numSeries=rnd(1,2);
+  else numSeries=rnd(2,3);
+  var seriesLabels=shuffle(['Series A','Series B','Series C','Alpha','Beta','Gamma']).slice(0,numSeries);
+  var series=[];
+  var minV, maxV;
+  if(difficulty==='easy'){minV=15;maxV=100}
+  else if(difficulty==='med'){minV=20;maxV=250}
+  else{minV=30;maxV=500}
+  for(var s=0;s<numSeries;s++){
+    var vals=[];
+    var cur=rnd(minV,minV+(maxV-minV)/2);
+    vals.push(cur);
+    for(var i=1;i<x.length;i++){
+      var delta=rnd(-Math.round((maxV-minV)/6), Math.round((maxV-minV)/6));
+      cur=Math.max(minV, Math.min(maxV, cur+delta));
+      vals.push(cur);
+    }
+    series.push({label:seriesLabels[s],values:vals,color:PAL[s*3%PAL.length]});
+  }
+  return {
+    kind:'line',
+    title:theme.title,
+    sub:theme.sub,
+    x:x,
+    series:series,
+    unit:theme.unit
+  };
+}
+
+function genMixedData(){
+  // table + supplementary fact; or bar+table. We do a simple "table with totals" version.
+  var theme=pick(DATASET_THEMES);
+  var rows=shuffle(theme.rowSet.slice()).slice(0,rnd(3,4));
+  var cols=shuffle(theme.colSet.slice()).slice(0,rnd(3,4)).sort(function(a,b){
+    var na=parseFloat(a),nb=parseFloat(b);
+    if(!isNaN(na)&&!isNaN(nb))return na-nb;
+    return 0;
+  });
+  var minV=60, maxV=600;
+  if(difficulty==='hard'){minV=80;maxV=900}
+  var matrix=[];
+  for(var i=0;i<rows.length;i++){
+    var row=[];
+    for(var j=0;j<cols.length;j++){
+      row.push(rnd(minV,maxV));
+    }
+    matrix.push(row);
+  }
+  return {
+    kind:'mixed',
+    title:theme.title+' (with chart)',
+    sub:theme.sub,
+    rows:rows,
+    cols:cols,
+    colsLabel:theme.colsLabel,
+    matrix:matrix,
+    unit:theme.unit
+  };
+}
+
+function generateDataset(){
+  var m=mode;
+  if(m==='mixed'){
+    // Mixed mode: choose any chart type
+    var types=['bar','pie','table','line','mixed'];
+    m=pick(types);
+  }
+  if(m==='bar')return genBarData();
+  if(m==='pie')return genPieData();
+  if(m==='table')return genTableData();
+  if(m==='line')return genLineData();
+  if(m==='mixed')return genMixedData();
+  return genBarData();
+}
+
+/* ==================== CHART RENDERING: CANVAS ==================== */
+
+function makeCanvas(w,h){
+  var cv=document.createElement('canvas');
+  var dpr=window.devicePixelRatio||1;
+  cv.width=w*dpr;
+  cv.height=h*dpr;
+  cv.style.width=w+'px';
+  cv.style.height=h+'px';
+  cv.className='chart-canvas';
+  var ctx=cv.getContext('2d');
+  ctx.scale(dpr,dpr);
+  return {cv:cv,ctx:ctx,w:w,h:h};
+}
+
+function getChartSize(){
+  // Base canvas size: responsive to card width
+  var card=document.getElementById('chartCard');
+  var inner=card?card.clientWidth-24:320;
+  var w=Math.max(260, Math.min(480, inner));
+  return {w:w, h:Math.max(180, Math.min(240, Math.round(w*0.65)))};
+}
+
+function drawBarChart(data){
+  var sz=getChartSize();
+  var cr=makeCanvas(sz.w, sz.h);
+  var cv=cr.cv, ctx=cr.ctx, w=cr.w, h=cr.h;
+  var pad={l:38,r:10,t:10,b:36};
+  var innerW=w-pad.l-pad.r;
+  var innerH=h-pad.t-pad.b;
+  var n=data.labels.length;
+  var maxV=0;
+  for(var i=0;i<n;i++)if(data.values[i]>maxV)maxV=data.values[i];
+  // Round max up for nice scale
+  var tickMax=niceCeiling(maxV);
+  // Draw grid & y-axis
+  ctx.strokeStyle='#e2e8f0';
+  ctx.fillStyle='#64748b';
+  ctx.font='10px -apple-system,Arial,sans-serif';
+  ctx.textAlign='right';
+  ctx.textBaseline='middle';
+  ctx.lineWidth=1;
+  var ticks=5;
+  for(var t=0;t<=ticks;t++){
+    var y=pad.t+innerH-(t/ticks)*innerH;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(pad.l+innerW, y);
+    ctx.stroke();
+    ctx.fillText(String(Math.round(tickMax*t/ticks)), pad.l-5, y);
+  }
+  // Y-axis line
+  ctx.strokeStyle='#cbd5e1';
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t);
+  ctx.lineTo(pad.l, pad.t+innerH);
+  ctx.lineTo(pad.l+innerW, pad.t+innerH);
+  ctx.stroke();
+  // Bars
+  var gap=6;
+  var barW=(innerW - gap*(n+1))/n;
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+  ctx.font='10px -apple-system,Arial,sans-serif';
+  for(var i=0;i<n;i++){
+    var v=data.values[i];
+    var hBar=(v/tickMax)*innerH;
+    var x=pad.l+gap+i*(barW+gap);
+    var y=pad.t+innerH-hBar;
+    ctx.fillStyle=data.colors[i%data.colors.length];
+    ctx.fillRect(x, y, barW, hBar);
+    // Value above bar
+    ctx.fillStyle='#0f172a';
+    ctx.font='bold 10px -apple-system,Arial,sans-serif';
+    ctx.fillText(String(v), x+barW/2, y-12);
+    // Label below
+    ctx.font='10px -apple-system,Arial,sans-serif';
+    ctx.fillStyle='#475569';
+    var lbl=data.labels[i];
+    if(lbl.length>8)lbl=lbl.substring(0,7)+'.';
+    ctx.fillText(lbl, x+barW/2, pad.t+innerH+4);
+  }
+  chartBody.innerHTML='';
+  chartBody.appendChild(cv);
+  // No legend for single-series bar; label is at axis
+  renderLegend([]);
+}
+
+function drawPieChart(data){
+  var sz=getChartSize();
+  var cr=makeCanvas(sz.w, sz.h);
+  var cv=cr.cv, ctx=cr.ctx, w=cr.w, h=cr.h;
+  var cx=w/2;
+  var cy=h/2;
+  var r=Math.min(w,h)/2 - 22;
+  var startAng=-Math.PI/2;
+  var n=data.labels.length;
+  for(var i=0;i<n;i++){
+    var pct=data.pcts[i];
+    var sweep=(pct/100)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAng, startAng+sweep);
+    ctx.closePath();
+    ctx.fillStyle=data.colors[i%data.colors.length];
+    ctx.fill();
+    // Slice separator
+    ctx.strokeStyle='#fff';
+    ctx.lineWidth=2;
+    ctx.stroke();
+    // Percentage label
+    var midAng=startAng+sweep/2;
+    var lx=cx+Math.cos(midAng)*(r*0.62);
+    var ly=cy+Math.sin(midAng)*(r*0.62);
+    ctx.fillStyle='#fff';
+    ctx.font='bold 11px -apple-system,Arial,sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    if(pct>=6){
+      ctx.fillText(pct+'%', lx, ly);
+    }
+    startAng+=sweep;
+  }
+  chartBody.innerHTML='';
+  chartBody.appendChild(cv);
+  // Legend with colors + labels + pct
+  var legendItems=[];
+  for(var i=0;i<n;i++){
+    legendItems.push({color:data.colors[i],label:data.labels[i]+' ('+data.pcts[i]+'%)'});
+  }
+  renderLegend(legendItems);
+}
+
+function drawLineGraph(data){
+  var sz=getChartSize();
+  var cr=makeCanvas(sz.w, sz.h);
+  var cv=cr.cv, ctx=cr.ctx, w=cr.w, h=cr.h;
+  var pad={l:38,r:14,t:10,b:36};
+  var innerW=w-pad.l-pad.r;
+  var innerH=h-pad.t-pad.b;
+  var nX=data.x.length;
+  var maxV=0;
+  var minV=Infinity;
+  for(var s=0;s<data.series.length;s++){
+    for(var i=0;i<data.series[s].values.length;i++){
+      if(data.series[s].values[i]>maxV)maxV=data.series[s].values[i];
+      if(data.series[s].values[i]<minV)minV=data.series[s].values[i];
+    }
+  }
+  var tickMax=niceCeiling(maxV);
+  var tickMin=0;
+  // Grid
+  ctx.strokeStyle='#e2e8f0';
+  ctx.fillStyle='#64748b';
+  ctx.font='10px -apple-system,Arial,sans-serif';
+  ctx.textAlign='right';
+  ctx.textBaseline='middle';
+  ctx.lineWidth=1;
+  var ticks=5;
+  for(var t=0;t<=ticks;t++){
+    var y=pad.t+innerH-(t/ticks)*innerH;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(pad.l+innerW, y);
+    ctx.stroke();
+    ctx.fillText(String(Math.round(tickMax*t/ticks)), pad.l-5, y);
+  }
+  ctx.strokeStyle='#cbd5e1';
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t);
+  ctx.lineTo(pad.l, pad.t+innerH);
+  ctx.lineTo(pad.l+innerW, pad.t+innerH);
+  ctx.stroke();
+  // X labels
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+  ctx.fillStyle='#475569';
+  for(var i=0;i<nX;i++){
+    var x=pad.l+(i/(nX-1))*innerW;
+    var lbl=data.x[i];
+    if(lbl.length>5)lbl=lbl.substring(0,4)+'.';
+    ctx.fillText(lbl, x, pad.t+innerH+4);
+  }
+  // Draw each series
+  for(var s=0;s<data.series.length;s++){
+    var ser=data.series[s];
+    ctx.strokeStyle=ser.color;
+    ctx.fillStyle=ser.color;
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    for(var i=0;i<ser.values.length;i++){
+      var xv=pad.l+(i/(nX-1))*innerW;
+      var yv=pad.t+innerH-((ser.values[i]-tickMin)/(tickMax-tickMin))*innerH;
+      if(i===0)ctx.moveTo(xv,yv);
+      else ctx.lineTo(xv,yv);
+    }
+    ctx.stroke();
+    // Points
+    for(var i=0;i<ser.values.length;i++){
+      var xv=pad.l+(i/(nX-1))*innerW;
+      var yv=pad.t+innerH-((ser.values[i]-tickMin)/(tickMax-tickMin))*innerH;
+      ctx.beginPath();
+      ctx.arc(xv, yv, 3, 0, Math.PI*2);
+      ctx.fill();
+      // Value label (only if single series or values don't overlap much)
+      if(data.series.length<=2){
+        ctx.fillStyle='#0f172a';
+        ctx.font='bold 9px -apple-system,Arial,sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText(String(ser.values[i]), xv, yv-12);
+        ctx.fillStyle=ser.color;
+      }
+    }
+  }
+  chartBody.innerHTML='';
+  chartBody.appendChild(cv);
+  var legendItems=[];
+  for(var s=0;s<data.series.length;s++){
+    legendItems.push({color:data.series[s].color, label:data.series[s].label});
+  }
+  renderLegend(legendItems);
+}
+
+function drawTable(data){
+  chartBody.innerHTML='';
+  var wrap=document.createElement('div');
+  wrap.className='data-tbl-wrap';
+  var tbl=document.createElement('table');
+  tbl.className='data-tbl';
+  // Header
+  var thead=document.createElement('thead');
+  var htr=document.createElement('tr');
+  var thEmpty=document.createElement('th');
+  thEmpty.textContent=data.colsLabel||'';
+  htr.appendChild(thEmpty);
+  for(var j=0;j<data.cols.length;j++){
+    var th=document.createElement('th');
+    th.textContent=data.cols[j];
+    htr.appendChild(th);
+  }
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+  // Body
+  var tbody=document.createElement('tbody');
+  for(var i=0;i<data.rows.length;i++){
+    var tr=document.createElement('tr');
+    var tdName=document.createElement('td');
+    tdName.textContent=data.rows[i];
+    tr.appendChild(tdName);
+    for(var j=0;j<data.cols.length;j++){
+      var td=document.createElement('td');
+      td.textContent=data.matrix[i][j];
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
+  chartBody.appendChild(wrap);
+  renderLegend([]);
+}
+
+function drawMixed(data){
+  // Show table + a small bar chart of row totals
+  chartBody.innerHTML='';
+  // Table first
+  var wrap=document.createElement('div');
+  wrap.className='data-tbl-wrap';
+  var tbl=document.createElement('table');
+  tbl.className='data-tbl';
+  var thead=document.createElement('thead');
+  var htr=document.createElement('tr');
+  var thEmpty=document.createElement('th');
+  thEmpty.textContent=data.colsLabel||'';
+  htr.appendChild(thEmpty);
+  for(var j=0;j<data.cols.length;j++){
+    var th=document.createElement('th');
+    th.textContent=data.cols[j];
+    htr.appendChild(th);
+  }
+  var thT=document.createElement('th');
+  thT.textContent='Total';
+  thT.style.background='#fef3c7';
+  thT.style.color='#b45309';
+  htr.appendChild(thT);
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+  var tbody=document.createElement('tbody');
+  var rowTotals=[];
+  for(var i=0;i<data.rows.length;i++){
+    var tr=document.createElement('tr');
+    var tdName=document.createElement('td');
+    tdName.textContent=data.rows[i];
+    tr.appendChild(tdName);
+    var rTot=0;
+    for(var j=0;j<data.cols.length;j++){
+      var td=document.createElement('td');
+      td.textContent=data.matrix[i][j];
+      rTot+=data.matrix[i][j];
+      tr.appendChild(td);
+    }
+    rowTotals.push(rTot);
+    var tdT=document.createElement('td');
+    tdT.textContent=rTot;
+    tdT.style.background='#fef3c7';
+    tdT.style.color='#b45309';
+    tdT.style.fontWeight='900';
+    tr.appendChild(tdT);
+    tbody.appendChild(tr);
+  }
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
+  chartBody.appendChild(wrap);
+  data._rowTotals=rowTotals;
+  renderLegend([]);
+}
+
+function renderLegend(items){
+  legendEl.innerHTML='';
+  if(!items || items.length===0){
+    legendEl.style.display='none';
+    return;
+  }
+  legendEl.style.display='flex';
+  for(var i=0;i<items.length;i++){
+    var d=document.createElement('div');
+    d.className='legend-item';
+    var dot=document.createElement('span');
+    dot.className='legend-dot';
+    dot.style.background=items[i].color;
+    var txt=document.createElement('span');
+    txt.textContent=items[i].label;
+    d.appendChild(dot);
+    d.appendChild(txt);
+    legendEl.appendChild(d);
+  }
+}
+
+function niceCeiling(v){
+  if(v<=0)return 10;
+  var mag=Math.pow(10, Math.floor(Math.log10(v)));
+  var unit=v/mag;
+  var step;
+  if(unit<=1)step=1;
+  else if(unit<=2)step=2;
+  else if(unit<=5)step=5;
+  else step=10;
+  return step*mag;
+}
+
+/* ==================== CHART DISPATCHER ==================== */
+function renderDataset(data){
+  chartTitle.innerHTML=data.title;
+  chartSub.innerHTML=data.sub;
+  if(data.kind==='bar')drawBarChart(data);
+  else if(data.kind==='pie')drawPieChart(data);
+  else if(data.kind==='table')drawTable(data);
+  else if(data.kind==='line')drawLineGraph(data);
+  else if(data.kind==='mixed')drawMixed(data);
+}
+
+/* ==================== QUESTION GENERATORS ==================== */
+
+function optionsFromCandidates(ans, candidates){
+  // Select 3 distractors near the answer.
+  var opts=[ans];
+  shuffle(candidates);
+  for(var i=0;i<candidates.length && opts.length<4;i++){
+    var c=candidates[i];
+    if(Math.abs(c-ans)<1e-6)continue;
+    var dup=false;
+    for(var k=0;k<opts.length;k++){
+      if(Math.abs(opts[k]-c)<1e-6){dup=true;break}
+    }
+    if(!dup)opts.push(c);
+  }
+  return opts;
+}
+
+function generateDistractors(ans, isFloat, isPercent){
+  // Create plausible wrong answers
+  var opts=[ans];
+  var tries=0;
+  var absA=Math.abs(ans)||1;
+  while(opts.length<4 && tries<80){
+    tries++;
+    var delta;
+    if(absA<10)delta=rnd(1,4);
+    else if(absA<50)delta=rnd(1,8);
+    else if(absA<200)delta=rnd(2,20);
+    else if(absA<1000)delta=rnd(5,80);
+    else delta=rnd(10,Math.round(absA*0.15));
+    if(Math.random()<0.5)delta=-delta;
+    var cand;
+    if(isFloat){
+      cand=Math.round((ans+delta*0.5)*10)/10;
+    } else {
+      cand=ans+delta;
+    }
+    if(isPercent){
+      if(cand<0||cand>100)continue;
+    }
+    if(cand===ans)continue;
+    if(cand<0 && ans>=0)continue;
+    var dup=false;
+    for(var k=0;k<opts.length;k++){
+      if(Math.abs(opts[k]-cand)<1e-6){dup=true;break}
+    }
+    if(!dup)opts.push(cand);
+  }
+  while(opts.length<4){
+    opts.push(ans + opts.length*(isFloat?1.3:7) + 1);
+  }
+  return opts;
+}
+
+// ===== BAR QUESTIONS =====
+function questionsForBar(data){
+  var qs=[];
+  var vals=data.values;
+  var labels=data.labels;
+  var n=vals.length;
+  var total=sum(vals);
+
+  // Q1: Total
+  qs.push({
+    q:'What is the total value across all '+(labels.length)+' categories?',
+    ans:total,
+    opts:generateDistractors(total, false, false)
+  });
+  // Q2: Largest
+  var hi=maxIdx(vals);
+  qs.push({
+    q:'Which category has the highest value?',
+    ans:labels[hi],
+    textOpts:shuffle(labels.slice()).slice(0,4),
+    isText:true
+  });
+  // Q3: Smallest
+  var lo=minIdx(vals);
+  qs.push({
+    q:'Which category has the lowest value?',
+    ans:labels[lo],
+    textOpts:shuffle(labels.slice()).slice(0,4),
+    isText:true
+  });
+  // Q4: Average
+  var a=Math.round(total/n);
+  qs.push({
+    q:'What is the approximate average value? (rounded)',
+    ans:a,
+    opts:generateDistractors(a, false, false)
+  });
+  // Q5: Difference max-min
+  var diff=vals[hi]-vals[lo];
+  qs.push({
+    q:'What is the difference between the highest and lowest value?',
+    ans:diff,
+    opts:generateDistractors(diff, false, false)
+  });
+  // Q6: Ratio of two random
+  var idx1=rnd(0,n-1);
+  var idx2=rnd(0,n-1);
+  while(idx2===idx1)idx2=rnd(0,n-1);
+  if(vals[idx1]<vals[idx2]){var tmp=idx1;idx1=idx2;idx2=tmp}
+  var ratio=vals[idx1]/vals[idx2];
+  var ratioClean=Math.round(ratio*10)/10;
+  qs.push({
+    q:'What is the approximate ratio of '+labels[idx1]+' to '+labels[idx2]+'? (to 1 decimal)',
+    ans:ratioClean,
+    opts:generateDistractors(ratioClean, true, false),
+    isFloat:true
+  });
+  // Q7: What % is X of total
+  var pIdx=rnd(0,n-1);
+  var pctOfTotal=Math.round((vals[pIdx]/total)*1000)/10;
+  qs.push({
+    q:'What percentage of the total does '+labels[pIdx]+' represent?',
+    ans:pctOfTotal,
+    opts:generateDistractors(pctOfTotal, true, true),
+    isFloat:true,
+    isPct:true
+  });
+  // Q8: Sum of two
+  var i1=rnd(0,n-1);
+  var i2=rnd(0,n-1);
+  while(i2===i1)i2=rnd(0,n-1);
+  var sumTwo=vals[i1]+vals[i2];
+  qs.push({
+    q:'What is the combined value of '+labels[i1]+' and '+labels[i2]+'?',
+    ans:sumTwo,
+    opts:generateDistractors(sumTwo, false, false)
+  });
+
+  shuffle(qs);
+  var count=pickQCount();
+  return qs.slice(0,count);
+}
+
+// ===== PIE QUESTIONS =====
+function questionsForPie(data){
+  var qs=[];
+  var labels=data.labels;
+  var pcts=data.pcts;
+  var total=data.total;
+  var n=labels.length;
+
+  // Q1: Largest slice
+  var hi=maxIdx(pcts);
+  qs.push({
+    q:'Which category has the highest share?',
+    ans:labels[hi],
+    textOpts:shuffle(labels.slice()).slice(0,4),
+    isText:true
+  });
+  // Q2: Value of a specific slice
+  var sIdx=rnd(0,n-1);
+  var val=Math.round(total*pcts[sIdx]/100);
+  qs.push({
+    q:'What is the value of '+labels[sIdx]+'? (Total = '+total+')',
+    ans:val,
+    opts:generateDistractors(val, false, false)
+  });
+  // Q3: Combined % of two
+  var i1=rnd(0,n-1);
+  var i2=rnd(0,n-1);
+  while(i2===i1)i2=rnd(0,n-1);
+  var combPct=pcts[i1]+pcts[i2];
+  qs.push({
+    q:'What is the combined percentage of '+labels[i1]+' and '+labels[i2]+'?',
+    ans:combPct,
+    opts:generateDistractors(combPct, false, true),
+    isPct:true
+  });
+  // Q4: Difference between two slices in value
+  var j1=rnd(0,n-1);
+  var j2=rnd(0,n-1);
+  while(j2===j1)j2=rnd(0,n-1);
+  var v1=Math.round(total*pcts[j1]/100);
+  var v2=Math.round(total*pcts[j2]/100);
+  var diff=Math.abs(v1-v2);
+  qs.push({
+    q:'What is the difference in value between '+labels[j1]+' ('+pcts[j1]+'%) and '+labels[j2]+' ('+pcts[j2]+'%)?',
+    ans:diff,
+    opts:generateDistractors(diff, false, false)
+  });
+  // Q5: Ratio
+  var k1=rnd(0,n-1);
+  var k2=rnd(0,n-1);
+  while(k2===k1)k2=rnd(0,n-1);
+  if(pcts[k1]<pcts[k2]){var tmp=k1;k1=k2;k2=tmp}
+  var ratio=Math.round(pcts[k1]/pcts[k2]*10)/10;
+  qs.push({
+    q:'What is the ratio of '+labels[k1]+' to '+labels[k2]+'? (to 1 decimal)',
+    ans:ratio,
+    opts:generateDistractors(ratio, true, false),
+    isFloat:true
+  });
+  // Q6: Combined value of two slices
+  var l1=rnd(0,n-1);
+  var l2=rnd(0,n-1);
+  while(l2===l1)l2=rnd(0,n-1);
+  var combVal=Math.round(total*(pcts[l1]+pcts[l2])/100);
+  qs.push({
+    q:'What is the combined value of '+labels[l1]+' and '+labels[l2]+'?',
+    ans:combVal,
+    opts:generateDistractors(combVal, false, false)
+  });
+  // Q7: Smallest
+  var lo=minIdx(pcts);
+  qs.push({
+    q:'Which category has the smallest share?',
+    ans:labels[lo],
+    textOpts:shuffle(labels.slice()).slice(0,4),
+    isText:true
+  });
+  // Q8: "If X increased by 20%, new value?"
+  var m1=rnd(0,n-1);
+  var vOrig=Math.round(total*pcts[m1]/100);
+  var incPct=pick([10,20,25]);
+  var vNew=Math.round(vOrig*(100+incPct)/100);
+  qs.push({
+    q:'If '+labels[m1]+' (currently '+vOrig+') increased by '+incPct+'%, the new value would be?',
+    ans:vNew,
+    opts:generateDistractors(vNew, false, false)
+  });
+
+  shuffle(qs);
+  return qs.slice(0, pickQCount());
+}
+
+// ===== TABLE QUESTIONS =====
+function questionsForTable(data){
+  var qs=[];
+  var rows=data.rows;
+  var cols=data.cols;
+  var m=data.matrix;
+  var R=rows.length, C=cols.length;
+
+  // Row sums & col sums
+  var rowSums=[];
+  var colSums=[];
+  for(var i=0;i<R;i++){
+    var s=0;
+    for(var j=0;j<C;j++)s+=m[i][j];
+    rowSums.push(s);
+  }
+  for(var j=0;j<C;j++){
+    var s=0;
+    for(var i=0;i<R;i++)s+=m[i][j];
+    colSums.push(s);
+  }
+  var grandTotal=sum(rowSums);
+
+  // Q1: Total in a specific column
+  var cIdx=rnd(0,C-1);
+  qs.push({
+    q:'What is the total value across all '+rows.join(', ').replace(/,([^,]*)$/,' and$1')+' in '+cols[cIdx]+'?',
+    ans:colSums[cIdx],
+    opts:generateDistractors(colSums[cIdx], false, false)
+  });
+  // Q2: Total for a specific row
+  var rIdx=rnd(0,R-1);
+  qs.push({
+    q:'What is the total value of '+rows[rIdx]+' across all '+data.colsLabel.toLowerCase()+'s?',
+    ans:rowSums[rIdx],
+    opts:generateDistractors(rowSums[rIdx], false, false)
+  });
+  // Q3: Average for a specific row
+  var rIdx2=rnd(0,R-1);
+  var avgR=Math.round(rowSums[rIdx2]/C);
+  qs.push({
+    q:'What is the approximate average value of '+rows[rIdx2]+' across all '+data.colsLabel.toLowerCase()+'s? (rounded)',
+    ans:avgR,
+    opts:generateDistractors(avgR, false, false)
+  });
+  // Q4: Which row had the highest total
+  var hiRow=maxIdx(rowSums);
+  qs.push({
+    q:'Which '+(labelGuess(rows))+' has the highest total across all '+data.colsLabel.toLowerCase()+'s?',
+    ans:rows[hiRow],
+    textOpts:shuffle(rows.slice()).slice(0,4),
+    isText:true
+  });
+  // Q5: Which column had the highest total
+  var hiCol=maxIdx(colSums);
+  qs.push({
+    q:'Which '+data.colsLabel.toLowerCase()+' had the highest total?',
+    ans:cols[hiCol],
+    textOpts:shuffle(cols.slice()).slice(0,4),
+    isText:true
+  });
+  // Q6: % growth of one row from colA to colB (if col has numeric order)
+  if(C>=2){
+    var a=rnd(0,C-2);
+    var b=a+1;
+    var rIdx3=rnd(0,R-1);
+    var va=m[rIdx3][a];
+    var vb=m[rIdx3][b];
+    if(va>0){
+      var pct=Math.round(((vb-va)/va)*1000)/10;
+      qs.push({
+        q:'What is the percentage change for '+rows[rIdx3]+' from '+cols[a]+' to '+cols[b]+'?',
+        ans:pct,
+        opts:generateDistractors(pct, true, false),
+        isFloat:true,
+        isPct:true,
+        suffix:'%'
+      });
+    }
+  }
+  // Q7: Ratio of specific cell to specific cell
+  var r1=rnd(0,R-1);
+  var r2=rnd(0,R-1);
+  var c1=rnd(0,C-1);
+  while(r2===r1)r2=rnd(0,R-1);
+  var vA=m[r1][c1];
+  var vB=m[r2][c1];
+  if(vB<vA){var t=r1;r1=r2;r2=t;t=vA;vA=vB;vB=t}
+  if(vA>0){
+    var ratio=Math.round(vB/vA*10)/10;
+    qs.push({
+      q:'In '+cols[c1]+', what is the ratio of '+rows[r2]+' to '+rows[r1]+'? (to 1 decimal)',
+      ans:ratio,
+      opts:generateDistractors(ratio, true, false),
+      isFloat:true
+    });
+  }
+  // Q8: Specific cell value
+  var r3=rnd(0,R-1);
+  var c3=rnd(0,C-1);
+  var cellV=m[r3][c3];
+  qs.push({
+    q:'What is the value of '+rows[r3]+' in '+cols[c3]+'?',
+    ans:cellV,
+    opts:generateDistractors(cellV, false, false)
+  });
+  // Q9: Difference between two cells
+  var ra=rnd(0,R-1), rb=rnd(0,R-1);
+  while(rb===ra)rb=rnd(0,R-1);
+  var ca=rnd(0,C-1);
+  var diff=Math.abs(m[ra][ca]-m[rb][ca]);
+  qs.push({
+    q:'In '+cols[ca]+', what is the difference between '+rows[ra]+' and '+rows[rb]+'?',
+    ans:diff,
+    opts:generateDistractors(diff, false, false)
+  });
+
+  shuffle(qs);
+  return qs.slice(0, pickQCount());
+}
+
+// ===== LINE QUESTIONS =====
+function questionsForLine(data){
+  var qs=[];
+  var x=data.x;
+  var series=data.series;
+
+  // Pick a series
+  var sIdx0=rnd(0,series.length-1);
+  var vals=series[sIdx0].values;
+  var nm=series[sIdx0].label;
+  // Q1: Max of a series
+  var hi=maxIdx(vals);
+  qs.push({
+    q:'At which point does '+nm+' reach its maximum?',
+    ans:x[hi],
+    textOpts:shuffle(x.slice()).slice(0,4),
+    isText:true
+  });
+  // Q2: Min
+  var lo=minIdx(vals);
+  qs.push({
+    q:'At which point does '+nm+' reach its minimum?',
+    ans:x[lo],
+    textOpts:shuffle(x.slice()).slice(0,4),
+    isText:true
+  });
+  // Q3: Difference max-min
+  var rng=vals[hi]-vals[lo];
+  qs.push({
+    q:'What is the difference between the maximum and minimum values of '+nm+'?',
+    ans:rng,
+    opts:generateDistractors(rng, false, false)
+  });
+  // Q4: Total / sum over period
+  var sAll=sum(vals);
+  qs.push({
+    q:'What is the total value of '+nm+' over the entire period?',
+    ans:sAll,
+    opts:generateDistractors(sAll, false, false)
+  });
+  // Q5: Average
+  var avgS=Math.round(sAll/vals.length);
+  qs.push({
+    q:'What is the approximate average value of '+nm+' over the period? (rounded)',
+    ans:avgS,
+    opts:generateDistractors(avgS, false, false)
+  });
+  // Q6: % change from start to end
+  if(vals[0]>0){
+    var pctCh=Math.round(((vals[vals.length-1]-vals[0])/vals[0])*1000)/10;
+    qs.push({
+      q:'What is the percentage change in '+nm+' from '+x[0]+' to '+x[vals.length-1]+'?',
+      ans:pctCh,
+      opts:generateDistractors(pctCh, true, false),
+      isFloat:true,
+      isPct:true,
+      suffix:'%'
+    });
+  }
+  // Q7: Value at a specific point
+  var pt=rnd(0, x.length-1);
+  qs.push({
+    q:'What is the value of '+nm+' at '+x[pt]+'?',
+    ans:vals[pt],
+    opts:generateDistractors(vals[pt], false, false)
+  });
+  // Q8: If 2+ series, which is higher at end?
+  if(series.length>=2){
+    var endIdx=x.length-1;
+    var maxSer=0;
+    for(var s=1;s<series.length;s++){
+      if(series[s].values[endIdx]>series[maxSer].values[endIdx])maxSer=s;
+    }
+    var serNames=[];
+    for(var s=0;s<series.length;s++)serNames.push(series[s].label);
+    // Pad to 4 options
+    var distractorSer=serNames.slice();
+    var fillers=['Series D','Series E','Series F','Series G'];
+    var fi=0;
+    while(distractorSer.length<4)distractorSer.push(fillers[fi++]);
+    qs.push({
+      q:'At '+x[endIdx]+', which series has the highest value?',
+      ans:series[maxSer].label,
+      textOpts:shuffle(distractorSer).slice(0,4),
+      isText:true
+    });
+  }
+  // Q9: Difference between 2 consecutive points
+  var p=rnd(0,x.length-2);
+  var delta=Math.abs(vals[p+1]-vals[p]);
+  qs.push({
+    q:'What is the absolute difference in '+nm+' between '+x[p]+' and '+x[p+1]+'?',
+    ans:delta,
+    opts:generateDistractors(delta, false, false)
+  });
+
+  shuffle(qs);
+  return qs.slice(0, pickQCount());
+}
+
+// ===== MIXED QUESTIONS =====
+function questionsForMixed(data){
+  var qs=[];
+  var rows=data.rows;
+  var cols=data.cols;
+  var m=data.matrix;
+  var R=rows.length, C=cols.length;
+  var rowSums=data._rowTotals || [];
+  if(rowSums.length===0){
+    for(var i=0;i<R;i++){
+      var s=0;for(var j=0;j<C;j++)s+=m[i][j];
+      rowSums.push(s);
+    }
+  }
+  var colSums=[];
+  for(var j=0;j<C;j++){
+    var s=0;for(var i=0;i<R;i++)s+=m[i][j];
+    colSums.push(s);
+  }
+  var grand=sum(rowSums);
+
+  // Grand total
+  qs.push({
+    q:'What is the grand total across all categories and '+data.colsLabel.toLowerCase()+'s?',
+    ans:grand,
+    opts:generateDistractors(grand, false, false)
+  });
+  // % that one row is of grand total
+  var rIdx=rnd(0,R-1);
+  var pct=Math.round((rowSums[rIdx]/grand)*1000)/10;
+  qs.push({
+    q:'What percentage of the grand total is '+rows[rIdx]+'?',
+    ans:pct,
+    opts:generateDistractors(pct, true, true),
+    isFloat:true,
+    isPct:true,
+    suffix:'%'
+  });
+  // Highest row total
+  var hi=maxIdx(rowSums);
+  qs.push({
+    q:'Which category has the highest total?',
+    ans:rows[hi],
+    textOpts:shuffle(rows.slice()).slice(0,4),
+    isText:true
+  });
+  // Highest col total
+  var hiC=maxIdx(colSums);
+  qs.push({
+    q:'Which '+data.colsLabel.toLowerCase()+' has the highest column total?',
+    ans:cols[hiC],
+    textOpts:shuffle(cols.slice()).slice(0,4),
+    isText:true
+  });
+  // Avg column total
+  var avgCol=Math.round(sum(colSums)/C);
+  qs.push({
+    q:'What is the approximate average column total? (rounded)',
+    ans:avgCol,
+    opts:generateDistractors(avgCol, false, false)
+  });
+  // Specific cell
+  var r1=rnd(0,R-1);
+  var c1=rnd(0,C-1);
+  qs.push({
+    q:'What is the value of '+rows[r1]+' in '+cols[c1]+'?',
+    ans:m[r1][c1],
+    opts:generateDistractors(m[r1][c1], false, false)
+  });
+  // Difference of row totals
+  var a=rnd(0,R-1), b=rnd(0,R-1);
+  while(b===a)b=rnd(0,R-1);
+  var dRow=Math.abs(rowSums[a]-rowSums[b]);
+  qs.push({
+    q:'What is the difference between the totals of '+rows[a]+' and '+rows[b]+'?',
+    ans:dRow,
+    opts:generateDistractors(dRow, false, false)
+  });
+  // Ratio row totals
+  var x1=rnd(0,R-1), x2=rnd(0,R-1);
+  while(x2===x1)x2=rnd(0,R-1);
+  if(rowSums[x1]<rowSums[x2]){var t=x1;x1=x2;x2=t}
+  var ra=Math.round(rowSums[x1]/rowSums[x2]*10)/10;
+  qs.push({
+    q:'What is the ratio of total '+rows[x1]+' to total '+rows[x2]+'? (to 1 decimal)',
+    ans:ra,
+    opts:generateDistractors(ra, true, false),
+    isFloat:true
+  });
+
+  shuffle(qs);
+  return qs.slice(0, pickQCount());
+}
+
+function labelGuess(arr){
+  // Simple heuristic for question wording
+  if(!arr||!arr.length)return 'item';
+  var a=arr[0].toLowerCase();
+  if(a.indexOf('product')>=0)return 'product';
+  if(a.indexOf('city')>=0)return 'city';
+  if(a.indexOf('school')>=0)return 'school';
+  if(a.indexOf('corp')>=0||a.indexOf('ltd')>=0||a.indexOf('inc')>=0||a.indexOf('llc')>=0)return 'company';
+  return 'category';
+}
+
+function pickQCount(){
+  if(difficulty==='easy')return rnd(3,4);
+  if(difficulty==='med')return rnd(4,5);
+  return rnd(4,5);
+}
+
+function generateQuestions(ds){
+  if(ds.kind==='bar')return questionsForBar(ds);
+  if(ds.kind==='pie')return questionsForPie(ds);
+  if(ds.kind==='table')return questionsForTable(ds);
+  if(ds.kind==='line')return questionsForLine(ds);
+  if(ds.kind==='mixed')return questionsForMixed(ds);
+  return [];
+}
+
+/* ==================== QUESTION RENDERING ==================== */
+function renderQuestion(){
+  var q=currentQuestions[qIdx];
+  if(!q){nextRound();return}
+  qMeta.textContent='QUESTION '+(qIdx+1)+' OF '+currentQuestions.length;
+  qText.innerHTML=q.q;
+  qCard.classList.remove('ok','bad');
+  feedback.classList.remove('show','ok','bad');
+  feedback.innerHTML='&nbsp;';
+  qNumVal.textContent=(qIdx+1)+'/'+currentQuestions.length;
+
+  var optsArr;
+  if(q.isText){
+    optsArr=q.textOpts.slice();
+    // Ensure correct answer is present
+    var has=false;
+    for(var i=0;i<optsArr.length;i++)if(optsArr[i]===q.ans){has=true;break}
+    if(!has){
+      optsArr[rnd(0,3)]=q.ans;
+    }
+    shuffle(optsArr);
+  } else {
+    optsArr=q.opts.slice();
+    shuffle(optsArr);
+  }
+  for(var i=0;i<4;i++){
+    var btn=optBtns[i];
+    btn.classList.remove('ok','bad');
+    btn.removeAttribute('disabled');
+    var v=optsArr[i]!==undefined?optsArr[i]:'';
+    var disp=v;
+    if(q.suffix)disp=v+q.suffix;
+    else if(q.isPct && !q.isText)disp=v+'%';
+    btn.querySelector('.val').textContent=disp;
+    btn.dataset.val=String(v);
+    btn.dataset.isText=q.isText?'1':'0';
+  }
+  acceptingInput=true;
+  startQuestionTimer();
+}
+
+function startQuestionTimer(){
+  timeLeft=QUESTION_TIME;
+  timeVal.textContent=timeLeft;
+  timeVal.classList.remove('time-warn');
+  tbar.style.transitionDuration='0s';
+  tbar.style.width='100%';
+  tbar.classList.remove('warn');
+  void tbar.offsetWidth;
+  setTimeout(function(){
+    tbar.style.transitionDuration=QUESTION_TIME+'s';
+    tbar.style.width='0%';
+  },30);
+  if(tickHandle)clearInterval(tickHandle);
+  tickHandle=setInterval(function(){
+    timeLeft--;
+    timeVal.textContent=timeLeft;
+    if(timeLeft<=8){timeVal.classList.add('time-warn');tbar.classList.add('warn')}
+    if(timeLeft<=0){
+      clearInterval(tickHandle);
+      tickHandle=null;
+      onTimeout();
+    }
+  },1000);
+}
+
+function stopTimer(){
+  if(tickHandle){clearInterval(tickHandle);tickHandle=null}
+}
+
+function onTimeout(){
+  if(!acceptingInput)return;
+  acceptingInput=false;
+  wrong++;
+  totalQuestionsAsked++;
+  var q=currentQuestions[qIdx];
+  // Disable all & reveal correct
+  for(var i=0;i<4;i++){
+    optBtns[i].setAttribute('disabled','');
+    var v=optBtns[i].dataset.val;
+    var matches;
+    if(q.isText){matches=(v===String(q.ans))}
+    else{matches=(Math.abs(parseFloat(v)-q.ans)<1e-6)}
+    if(matches)optBtns[i].classList.add('ok');
+  }
+  feedback.textContent='Time up! Correct: '+fmtAnswer(q);
+  feedback.classList.remove('ok');
+  feedback.classList.add('bad','show');
+  qCard.classList.add('bad');
+  if(feedbackHandle)clearTimeout(feedbackHandle);
+  feedbackHandle=setTimeout(advance, 1400);
+}
+
+function fmtAnswer(q){
+  var a=q.ans;
+  if(q.isText)return String(a);
+  var str;
+  if(q.isFloat){
+    str=(Math.round(a*100)/100);
+    if(Number.isInteger(str))str=String(str);
+    else str=str.toFixed(q.isPct?1:2);
+  } else {
+    str=String(a);
+  }
+  if(q.suffix)str+=q.suffix;
+  else if(q.isPct && !q.isText)str+='%';
+  return str;
+}
+
+function chooseAnswer(btn){
+  if(!acceptingInput)return;
+  acceptingInput=false;
+  stopTimer();
+  var q=currentQuestions[qIdx];
+  var val=btn.dataset.val;
+  var isText=btn.dataset.isText==='1';
+  var isRight;
+  if(isText){
+    isRight=(val===String(q.ans));
+  } else {
+    var v=parseFloat(val);
+    isRight=(Math.abs(v-q.ans)<1e-6);
+  }
+  for(var i=0;i<4;i++)optBtns[i].setAttribute('disabled','');
+  totalQuestionsAsked++;
+  if(isRight){
+    correct++;
+    score++;
+    scoreVal.textContent=score;
+    btn.classList.add('ok');
+    qCard.classList.add('ok');
+    feedback.textContent='Correct!';
+    feedback.classList.remove('bad');
+    feedback.classList.add('ok','show');
+  } else {
+    wrong++;
+    btn.classList.add('bad');
+    qCard.classList.add('bad');
+    // reveal correct
+    for(var j=0;j<4;j++){
+      var v=optBtns[j].dataset.val;
+      var matches;
+      if(isText)matches=(v===String(q.ans));
+      else matches=(Math.abs(parseFloat(v)-q.ans)<1e-6);
+      if(matches){optBtns[j].classList.add('ok');break}
+    }
+    feedback.textContent='Wrong. Correct: '+fmtAnswer(q);
+    feedback.classList.remove('ok');
+    feedback.classList.add('bad','show');
+  }
+  if(feedbackHandle)clearTimeout(feedbackHandle);
+  feedbackHandle=setTimeout(advance, isRight?700:1300);
+}
+
+function advance(){
+  qIdx++;
+  if(qIdx<currentQuestions.length){
+    renderQuestion();
+  } else {
+    nextRound();
+  }
+}
+
+/* ==================== ROUND / GAME LIFECYCLE ==================== */
+function showRoundBanner(r, cb){
+  rbTitle.textContent='ROUND '+r;
+  rbSub.textContent='New Dataset';
+  roundBanner.classList.add('show');
+  if(bannerHandle)clearTimeout(bannerHandle);
+  bannerHandle=setTimeout(function(){
+    roundBanner.classList.remove('show');
+    if(cb)cb();
+  }, 900);
+}
+
+function startRound(r){
+  roundVal.textContent=r+'/'+TOTAL_ROUNDS;
+  qIdx=0;
+  currentDataset=generateDataset();
+  // Ensure at least some questions
+  var attempts=0;
+  do{
+    currentQuestions=generateQuestions(currentDataset);
+    attempts++;
+    if(attempts>3)break;
+  }while(currentQuestions.length===0);
+  renderDataset(currentDataset);
+  showRoundBanner(r, function(){
+    renderQuestion();
+  });
+}
+
+function nextRound(){
+  roundIdx++;
+  if(roundIdx>=TOTAL_ROUNDS){
+    endGame();
+    return;
+  }
+  startRound(roundIdx+1);
+}
+
+function startGame(){
+  roundIdx=0;
+  score=0;correct=0;wrong=0;totalQuestionsAsked=0;
+  scoreVal.textContent=0;
+  showScreen(scGame);
+  setTimeout(function(){
+    startRound(1);
+  }, 50);
+}
+
+function endGame(){
+  stopTimer();
+  if(feedbackHandle){clearTimeout(feedbackHandle);feedbackHandle=null}
+  if(bannerHandle){clearTimeout(bannerHandle);bannerHandle=null}
+  acceptingInput=false;
+  var best=loadBest(mode);
+  var isNewBest=score>best;
+  if(isNewBest){saveBest(mode,score);best=score}
+  finalScore.textContent=score;
+  totalLbl.textContent='out of '+totalQuestionsAsked+' questions';
+  statCorrect.textContent=correct;
+  statWrong.textContent=wrong;
+  var total=correct+wrong;
+  var acc=total?Math.round((correct/total)*100):0;
+  statAcc.textContent=acc+'%';
+  var bestHtml='Best ('+modeLabels[mode]+'): <b>'+best+'</b>';
+  if(isNewBest && score>0)bestHtml+='<span class="newbest">NEW BEST!</span>';
+  endBest.innerHTML=bestHtml;
+  showScreen(scEnd);
+}
+
+function quitGame(){
+  stopTimer();
+  if(feedbackHandle){clearTimeout(feedbackHandle);feedbackHandle=null}
+  if(bannerHandle){clearTimeout(bannerHandle);bannerHandle=null}
+  refreshBestDisplay();
+  showScreen(scStart);
+}
+
+function goStart(){
+  refreshBestDisplay();
+  showScreen(scStart);
+}
+
+/* ==================== SHARE ==================== */
+function shareScore(){
+  var txt='I scored '+score+'/'+totalQuestionsAsked+' on DI Drill ('+modeLabels[mode]+' - '+diffLabels[difficulty]+'), '+statAcc.textContent+' accuracy. Can you beat it at fun5games.us?';
+  var showToast=function(){toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1400)};
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(showToast, function(){fallbackCopy(txt);showToast()});
+    } else {
+      fallbackCopy(txt);showToast();
+    }
+  }catch(e){fallbackCopy(txt);showToast()}
+}
+
+function fallbackCopy(txt){
+  try{
+    var ta=document.createElement('textarea');
+    ta.value=txt;
+    ta.style.position='absolute';
+    ta.style.left='-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }catch(e){}
+}
+
+/* ==================== EVENT WIRING ==================== */
+// Mode selector
+var modeBtns=document.querySelectorAll('.mode-btn');
+for(var i=0;i<modeBtns.length;i++){
+  modeBtns[i].addEventListener('click',function(e){
+    e.stopPropagation();e.preventDefault();
+    for(var k=0;k<modeBtns.length;k++)modeBtns[k].classList.remove('sel');
+    this.classList.add('sel');
+    mode=this.getAttribute('data-m');
+    refreshBestDisplay();
+  });
+}
+
+// Difficulty selector
+var diffBtns=document.querySelectorAll('.diff-btn');
+for(var i=0;i<diffBtns.length;i++){
+  diffBtns[i].addEventListener('click',function(e){
+    e.stopPropagation();e.preventDefault();
+    for(var k=0;k<diffBtns.length;k++)diffBtns[k].classList.remove('sel');
+    this.classList.add('sel');
+    difficulty=this.getAttribute('data-d');
+  });
+}
+
+// How to play
+document.getElementById('howHd').addEventListener('click',function(e){
+  e.stopPropagation();e.preventDefault();
+  document.getElementById('how').classList.toggle('open');
+});
+
+// Play / Answer / Quit / End buttons
+document.getElementById('playBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();startGame()});
+for(var i=0;i<optBtns.length;i++){
+  optBtns[i].addEventListener('click',function(e){e.stopPropagation();e.preventDefault();chooseAnswer(this)});
+}
+document.getElementById('quitBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();quitGame()});
+document.getElementById('shareBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();shareScore()});
+document.getElementById('againBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();startGame()});
+document.getElementById('changeBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();goStart()});
+
+// Keyboard shortcuts
+window.addEventListener('keydown',function(e){
+  if(!scGame.classList.contains('hidden') && acceptingInput){
+    var idx=-1;
+    if(e.key==='1'||e.key==='a'||e.key==='A')idx=0;
+    else if(e.key==='2'||e.key==='b'||e.key==='B')idx=1;
+    else if(e.key==='3'||e.key==='c'||e.key==='C')idx=2;
+    else if(e.key==='4'||e.key==='d'||e.key==='D')idx=3;
+    if(idx>=0){e.preventDefault();chooseAnswer(optBtns[idx])}
+  } else if(!scStart.classList.contains('hidden') && (e.key==='Enter'||e.key===' ')){
+    e.preventDefault();startGame();
+  } else if(!scEnd.classList.contains('hidden') && (e.key==='Enter'||e.key===' ')){
+    e.preventDefault();startGame();
+  }
+});
+
+// Prevent iOS pull-to-refresh
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+
+// Init
+refreshBestDisplay();
+
+})();
+</script>
+</body>
+</html>

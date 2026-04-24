@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ecfeff">
+<title>Odd One Out</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#ecfeff}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#0f172a;position:relative}
+
+/* Root stages */
+.stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.stage.hidden{display:none}
+
+/* ---------- START SCREEN ---------- */
+.title{font-size:clamp(30px,8.5vw,44px);font-weight:900;letter-spacing:2px;color:#06b6d4;text-align:center;margin-top:3vh;text-shadow:0 2px 8px rgba(6,182,212,.18);line-height:1}
+.tag{color:#334155;font-size:clamp(12px,3.5vw,15px);text-align:center;margin-top:8px;max-width:320px;line-height:1.4}
+
+/* Ad placeholder */
+.ad-slot{border:1px dashed #94a3b8;background:rgba(6,182,212,.05);color:#64748b;font-size:11px;padding:12px;text-align:center;width:100%;max-width:360px;margin:12px 0;border-radius:4px;letter-spacing:1px}
+
+/* How to play */
+.how{width:100%;max-width:360px;background:#fff;border:1px solid #cffafe;border-radius:10px;margin-top:4px;overflow:hidden;box-shadow:0 2px 4px rgba(6,182,212,.08)}
+.how-hd{padding:12px 16px;font-size:13px;font-weight:bold;color:#0891b2;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.how-hd .arrow{transition:transform .25s}
+.how.open .how-hd .arrow{transform:rotate(180deg)}
+.how-bd{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:12.5px;color:#334155;line-height:1.7}
+.how.open .how-bd{max-height:300px}
+.how-bd ul{padding:4px 16px 14px 32px}
+.how-bd li{margin-bottom:2px}
+
+/* Selector labels */
+.sel-label{font-size:12px;color:#64748b;margin-top:16px;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+
+/* Difficulty grid */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:360px;margin-top:10px}
+.diff-btn{background:#fff;border:2px solid #cffafe;color:#0f172a;padding:12px 6px;border-radius:10px;font-family:inherit;font-size:13px;font-weight:bold;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;transition:all .2s;text-align:center}
+.diff-btn .sub{display:block;font-size:10px;color:#64748b;font-weight:normal;margin-top:3px;letter-spacing:.5px}
+.diff-btn.sel{background:#06b6d4;border-color:#0891b2;color:#fff}
+.diff-btn.sel .sub{color:#cffafe}
+.diff-btn:active{transform:scale(.97)}
+
+/* Mode toggle */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:360px;margin-top:10px}
+.mode-btn{background:#fff;border:2px solid #fed7aa;color:#0f172a;padding:10px 6px;border-radius:10px;font-family:inherit;font-size:12px;font-weight:bold;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;transition:all .2s}
+.mode-btn.sel{background:#f97316;border-color:#ea580c;color:#fff}
+.mode-btn:active{transform:scale(.97)}
+
+/* Best score */
+.best-row{font-size:13px;color:#475569;margin-top:16px}
+.best-row b{color:#06b6d4;font-size:16px}
+
+/* PLAY button */
+.play-btn{background:linear-gradient(180deg,#22d3ee,#06b6d4);color:#fff;border:none;padding:16px 60px;font-family:inherit;font-size:20px;font-weight:900;letter-spacing:4px;border-radius:12px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;box-shadow:0 6px 18px rgba(6,182,212,.35);margin-top:18px;min-width:220px}
+.play-btn:active{transform:scale(.96)}
+
+/* ---------- GAME SCREEN ---------- */
+.hud{width:100%;max-width:460px;display:flex;justify-content:space-between;align-items:center;padding:4px 2px;margin-top:4px}
+.hud-box{text-align:center}
+.hud-lbl{font-size:10px;color:#64748b;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.hud-val{font-size:clamp(22px,6vw,30px);font-weight:900;color:#06b6d4;line-height:1}
+.hud-val.streak{color:#f97316}
+.hud-val.time-warn{color:#ef4444;animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+
+/* Timer bar */
+.tbar-wrap{width:100%;max-width:460px;height:10px;background:#e2e8f0;border-radius:5px;margin-top:10px;overflow:hidden}
+.tbar{height:100%;width:100%;background:linear-gradient(90deg,#06b6d4,#22d3ee);border-radius:5px;transition:width .95s linear}
+.tbar.warn{background:linear-gradient(90deg,#ef4444,#f97316)}
+
+/* Question timer bar */
+.qbar-wrap{width:100%;max-width:460px;height:4px;background:#e2e8f0;border-radius:2px;margin-top:4px;overflow:hidden}
+.qbar{height:100%;width:100%;background:#f97316;border-radius:2px;transition:width .95s linear}
+
+/* Combo badge */
+.combo{height:22px;margin-top:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;color:#f97316;letter-spacing:1px;opacity:0;transition:opacity .2s}
+.combo.show{opacity:1}
+
+/* Category label */
+.cat-label{width:100%;max-width:460px;text-align:center;margin-top:8px;font-size:12px;color:#64748b;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+
+/* Prompt card */
+.prompt{width:100%;max-width:460px;background:#fff;border:2px solid #cffafe;border-radius:14px;padding:16px 14px;margin-top:6px;text-align:center;font-size:clamp(14px,4vw,17px);font-weight:700;color:#0f172a;line-height:1.3;box-shadow:0 3px 6px rgba(6,182,212,.08)}
+.prompt.ok{background:#dcfce7;border-color:#22c55e;color:#15803d}
+.prompt.bad{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+
+/* Explanation strip */
+.explain{width:100%;max-width:460px;min-height:40px;margin-top:8px;padding:8px 10px;font-size:13px;color:#0891b2;background:#f0fdff;border:1px solid #cffafe;border-radius:8px;text-align:center;line-height:1.35;opacity:0;transition:opacity .2s}
+.explain.show{opacity:1}
+.explain.bad{color:#991b1b;background:#fef2f2;border-color:#fecaca}
+.explain b{font-weight:900}
+
+/* Items 2x2 grid */
+.items{width:100%;max-width:460px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.item{background:#fff;border:2px solid #cffafe;color:#0f172a;padding:22px 10px;border-radius:14px;font-family:inherit;font-size:clamp(16px,4.5vw,22px);font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:82px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;box-shadow:0 2px 4px rgba(6,182,212,.08);transition:transform .1s,background .15s,border-color .15s}
+.item .idx{position:absolute;top:4px;left:8px;font-size:10px;color:#94a3b8;font-weight:normal}
+.item:active{transform:scale(.97)}
+.item.ok{background:#22c55e;border-color:#16a34a;color:#fff;animation:correctPulse .5s ease}
+.item.bad{background:#ef4444;border-color:#dc2626;color:#fff;animation:wrongShake .4s ease}
+.item.revealed{background:#dcfce7;border-color:#22c55e;color:#15803d}
+.item[disabled]{pointer-events:none;opacity:.85}
+@keyframes correctPulse{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* Quit button */
+.quit{background:#fff;border:1px solid #cbd5e1;color:#64748b;padding:8px 18px;border-radius:8px;font-family:inherit;font-size:12px;margin-top:12px;cursor:pointer;-webkit-appearance:none;font-weight:600}
+.quit:active{transform:scale(.96)}
+
+/* ---------- END SCREEN ---------- */
+.end-title{font-size:clamp(30px,8.5vw,42px);font-weight:900;color:#06b6d4;letter-spacing:2px;margin-top:3vh;text-align:center;animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+.big-score{font-size:clamp(60px,16vw,92px);font-weight:900;color:#f97316;line-height:1;margin-top:6px;animation:pop .7s ease}
+.score-lbl{font-size:12px;color:#64748b;letter-spacing:3px;text-transform:uppercase;margin-top:4px;font-weight:600}
+.stats{display:flex;gap:10px;margin-top:16px;width:100%;max-width:360px;justify-content:center;flex-wrap:wrap}
+.stat-box{background:#fff;border:1px solid #cffafe;border-radius:10px;padding:10px 14px;min-width:80px;text-align:center;box-shadow:0 2px 4px rgba(6,182,212,.08)}
+.stat-v{font-size:20px;font-weight:900;color:#0f172a}
+.stat-v.green{color:#22c55e}.stat-v.red{color:#ef4444}.stat-v.orange{color:#f97316}
+.stat-l{font-size:10px;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;font-weight:600}
+.end-best{font-size:13px;color:#64748b;margin-top:14px}
+.end-best b{color:#06b6d4;font-size:15px}
+.end-best .newbest{color:#22c55e;font-weight:bold;display:block;margin-top:4px;animation:pop .6s ease}
+
+.end-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center;width:100%;max-width:360px}
+.btn-sec{background:linear-gradient(180deg,#22d3ee,#06b6d4);color:#fff;border:none;padding:14px 20px;font-family:inherit;font-size:14px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;-webkit-appearance:none;flex:1;min-width:130px}
+.btn-sec.alt{background:#fff;color:#0f172a;border:1px solid #cbd5e1}
+.btn-sec.share{background:#f97316;color:#fff}
+.btn-sec:active{transform:scale(.96)}
+
+/* Toast */
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:bold;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div class="stage" id="scStart">
+  <div class="title">ODD ONE OUT</div>
+  <div class="tag">Find the item that doesn't belong.<br>Classification &amp; pattern reasoning.</div>
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="how" id="how">
+    <div class="how-hd" id="howHd" ontouchstart="">
+      <span>HOW TO PLAY</span>
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="how-bd">
+      <ul>
+        <li>60 seconds total clock</li>
+        <li>10 seconds per question, auto-advance</li>
+        <li>4 items shown — tap the ONE that doesn't fit</li>
+        <li>Correct: green flash + brief explanation</li>
+        <li>Wrong: red flash + correct answer revealed</li>
+        <li>Streak 3+ earns &#215;2 bonus</li>
+        <li>Best score saved per difficulty</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sel-label">Difficulty</div>
+  <div class="diff-grid" id="diffGrid">
+    <button class="diff-btn sel" data-d="easy" ontouchstart="">EASY<span class="sub">SSC basic</span></button>
+    <button class="diff-btn" data-d="med" ontouchstart="">MEDIUM<span class="sub">Bank PO</span></button>
+    <button class="diff-btn" data-d="hard" ontouchstart="">HARD<span class="sub">CAT level</span></button>
+  </div>
+
+  <div class="sel-label">Mode</div>
+  <div class="mode-grid" id="modeGrid">
+    <button class="mode-btn sel" data-m="mixed" ontouchstart="">MIXED</button>
+    <button class="mode-btn" data-m="words" ontouchstart="">WORDS</button>
+    <button class="mode-btn" data-m="numbers" ontouchstart="">NUMBERS</button>
+  </div>
+
+  <div class="best-row">Best: <b id="bestDisp">0</b></div>
+  <button class="play-btn" id="playBtn" ontouchstart="">PLAY</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="stage hidden" id="scGame">
+  <div class="hud">
+    <div class="hud-box"><div class="hud-lbl">Time</div><div class="hud-val" id="timeVal">60</div></div>
+    <div class="hud-box"><div class="hud-lbl">Score</div><div class="hud-val" id="scoreVal" style="color:#f97316">0</div></div>
+    <div class="hud-box"><div class="hud-lbl">Streak</div><div class="hud-val streak" id="streakVal">0</div></div>
+  </div>
+  <div class="tbar-wrap"><div class="tbar" id="tbar"></div></div>
+  <div class="combo" id="combo"></div>
+  <div class="cat-label" id="catLabel">Which doesn't belong?</div>
+  <div class="prompt" id="prompt">Pick the odd one out</div>
+  <div class="qbar-wrap"><div class="qbar" id="qbar"></div></div>
+  <div class="items" id="items">
+    <button class="item" data-i="0" ontouchstart="">&nbsp;</button>
+    <button class="item" data-i="1" ontouchstart="">&nbsp;</button>
+    <button class="item" data-i="2" ontouchstart="">&nbsp;</button>
+    <button class="item" data-i="3" ontouchstart="">&nbsp;</button>
+  </div>
+  <div class="explain" id="explain">&nbsp;</div>
+  <button class="quit" id="quitBtn" ontouchstart="">QUIT</button>
+</div>
+
+<!-- END SCREEN -->
+<div class="stage hidden" id="scEnd">
+  <div class="end-title">TIME'S UP!</div>
+  <div class="score-lbl">Final Score</div>
+  <div class="big-score" id="finalScore">0</div>
+  <div class="stats">
+    <div class="stat-box"><div class="stat-v green" id="statCorrect">0</div><div class="stat-l">Correct</div></div>
+    <div class="stat-box"><div class="stat-v red" id="statWrong">0</div><div class="stat-l">Wrong</div></div>
+    <div class="stat-box"><div class="stat-v orange" id="statAcc">0%</div><div class="stat-l">Accuracy</div></div>
+  </div>
+  <div class="end-best" id="endBest">Best: <b>0</b></div>
+  <div class="ad-slot">Advertisement</div>
+  <div class="end-btns">
+    <button class="btn-sec share" id="shareBtn" ontouchstart="">SHARE</button>
+    <button class="btn-sec" id="againBtn" ontouchstart="">PLAY AGAIN</button>
+    <button class="btn-sec alt" id="changeBtn" ontouchstart="">CHANGE</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+(function(){'use strict';
+
+// ===== PUZZLE BANK =====
+// Each puzzle: items (4), odd (index), explain, cat (category tag), diff (easy/med/hard), type (word/number)
+var PUZZLES=[
+  // ========== EASY — WORDS (Fruits, Veggies, Colors, Animals, Basics) ==========
+  {items:["APPLE","MANGO","BANANA","ONION"],odd:3,explain:"Onion is a vegetable; others are fruits",cat:"food",diff:"easy",type:"word"},
+  {items:["CARROT","POTATO","GRAPE","CABBAGE"],odd:2,explain:"Grape is a fruit; others are vegetables",cat:"food",diff:"easy",type:"word"},
+  {items:["ORANGE","LEMON","TOMATO","PAPAYA"],odd:2,explain:"Tomato is a vegetable (botanically fruit but culinary veggie); others are fruits",cat:"food",diff:"easy",type:"word"},
+  {items:["SPINACH","BROCCOLI","CAULIFLOWER","STRAWBERRY"],odd:3,explain:"Strawberry is a fruit; others are vegetables",cat:"food",diff:"easy",type:"word"},
+  {items:["GRAPES","PEAR","PINEAPPLE","GARLIC"],odd:3,explain:"Garlic is a vegetable; others are fruits",cat:"food",diff:"easy",type:"word"},
+  {items:["GUAVA","WATERMELON","PEACH","BEETROOT"],odd:3,explain:"Beetroot is a vegetable; others are fruits",cat:"food",diff:"easy",type:"word"},
+  {items:["CUCUMBER","RADISH","PUMPKIN","LYCHEE"],odd:3,explain:"Lychee is a fruit; others are vegetables",cat:"food",diff:"easy",type:"word"},
+  {items:["KIWI","POMEGRANATE","PLUM","GINGER"],odd:3,explain:"Ginger is a root/vegetable; others are fruits",cat:"food",diff:"easy",type:"word"},
+
+  // Colors
+  {items:["RED","BLUE","GREEN","DELHI"],odd:3,explain:"Delhi is a city; others are colors",cat:"color",diff:"easy",type:"word"},
+  {items:["YELLOW","PURPLE","ORANGE","TABLE"],odd:3,explain:"Table is furniture; others are colors",cat:"color",diff:"easy",type:"word"},
+  {items:["BLACK","WHITE","PINK","TIGER"],odd:3,explain:"Tiger is an animal; others are colors",cat:"color",diff:"easy",type:"word"},
+  {items:["BROWN","GREY","VIOLET","MONDAY"],odd:3,explain:"Monday is a day; others are colors",cat:"color",diff:"easy",type:"word"},
+  {items:["MAROON","CRIMSON","SCARLET","EMERALD"],odd:3,explain:"Emerald is a shade of green; others are shades of red",cat:"color",diff:"easy",type:"word"},
+  {items:["INDIGO","NAVY","AZURE","CORAL"],odd:3,explain:"Coral is orange-pink; others are shades of blue",cat:"color",diff:"easy",type:"word"},
+
+  // Animals — mammals vs others
+  {items:["LION","TIGER","EAGLE","ELEPHANT"],odd:2,explain:"Eagle is a bird; others are mammals",cat:"animal",diff:"easy",type:"word"},
+  {items:["DOG","CAT","COW","SNAKE"],odd:3,explain:"Snake is a reptile; others are mammals",cat:"animal",diff:"easy",type:"word"},
+  {items:["SPARROW","PARROT","PIGEON","RABBIT"],odd:3,explain:"Rabbit is a mammal; others are birds",cat:"animal",diff:"easy",type:"word"},
+  {items:["SHARK","WHALE","DOLPHIN","OCTOPUS"],odd:3,explain:"Octopus is a mollusc; others are marine animals (whale/dolphin mammals, shark fish but all vertebrates)",cat:"animal",diff:"easy",type:"word"},
+  {items:["CROCODILE","TURTLE","LIZARD","FROG"],odd:3,explain:"Frog is an amphibian; others are reptiles",cat:"animal",diff:"easy",type:"word"},
+  {items:["ANT","BEE","SPIDER","BUTTERFLY"],odd:2,explain:"Spider is an arachnid (8 legs); others are insects (6 legs)",cat:"animal",diff:"easy",type:"word"},
+  {items:["COW","HORSE","GOAT","LION"],odd:3,explain:"Lion is a wild animal; others are domestic",cat:"animal",diff:"easy",type:"word"},
+  {items:["HEN","DUCK","OWL","PEACOCK"],odd:2,explain:"Owl is nocturnal; others are diurnal birds",cat:"animal",diff:"easy",type:"word"},
+  {items:["COBRA","VIPER","PYTHON","EEL"],odd:3,explain:"Eel is a fish; others are snakes",cat:"animal",diff:"easy",type:"word"},
+  {items:["DEER","RHINO","BUFFALO","CROCODILE"],odd:3,explain:"Crocodile is a reptile; others are mammals",cat:"animal",diff:"easy",type:"word"},
+
+  // Body parts
+  {items:["HEART","LUNG","LIVER","PEN"],odd:3,explain:"Pen is an object; others are body organs",cat:"body",diff:"easy",type:"word"},
+  {items:["EYE","NOSE","EAR","CHAIR"],odd:3,explain:"Chair is furniture; others are sense organs",cat:"body",diff:"easy",type:"word"},
+  {items:["KIDNEY","BRAIN","STOMACH","CLOCK"],odd:3,explain:"Clock is a device; others are organs",cat:"body",diff:"easy",type:"word"},
+  {items:["ARM","LEG","HAND","SCHOOL"],odd:3,explain:"School is a building; others are body parts",cat:"body",diff:"easy",type:"word"},
+
+  // Transport
+  {items:["CAR","BUS","TRAIN","HORSE"],odd:3,explain:"Horse is an animal; others are motor vehicles",cat:"transport",diff:"easy",type:"word"},
+  {items:["CYCLE","SCOOTER","MOTORBIKE","RIVER"],odd:3,explain:"River is not transport; others are vehicles",cat:"transport",diff:"easy",type:"word"},
+  {items:["SHIP","BOAT","SUBMARINE","PLANE"],odd:3,explain:"Plane flies; others travel on/under water",cat:"transport",diff:"easy",type:"word"},
+  {items:["TRUCK","VAN","TAXI","CYCLE"],odd:3,explain:"Cycle is human-powered; others have engines",cat:"transport",diff:"easy",type:"word"},
+
+  // Days & Months
+  {items:["MONDAY","TUESDAY","JANUARY","SUNDAY"],odd:2,explain:"January is a month; others are days of the week",cat:"time",diff:"easy",type:"word"},
+  {items:["MARCH","APRIL","MAY","FRIDAY"],odd:3,explain:"Friday is a day; others are months",cat:"time",diff:"easy",type:"word"},
+  {items:["JUNE","JULY","AUGUST","WEEK"],odd:3,explain:"Week is a time unit; others are months",cat:"time",diff:"easy",type:"word"},
+  {items:["HOUR","MINUTE","SECOND","METER"],odd:3,explain:"Meter is a length unit; others are time units",cat:"time",diff:"easy",type:"word"},
+  {items:["SPRING","SUMMER","WINTER","MONDAY"],odd:3,explain:"Monday is a day; others are seasons",cat:"time",diff:"easy",type:"word"},
+
+  // Sports
+  {items:["CRICKET","FOOTBALL","HOCKEY","VIOLIN"],odd:3,explain:"Violin is a musical instrument; others are sports",cat:"sport",diff:"easy",type:"word"},
+  {items:["TENNIS","BADMINTON","CHESS","KABADDI"],odd:2,explain:"Chess is a board game/mental sport; others are physical outdoor sports",cat:"sport",diff:"easy",type:"word"},
+  {items:["VOLLEYBALL","BASKETBALL","GOLF","GUITAR"],odd:3,explain:"Guitar is an instrument; others are sports",cat:"sport",diff:"easy",type:"word"},
+  {items:["BOXING","WRESTLING","KARATE","COOKING"],odd:3,explain:"Cooking is not a sport; others are combat sports",cat:"sport",diff:"easy",type:"word"},
+  {items:["SWIMMING","DIVING","SURFING","CYCLING"],odd:3,explain:"Cycling is on land; others are water sports",cat:"sport",diff:"easy",type:"word"},
+  {items:["POLO","HORSE RACING","ARCHERY","EQUESTRIAN"],odd:2,explain:"Archery doesn't use horses; others involve horses",cat:"sport",diff:"med",type:"word"},
+
+  // Instruments
+  {items:["TABLA","SITAR","FLUTE","CANVAS"],odd:3,explain:"Canvas is for painting; others are musical instruments",cat:"instrument",diff:"easy",type:"word"},
+  {items:["PIANO","GUITAR","DRUM","BRUSH"],odd:3,explain:"Brush is for painting; others are instruments",cat:"instrument",diff:"easy",type:"word"},
+  {items:["VIOLIN","HARP","CELLO","TROMBONE"],odd:3,explain:"Trombone is brass/wind; others are string instruments",cat:"instrument",diff:"med",type:"word"},
+  {items:["TRUMPET","SAXOPHONE","CLARINET","DRUM"],odd:3,explain:"Drum is percussion; others are wind instruments",cat:"instrument",diff:"med",type:"word"},
+  {items:["VEENA","SITAR","SAROD","SHEHNAI"],odd:3,explain:"Shehnai is wind; others are string instruments",cat:"instrument",diff:"med",type:"word"},
+  {items:["TABLA","MRIDANGAM","DHOLAK","BANSURI"],odd:3,explain:"Bansuri is a flute; others are percussion instruments",cat:"instrument",diff:"med",type:"word"},
+
+  // ========== EASY — GEOGRAPHY ==========
+  {items:["KERALA","GOA","PARIS","MAHARASHTRA"],odd:2,explain:"Paris is a city in France; others are Indian states",cat:"geo",diff:"easy",type:"word"},
+  {items:["DELHI","MUMBAI","KOLKATA","LONDON"],odd:3,explain:"London is in UK; others are Indian cities",cat:"geo",diff:"easy",type:"word"},
+  {items:["TOKYO","BEIJING","MOSCOW","PUNJAB"],odd:3,explain:"Punjab is a state; others are capitals",cat:"geo",diff:"easy",type:"word"},
+  {items:["USA","UK","FRANCE","BIHAR"],odd:3,explain:"Bihar is an Indian state; others are countries",cat:"geo",diff:"easy",type:"word"},
+  {items:["ASIA","EUROPE","AFRICA","INDIA"],odd:3,explain:"India is a country; others are continents",cat:"geo",diff:"easy",type:"word"},
+  {items:["PACIFIC","ATLANTIC","INDIAN","SAHARA"],odd:3,explain:"Sahara is a desert; others are oceans",cat:"geo",diff:"easy",type:"word"},
+  {items:["GANGA","YAMUNA","HIMALAYA","KAVERI"],odd:2,explain:"Himalaya is a mountain range; others are rivers",cat:"geo",diff:"easy",type:"word"},
+  {items:["NILE","AMAZON","MISSISSIPPI","EVEREST"],odd:3,explain:"Everest is a mountain; others are rivers",cat:"geo",diff:"easy",type:"word"},
+  {items:["EVEREST","K2","KANCHENJUNGA","GODAVARI"],odd:3,explain:"Godavari is a river; others are mountain peaks",cat:"geo",diff:"easy",type:"word"},
+  {items:["THAR","SAHARA","GOBI","AMAZON"],odd:3,explain:"Amazon is a rainforest; others are deserts",cat:"geo",diff:"easy",type:"word"},
+  {items:["MUMBAI","CHENNAI","JAIPUR","KOLKATA"],odd:2,explain:"Jaipur is inland; others are coastal cities",cat:"geo",diff:"med",type:"word"},
+  {items:["SRINAGAR","SHIMLA","DARJEELING","CHENNAI"],odd:3,explain:"Chennai is a coastal plain; others are hill stations",cat:"geo",diff:"med",type:"word"},
+  {items:["JAPAN","INDONESIA","PHILIPPINES","NEPAL"],odd:3,explain:"Nepal is landlocked; others are island nations",cat:"geo",diff:"med",type:"word"},
+  {items:["CHINA","INDIA","RUSSIA","SWITZERLAND"],odd:3,explain:"Switzerland is small; others are among the largest countries",cat:"geo",diff:"med",type:"word"},
+
+  // Indian States
+  {items:["ASSAM","BIHAR","ODISHA","KATHMANDU"],odd:3,explain:"Kathmandu is Nepal's capital; others are Indian states",cat:"geo",diff:"easy",type:"word"},
+  {items:["GUJARAT","RAJASTHAN","KARNATAKA","DHAKA"],odd:3,explain:"Dhaka is Bangladesh's capital; others are Indian states",cat:"geo",diff:"easy",type:"word"},
+  {items:["SIKKIM","MIZORAM","MANIPUR","THIMPHU"],odd:3,explain:"Thimphu is Bhutan's capital; others are NE Indian states",cat:"geo",diff:"easy",type:"word"},
+
+  // ========== EASY — SCIENCE ==========
+  {items:["OXYGEN","HYDROGEN","IRON","NITROGEN"],odd:2,explain:"Iron is a solid metal; others are gases",cat:"science",diff:"easy",type:"word"},
+  {items:["COPPER","GOLD","SILVER","WATER"],odd:3,explain:"Water is a liquid compound; others are metals",cat:"science",diff:"easy",type:"word"},
+  {items:["CARBON","SULFUR","PHOSPHORUS","MERCURY"],odd:3,explain:"Mercury is a metal; others are non-metals",cat:"science",diff:"med",type:"word"},
+  {items:["SUN","MOON","STAR","TREE"],odd:3,explain:"Tree is on Earth; others are celestial bodies",cat:"science",diff:"easy",type:"word"},
+  {items:["MARS","VENUS","JUPITER","SUN"],odd:3,explain:"Sun is a star; others are planets",cat:"science",diff:"easy",type:"word"},
+  {items:["EARTH","MOON","PLUTO","MERCURY"],odd:1,explain:"Moon is Earth's satellite; others are planets (or dwarf)",cat:"science",diff:"med",type:"word"},
+  {items:["WATER","MILK","OIL","ICE"],odd:3,explain:"Ice is solid; others are liquids",cat:"science",diff:"easy",type:"word"},
+  {items:["STEAM","SMOKE","FOG","STONE"],odd:3,explain:"Stone is a solid; others are gas/aerosol forms",cat:"science",diff:"easy",type:"word"},
+
+  // ========== EASY — FAMOUS PEOPLE ==========
+  {items:["NEHRU","MODI","GANDHI","KALAM"],odd:3,explain:"Kalam was President; others were Prime Ministers",cat:"people",diff:"med",type:"word"},
+  {items:["SACHIN","DHONI","KOHLI","MESSI"],odd:3,explain:"Messi is a footballer; others are cricketers",cat:"people",diff:"easy",type:"word"},
+  {items:["PELE","MARADONA","MESSI","FEDERER"],odd:3,explain:"Federer is a tennis player; others are footballers",cat:"people",diff:"easy",type:"word"},
+  {items:["NADAL","DJOKOVIC","FEDERER","RONALDO"],odd:3,explain:"Ronaldo is a footballer; others are tennis stars",cat:"people",diff:"easy",type:"word"},
+  {items:["NEWTON","EINSTEIN","TESLA","SHAKESPEARE"],odd:3,explain:"Shakespeare was a writer; others were scientists",cat:"people",diff:"easy",type:"word"},
+  {items:["TAGORE","PREMCHAND","KALIDAS","RAMAN"],odd:3,explain:"Raman was a physicist; others were writers/poets",cat:"people",diff:"med",type:"word"},
+  {items:["AKBAR","BABUR","SHAH JAHAN","ASHOKA"],odd:3,explain:"Ashoka was a Maurya king; others were Mughals",cat:"people",diff:"med",type:"word"},
+  {items:["GANDHI","BHAGAT SINGH","BOSE","SARDAR PATEL"],odd:1,explain:"Bhagat Singh was a revolutionary; others led Congress movement",cat:"people",diff:"hard",type:"word"},
+
+  // ========== EASY — NUMBERS ==========
+  // Primes
+  {items:["3","5","7","9"],odd:3,explain:"9 = 3x3 (composite); others are primes",cat:"num",diff:"easy",type:"number"},
+  {items:["2","3","5","15"],odd:3,explain:"15 = 3x5 (composite); others are primes",cat:"num",diff:"easy",type:"number"},
+  {items:["11","13","17","21"],odd:3,explain:"21 = 3x7 (composite); others are primes",cat:"num",diff:"easy",type:"number"},
+  {items:["19","23","29","27"],odd:3,explain:"27 = 3^3 (composite); others are primes",cat:"num",diff:"med",type:"number"},
+  {items:["31","37","41","49"],odd:3,explain:"49 = 7x7 (composite); others are primes",cat:"num",diff:"med",type:"number"},
+  {items:["53","59","61","65"],odd:3,explain:"65 = 5x13 (composite); others are primes",cat:"num",diff:"med",type:"number"},
+  {items:["71","73","79","77"],odd:3,explain:"77 = 7x11 (composite); others are primes",cat:"num",diff:"med",type:"number"},
+  {items:["83","89","97","91"],odd:3,explain:"91 = 7x13 (composite); others are primes",cat:"num",diff:"hard",type:"number"},
+
+  // Perfect squares
+  {items:["4","16","25","30"],odd:3,explain:"30 is not a perfect square; others are 2^2, 4^2, 5^2",cat:"num",diff:"easy",type:"number"},
+  {items:["9","36","49","50"],odd:3,explain:"50 is not a perfect square; others are 3^2, 6^2, 7^2",cat:"num",diff:"easy",type:"number"},
+  {items:["64","81","100","110"],odd:3,explain:"110 is not a perfect square; others are 8^2, 9^2, 10^2",cat:"num",diff:"easy",type:"number"},
+  {items:["121","144","169","200"],odd:3,explain:"200 is not a perfect square; others are 11^2, 12^2, 13^2",cat:"num",diff:"med",type:"number"},
+  {items:["196","225","250","256"],odd:2,explain:"250 is not a perfect square; others are 14^2, 15^2, 16^2",cat:"num",diff:"med",type:"number"},
+  {items:["289","324","361","350"],odd:3,explain:"350 is not a perfect square; others are 17^2, 18^2, 19^2",cat:"num",diff:"hard",type:"number"},
+
+  // Cubes
+  {items:["8","27","64","100"],odd:3,explain:"100 is a square not cube; others are 2^3, 3^3, 4^3",cat:"num",diff:"easy",type:"number"},
+  {items:["125","216","343","400"],odd:3,explain:"400 is a square not cube; others are 5^3, 6^3, 7^3",cat:"num",diff:"med",type:"number"},
+  {items:["512","729","1000","1100"],odd:3,explain:"1100 is not a cube; others are 8^3, 9^3, 10^3",cat:"num",diff:"hard",type:"number"},
+  {items:["1","8","27","49"],odd:3,explain:"49 is a square (7^2); others are cubes",cat:"num",diff:"med",type:"number"},
+
+  // Evens / Odds
+  {items:["2","4","6","9"],odd:3,explain:"9 is odd; others are even",cat:"num",diff:"easy",type:"number"},
+  {items:["10","12","14","17"],odd:3,explain:"17 is odd; others are even",cat:"num",diff:"easy",type:"number"},
+  {items:["22","28","34","41"],odd:3,explain:"41 is odd; others are even",cat:"num",diff:"easy",type:"number"},
+  {items:["1","3","5","8"],odd:3,explain:"8 is even; others are odd",cat:"num",diff:"easy",type:"number"},
+  {items:["11","13","15","22"],odd:3,explain:"22 is even; others are odd",cat:"num",diff:"easy",type:"number"},
+  {items:["101","103","105","106"],odd:3,explain:"106 is even; others are odd",cat:"num",diff:"easy",type:"number"},
+
+  // Multiples of 5
+  {items:["10","15","20","17"],odd:3,explain:"17 is not a multiple of 5; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["25","35","45","48"],odd:3,explain:"48 is not a multiple of 5; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["55","65","70","72"],odd:3,explain:"72 is not a multiple of 5; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["100","125","150","175","200"].slice(0,4),odd:-1,explain:"placeholder",cat:"num",diff:"easy",type:"number"},
+  {items:["200","225","275","280"],odd:3,explain:"280 is a multiple of 5 but not of 25; others are multiples of 25",cat:"num",diff:"med",type:"number"},
+
+  // Multiples of 3
+  {items:["6","9","12","14"],odd:3,explain:"14 is not a multiple of 3; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["18","21","24","25"],odd:3,explain:"25 is not a multiple of 3; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["33","36","39","40"],odd:3,explain:"40 is not a multiple of 3; others are",cat:"num",diff:"easy",type:"number"},
+
+  // Multiples of 7
+  {items:["14","21","28","30"],odd:3,explain:"30 is not a multiple of 7; others are",cat:"num",diff:"med",type:"number"},
+  {items:["49","56","63","66"],odd:3,explain:"66 is not a multiple of 7; others are",cat:"num",diff:"med",type:"number"},
+  {items:["77","84","91","95"],odd:3,explain:"95 is not a multiple of 7; others are",cat:"num",diff:"med",type:"number"},
+
+  // Multiples of 11
+  {items:["22","33","44","50"],odd:3,explain:"50 is not a multiple of 11; others are",cat:"num",diff:"med",type:"number"},
+  {items:["66","77","88","90"],odd:3,explain:"90 is not a multiple of 11; others are",cat:"num",diff:"med",type:"number"},
+  {items:["121","132","143","150"],odd:3,explain:"150 is not a multiple of 11; others are",cat:"num",diff:"hard",type:"number"},
+
+  // Perfect number patterns
+  {items:["100","200","300","350"],odd:3,explain:"350 is not a multiple of 100; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["1000","2000","3000","2500"],odd:3,explain:"2500 is not a multiple of 1000; others are",cat:"num",diff:"easy",type:"number"},
+
+  // Fibonacci
+  {items:["1","2","3","4"],odd:3,explain:"4 is not Fibonacci; others are Fibonacci (1,2,3,5,8,...)",cat:"num",diff:"med",type:"number"},
+  {items:["5","8","13","15"],odd:3,explain:"15 is not Fibonacci; 5,8,13 are consecutive Fibonacci",cat:"num",diff:"med",type:"number"},
+  {items:["21","34","55","60"],odd:3,explain:"60 is not Fibonacci; others are Fibonacci numbers",cat:"num",diff:"hard",type:"number"},
+  {items:["89","144","233","200"],odd:3,explain:"200 is not Fibonacci; others are",cat:"num",diff:"hard",type:"number"},
+
+  // Triangular
+  {items:["3","6","10","12"],odd:3,explain:"12 is not triangular; 3=1+2, 6=1+2+3, 10=1+2+3+4",cat:"num",diff:"hard",type:"number"},
+  {items:["15","21","28","30"],odd:3,explain:"30 is not triangular; others are T5,T6,T7",cat:"num",diff:"hard",type:"number"},
+
+  // ========== MEDIUM — WORDS ==========
+  // Capitals
+  {items:["DELHI","PARIS","LONDON","FRANCE"],odd:3,explain:"France is a country; others are capitals",cat:"capital",diff:"med",type:"word"},
+  {items:["TOKYO","SEOUL","BANGKOK","THAILAND"],odd:3,explain:"Thailand is a country; others are capitals",cat:"capital",diff:"med",type:"word"},
+  {items:["KATHMANDU","DHAKA","ISLAMABAD","MUMBAI"],odd:3,explain:"Mumbai is not a capital (India's capital is Delhi); others are national capitals",cat:"capital",diff:"med",type:"word"},
+  {items:["CANBERRA","OTTAWA","WELLINGTON","SYDNEY"],odd:3,explain:"Sydney is a city (not capital); others are capitals of AU/CA/NZ",cat:"capital",diff:"hard",type:"word"},
+  {items:["WASHINGTON","NEW YORK","LOS ANGELES","CHICAGO"],odd:0,explain:"Washington is a capital; others are large cities",cat:"capital",diff:"med",type:"word"},
+
+  // Landmarks
+  {items:["TAJ MAHAL","RED FORT","QUTUB MINAR","EIFFEL TOWER"],odd:3,explain:"Eiffel Tower is in Paris; others are in India",cat:"landmark",diff:"easy",type:"word"},
+  {items:["PYRAMIDS","COLOSSEUM","SPHINX","MOSQUE"],odd:2,explain:"Sphinx and Pyramids are Egyptian; Colosseum is Roman; Mosque is generic religious building",cat:"landmark",diff:"hard",type:"word"},
+  {items:["EIFFEL TOWER","LOUVRE","NOTRE DAME","BIG BEN"],odd:3,explain:"Big Ben is in London; others are in Paris",cat:"landmark",diff:"med",type:"word"},
+
+  // Clothing
+  {items:["SHIRT","PANTS","HAT","PLATE"],odd:3,explain:"Plate is dinnerware; others are clothing",cat:"cloth",diff:"easy",type:"word"},
+  {items:["SAREE","KURTA","LEHENGA","LANTERN"],odd:3,explain:"Lantern is a lamp; others are Indian attire",cat:"cloth",diff:"easy",type:"word"},
+  {items:["TIE","SCARF","BELT","FORK"],odd:3,explain:"Fork is cutlery; others are accessories",cat:"cloth",diff:"easy",type:"word"},
+
+  // Furniture
+  {items:["CHAIR","TABLE","SOFA","APPLE"],odd:3,explain:"Apple is a fruit; others are furniture",cat:"furniture",diff:"easy",type:"word"},
+  {items:["BED","WARDROBE","DESK","DOG"],odd:3,explain:"Dog is an animal; others are furniture",cat:"furniture",diff:"easy",type:"word"},
+
+  // Professions
+  {items:["DOCTOR","ENGINEER","TEACHER","HOSPITAL"],odd:3,explain:"Hospital is a place; others are professions",cat:"job",diff:"easy",type:"word"},
+  {items:["LAWYER","JUDGE","PILOT","CAR"],odd:3,explain:"Car is a vehicle; others are professions",cat:"job",diff:"easy",type:"word"},
+  {items:["DENTIST","SURGEON","PHYSICIAN","ARCHITECT"],odd:3,explain:"Architect designs buildings; others are medical",cat:"job",diff:"med",type:"word"},
+  {items:["CARPENTER","PLUMBER","ELECTRICIAN","POET"],odd:3,explain:"Poet is artistic; others are manual trades",cat:"job",diff:"med",type:"word"},
+  {items:["AUTHOR","POET","NOVELIST","WELDER"],odd:3,explain:"Welder is a trade; others are literary",cat:"job",diff:"med",type:"word"},
+
+  // Languages
+  {items:["HINDI","TAMIL","BENGALI","BRAZILIAN"],odd:3,explain:"Brazilian is a nationality (not a language); others are Indian languages",cat:"lang",diff:"med",type:"word"},
+  {items:["FRENCH","GERMAN","SPANISH","AMERICAN"],odd:3,explain:"American is a nationality, not a language (English is spoken); others are languages",cat:"lang",diff:"med",type:"word"},
+  {items:["SANSKRIT","LATIN","GREEK","ENGLISH"],odd:3,explain:"English is modern; others are classical/ancient languages",cat:"lang",diff:"hard",type:"word"},
+
+  // Abstract nouns
+  {items:["HAPPINESS","SADNESS","ANGER","SCHOOL"],odd:3,explain:"School is concrete; others are emotions",cat:"abstract",diff:"easy",type:"word"},
+  {items:["HONESTY","COURAGE","KINDNESS","PAPER"],odd:3,explain:"Paper is a concrete object; others are abstract qualities",cat:"abstract",diff:"med",type:"word"},
+  {items:["LOVE","HATE","FEAR","BOOK"],odd:3,explain:"Book is concrete; others are emotions",cat:"abstract",diff:"easy",type:"word"},
+
+  // Religions
+  {items:["HINDUISM","ISLAM","CHRISTIANITY","ENGLISH"],odd:3,explain:"English is a language; others are religions",cat:"religion",diff:"easy",type:"word"},
+  {items:["BUDDHISM","JAINISM","SIKHISM","ZODIAC"],odd:3,explain:"Zodiac is astrology; others are Indian religions",cat:"religion",diff:"easy",type:"word"},
+
+  // Festivals
+  {items:["DIWALI","HOLI","EID","MONDAY"],odd:3,explain:"Monday is a day; others are festivals",cat:"festival",diff:"easy",type:"word"},
+  {items:["CHRISTMAS","EASTER","GOOD FRIDAY","DIWALI"],odd:3,explain:"Diwali is Hindu; others are Christian festivals",cat:"festival",diff:"med",type:"word"},
+  {items:["HOLI","DIWALI","DUSSEHRA","EID"],odd:3,explain:"Eid is Islamic; others are Hindu festivals",cat:"festival",diff:"med",type:"word"},
+  {items:["NAVRATRI","DURGA PUJA","ONAM","EID"],odd:3,explain:"Eid is Islamic; others are Hindu festivals",cat:"festival",diff:"med",type:"word"},
+
+  // ========== WORDS — Misc ==========
+  // Shapes
+  {items:["TRIANGLE","CIRCLE","SQUARE","PENCIL"],odd:3,explain:"Pencil is a tool; others are geometric shapes",cat:"shape",diff:"easy",type:"word"},
+  {items:["HEXAGON","OCTAGON","PENTAGON","EQUATION"],odd:3,explain:"Equation is math; others are polygons",cat:"shape",diff:"med",type:"word"},
+  {items:["SPHERE","CUBE","CYLINDER","RECTANGLE"],odd:3,explain:"Rectangle is 2D; others are 3D shapes",cat:"shape",diff:"med",type:"word"},
+  {items:["OVAL","CIRCLE","ELLIPSE","TRIANGLE"],odd:3,explain:"Triangle has corners; others are curved shapes",cat:"shape",diff:"med",type:"word"},
+
+  // Elements (earth/fire/water)
+  {items:["FIRE","WATER","EARTH","TABLE"],odd:3,explain:"Table is furniture; others are classical elements",cat:"element",diff:"easy",type:"word"},
+  {items:["AIR","WIND","BREEZE","STONE"],odd:3,explain:"Stone is solid; others relate to moving air",cat:"element",diff:"med",type:"word"},
+
+  // Metals vs non-metals
+  {items:["GOLD","SILVER","PLATINUM","GLASS"],odd:3,explain:"Glass is silica; others are precious metals",cat:"science",diff:"med",type:"word"},
+  {items:["IRON","COPPER","ALUMINIUM","PLASTIC"],odd:3,explain:"Plastic is a polymer; others are metals",cat:"science",diff:"easy",type:"word"},
+  {items:["GOLD","SILVER","COPPER","MERCURY"],odd:3,explain:"Mercury is liquid at room temp; others are solid metals",cat:"science",diff:"hard",type:"word"},
+
+  // Forms of water
+  {items:["ICE","STEAM","WATER","SAND"],odd:3,explain:"Sand is solid mineral; others are H2O states",cat:"science",diff:"easy",type:"word"},
+
+  // Planets
+  {items:["MARS","VENUS","JUPITER","ANDROMEDA"],odd:3,explain:"Andromeda is a galaxy; others are planets",cat:"science",diff:"med",type:"word"},
+  {items:["SATURN","URANUS","NEPTUNE","POLARIS"],odd:3,explain:"Polaris is a star; others are planets",cat:"science",diff:"med",type:"word"},
+  {items:["EARTH","MARS","VENUS","JUPITER"],odd:3,explain:"Jupiter is a gas giant; others are rocky planets",cat:"science",diff:"hard",type:"word"},
+
+  // Constellations
+  {items:["ORION","URSA MAJOR","CANIS","SUN"],odd:3,explain:"Sun is a star; others are constellations",cat:"science",diff:"hard",type:"word"},
+
+  // ========== ALPHABET PATTERNS (medium) ==========
+  {items:["A","E","I","K"],odd:3,explain:"K is a consonant; A, E, I are vowels",cat:"alphabet",diff:"med",type:"word"},
+  {items:["O","U","A","P"],odd:3,explain:"P is a consonant; O, U, A are vowels",cat:"alphabet",diff:"med",type:"word"},
+  {items:["B","C","P","T"],odd:3,explain:"T has only straight lines; B, C, P have curves",cat:"alphabet",diff:"hard",type:"word"},
+  {items:["D","O","Q","X"],odd:3,explain:"X has only straight lines; D, O, Q have curves",cat:"alphabet",diff:"hard",type:"word"},
+  {items:["V","W","M","O"],odd:3,explain:"O has curves; V, W, M are only straight lines",cat:"alphabet",diff:"hard",type:"word"},
+  {items:["A","B","C","Z"],odd:3,explain:"Z is the last letter; A, B, C are the first three",cat:"alphabet",diff:"med",type:"word"},
+  {items:["BD","FH","JL","NQ"],odd:3,explain:"Others skip 1 letter (B_D, F_H, J_L); N to Q skips 2",cat:"alphabet",diff:"hard",type:"word"},
+  {items:["ACE","BDF","CEG","DGI"],odd:3,explain:"Others have gap of 1 (A-C-E); DGI has gaps of 2 then 1",cat:"alphabet",diff:"hard",type:"word"},
+  {items:["AZ","BY","CX","DV"],odd:3,explain:"Pairs should be opposites in alphabet; D's opposite is W, not V",cat:"alphabet",diff:"hard",type:"word"},
+  {items:["CAT","DOG","RAT","BAT"],odd:1,explain:"DOG does not rhyme; CAT/RAT/BAT rhyme",cat:"alphabet",diff:"med",type:"word"},
+  {items:["BOOK","LOOK","COOK","DESK"],odd:3,explain:"DESK does not rhyme with others",cat:"alphabet",diff:"med",type:"word"},
+
+  // ========== HARD WORDS ==========
+  // Fibonacci in words
+  // Historical periods
+  {items:["MEDIEVAL","ANCIENT","MODERN","SIMPLE"],odd:3,explain:"Simple is an adjective of complexity; others are historical eras",cat:"hist",diff:"hard",type:"word"},
+
+  // Types of triangles
+  {items:["SCALENE","ISOSCELES","EQUILATERAL","PARALLEL"],odd:3,explain:"Parallel describes lines; others are types of triangles",cat:"shape",diff:"hard",type:"word"},
+
+  // Units
+  {items:["METER","KILOMETER","MILE","LITER"],odd:3,explain:"Liter measures volume; others measure distance",cat:"unit",diff:"med",type:"word"},
+  {items:["GRAM","KILOGRAM","TON","HOUR"],odd:3,explain:"Hour is time; others are mass units",cat:"unit",diff:"med",type:"word"},
+  {items:["SECOND","MINUTE","HOUR","INCH"],odd:3,explain:"Inch is length; others are time units",cat:"unit",diff:"med",type:"word"},
+  {items:["WATT","JOULE","NEWTON","CELSIUS"],odd:3,explain:"Celsius is temperature; others measure energy/force/power",cat:"unit",diff:"hard",type:"word"},
+  {items:["VOLT","AMPERE","OHM","METER"],odd:3,explain:"Meter measures length; others are electrical units",cat:"unit",diff:"hard",type:"word"},
+
+  // Chemistry
+  {items:["H2O","CO2","NH3","NaCl"],odd:3,explain:"NaCl is an ionic salt; others are covalent molecular compounds",cat:"science",diff:"hard",type:"word"},
+  {items:["ACID","BASE","SALT","FIRE"],odd:3,explain:"Fire is a reaction; others are chemical substance classes",cat:"science",diff:"hard",type:"word"},
+
+  // Biology
+  {items:["LIVER","KIDNEY","HEART","BONE"],odd:3,explain:"Bone is skeletal tissue; others are internal organs",cat:"body",diff:"med",type:"word"},
+  {items:["RETINA","CORNEA","LENS","CEMENT"],odd:3,explain:"Cement is construction; others are parts of the eye",cat:"body",diff:"med",type:"word"},
+  {items:["INSULIN","ADRENALINE","HEMOGLOBIN","THYROXINE"],odd:2,explain:"Hemoglobin is a blood protein; others are hormones",cat:"body",diff:"hard",type:"word"},
+
+  // Awards
+  {items:["NOBEL","OSCAR","GRAMMY","MONDAY"],odd:3,explain:"Monday is a day; others are awards",cat:"award",diff:"med",type:"word"},
+  {items:["BHARAT RATNA","PADMA SHRI","PADMA BHUSHAN","OSCAR"],odd:3,explain:"Oscar is a film award; others are Indian civilian awards",cat:"award",diff:"hard",type:"word"},
+
+  // Indian cultural
+  {items:["RAMAYANA","MAHABHARATA","BHAGAVAD GITA","QURAN"],odd:3,explain:"Quran is Islamic; others are Hindu scriptures",cat:"religion",diff:"med",type:"word"},
+  {items:["VEDAS","UPANISHADS","PURANAS","BIBLE"],odd:3,explain:"Bible is Christian; others are Hindu scriptures",cat:"religion",diff:"med",type:"word"},
+
+  // Weather
+  {items:["RAIN","SNOW","HAIL","BREEZE"],odd:3,explain:"Breeze is wind; others are precipitation",cat:"weather",diff:"med",type:"word"},
+  {items:["SUNNY","CLOUDY","RAINY","DESK"],odd:3,explain:"Desk is furniture; others describe weather",cat:"weather",diff:"easy",type:"word"},
+
+  // ========== MORE NUMBERS ==========
+  // Factorial
+  {items:["1","2","6","10"],odd:3,explain:"10 is not a factorial; 1!=1, 2!=2, 3!=6",cat:"num",diff:"hard",type:"number"},
+  {items:["24","120","720","500"],odd:3,explain:"500 is not a factorial; 4!=24, 5!=120, 6!=720",cat:"num",diff:"hard",type:"number"},
+
+  // Palindromes
+  {items:["121","131","141","132"],odd:3,explain:"132 is not a palindrome; others read same both ways",cat:"num",diff:"med",type:"number"},
+  {items:["343","454","565","567"],odd:3,explain:"567 is not a palindrome; others are",cat:"num",diff:"med",type:"number"},
+
+  // Sum of digits
+  {items:["9","18","27","29"],odd:3,explain:"29: digit sum 11 (not multiple of 9); others have digit sum 9 (multiples of 9)",cat:"num",diff:"hard",type:"number"},
+
+  // Divisibility by 4
+  {items:["12","16","20","22"],odd:3,explain:"22 is not divisible by 4; others are",cat:"num",diff:"med",type:"number"},
+  {items:["24","28","32","34"],odd:3,explain:"34 is not divisible by 4; others are",cat:"num",diff:"med",type:"number"},
+
+  // Divisibility by 6
+  {items:["12","18","24","26"],odd:3,explain:"26 is not divisible by 6; others are",cat:"num",diff:"med",type:"number"},
+  {items:["30","36","42","45"],odd:3,explain:"45 is not divisible by 6; others are",cat:"num",diff:"med",type:"number"},
+
+  // Divisibility by 8
+  {items:["16","24","32","36"],odd:3,explain:"36 is not divisible by 8; others are",cat:"num",diff:"hard",type:"number"},
+
+  // Divisibility by 9
+  {items:["18","27","36","40"],odd:3,explain:"40 is not divisible by 9; others are",cat:"num",diff:"med",type:"number"},
+  {items:["45","54","63","70"],odd:3,explain:"70 is not divisible by 9; others are",cat:"num",diff:"med",type:"number"},
+
+  // Divisibility by 12
+  {items:["24","36","48","50"],odd:3,explain:"50 is not divisible by 12; others are",cat:"num",diff:"hard",type:"number"},
+
+  // Mixed patterns — more cubes
+  {items:["1","27","64","100"],odd:3,explain:"100 is a square (not cube); others are cubes 1,3,4",cat:"num",diff:"med",type:"number"},
+  {items:["8","64","216","200"],odd:3,explain:"200 is not a cube; 2^3, 4^3, 6^3 are",cat:"num",diff:"hard",type:"number"},
+
+  // Prime sequences
+  {items:["2","3","5","4"],odd:3,explain:"4 is composite; others are primes",cat:"num",diff:"easy",type:"number"},
+
+  // Numbers ending in 0
+  {items:["10","20","30","35"],odd:3,explain:"35 doesn't end in 0; others do",cat:"num",diff:"easy",type:"number"},
+  {items:["100","200","300","250"],odd:3,explain:"250 ends in 0 but others are multiples of 100; 250 is not",cat:"num",diff:"med",type:"number"},
+
+  // Big numbers
+  {items:["1000","10000","100000","50000"],odd:3,explain:"50000 is not a power of 10; others are",cat:"num",diff:"med",type:"number"},
+  {items:["256","512","1024","2000"],odd:3,explain:"2000 is not a power of 2; others are 2^8, 2^9, 2^10",cat:"num",diff:"hard",type:"number"},
+
+  // Consecutive series
+  {items:["2","4","6","11"],odd:3,explain:"11 breaks the +2 pattern; others are consecutive evens",cat:"num",diff:"easy",type:"number"},
+  {items:["5","10","15","21"],odd:3,explain:"21 breaks the +5 pattern; others are multiples of 5",cat:"num",diff:"easy",type:"number"},
+
+  // Roman patterns via numbers (medium)
+  {items:["2","4","8","10"],odd:3,explain:"10 is not a power of 2; others are 2^1, 2^2, 2^3",cat:"num",diff:"med",type:"number"},
+  {items:["3","9","27","50"],odd:3,explain:"50 is not a power of 3; others are 3^1, 3^2, 3^3",cat:"num",diff:"med",type:"number"},
+  {items:["5","25","125","150"],odd:3,explain:"150 is not a power of 5; others are 5^1, 5^2, 5^3",cat:"num",diff:"med",type:"number"},
+
+  // Sum-related
+  {items:["6","28","496","500"],odd:3,explain:"500 is not a perfect number; 6, 28, 496 are perfect numbers",cat:"num",diff:"hard",type:"number"},
+
+  // ========== MORE WORDS (mixing topics) ==========
+  {items:["GOLD","SILVER","BRONZE","WOODEN"],odd:3,explain:"Wooden is material; others are Olympic medal metals",cat:"misc",diff:"med",type:"word"},
+  {items:["SPRING","AUTUMN","WINTER","RAIN"],odd:3,explain:"Rain is weather; others are seasons",cat:"time",diff:"easy",type:"word"},
+  {items:["DAWN","DUSK","NOON","DAY"],odd:3,explain:"Day covers all; others are specific times",cat:"time",diff:"med",type:"word"},
+
+  // Computer terms
+  {items:["MOUSE","KEYBOARD","MONITOR","BREAD"],odd:3,explain:"Bread is food; others are computer peripherals",cat:"tech",diff:"easy",type:"word"},
+  {items:["RAM","ROM","CPU","EYE"],odd:3,explain:"Eye is body organ; others are computer components",cat:"tech",diff:"easy",type:"word"},
+  {items:["WINDOWS","LINUX","ANDROID","EXCEL"],odd:3,explain:"Excel is an application; others are operating systems",cat:"tech",diff:"med",type:"word"},
+
+  // Currency
+  {items:["RUPEE","DOLLAR","EURO","ENGLAND"],odd:3,explain:"England is a country; others are currencies",cat:"money",diff:"easy",type:"word"},
+  {items:["YEN","POUND","PESO","PARIS"],odd:3,explain:"Paris is a city; others are currencies",cat:"money",diff:"easy",type:"word"},
+  {items:["DOLLAR","DINAR","EURO","GOLD"],odd:3,explain:"Gold is a metal; others are currencies",cat:"money",diff:"med",type:"word"},
+
+  // Food categories — dairy
+  {items:["MILK","CURD","BUTTER","BREAD"],odd:3,explain:"Bread is bakery; others are dairy",cat:"food",diff:"easy",type:"word"},
+  {items:["CHEESE","PANEER","CREAM","RICE"],odd:3,explain:"Rice is grain; others are dairy",cat:"food",diff:"easy",type:"word"},
+
+  // Grains vs pulses
+  {items:["WHEAT","RICE","MAIZE","DAL"],odd:3,explain:"Dal is a pulse/legume; others are cereals",cat:"food",diff:"med",type:"word"},
+  {items:["LENTIL","CHICKPEA","KIDNEY BEAN","BARLEY"],odd:3,explain:"Barley is a grain; others are pulses",cat:"food",diff:"med",type:"word"},
+
+  // Tools
+  {items:["HAMMER","SCREWDRIVER","SAW","BED"],odd:3,explain:"Bed is furniture; others are tools",cat:"misc",diff:"easy",type:"word"},
+
+  // Appliances
+  {items:["FRIDGE","WASHING MACHINE","TV","COW"],odd:3,explain:"Cow is an animal; others are home appliances",cat:"misc",diff:"easy",type:"word"},
+
+  // Rivers of India
+  {items:["GANGA","YAMUNA","BRAHMAPUTRA","NILE"],odd:3,explain:"Nile is in Africa; others are Indian rivers",cat:"geo",diff:"med",type:"word"},
+  {items:["KAVERI","KRISHNA","GODAVARI","THAMES"],odd:3,explain:"Thames is in England; others are Indian rivers",cat:"geo",diff:"med",type:"word"},
+  {items:["NARMADA","TAPI","MAHANADI","AMAZON"],odd:3,explain:"Amazon is in South America; others are Indian rivers",cat:"geo",diff:"med",type:"word"},
+
+  // Mountain ranges
+  {items:["HIMALAYAS","ANDES","ROCKIES","GANGES"],odd:3,explain:"Ganges is a river; others are mountain ranges",cat:"geo",diff:"med",type:"word"},
+  {items:["ALPS","ATLAS","URAL","SAHARA"],odd:3,explain:"Sahara is a desert; others are mountain ranges",cat:"geo",diff:"med",type:"word"},
+
+  // Trees
+  {items:["MANGO","NEEM","PEEPAL","LOTUS"],odd:3,explain:"Lotus is a flower; others are trees",cat:"plant",diff:"easy",type:"word"},
+  {items:["OAK","PINE","BAMBOO","ROSE"],odd:3,explain:"Rose is a flower; others are trees/plants",cat:"plant",diff:"easy",type:"word"},
+  {items:["BANYAN","TEAK","DEODAR","TULIP"],odd:3,explain:"Tulip is a flower; others are trees",cat:"plant",diff:"easy",type:"word"},
+
+  // Flowers
+  {items:["ROSE","LILY","TULIP","GRAPE"],odd:3,explain:"Grape is fruit; others are flowers",cat:"plant",diff:"easy",type:"word"},
+  {items:["SUNFLOWER","DAISY","MARIGOLD","APPLE"],odd:3,explain:"Apple is fruit; others are flowers",cat:"plant",diff:"easy",type:"word"},
+
+  // Birds
+  {items:["EAGLE","HAWK","OWL","PARROT"],odd:3,explain:"Parrot is non-predatory; others are birds of prey",cat:"animal",diff:"med",type:"word"},
+  {items:["OSTRICH","EMU","PEACOCK","SPARROW"],odd:3,explain:"Sparrow can fly well; others are flightless or rarely fly well",cat:"animal",diff:"hard",type:"word"},
+  {items:["PENGUIN","OSTRICH","EMU","ROBIN"],odd:3,explain:"Robin can fly; others are flightless birds",cat:"animal",diff:"med",type:"word"},
+
+  // Fish
+  {items:["SHARK","WHALE","TUNA","SALMON"],odd:1,explain:"Whale is a mammal; others are fish",cat:"animal",diff:"med",type:"word"},
+  {items:["CARP","TROUT","COD","CRAB"],odd:3,explain:"Crab is a crustacean; others are fish",cat:"animal",diff:"med",type:"word"},
+
+  // Insects
+  {items:["MOSQUITO","FLY","BEE","RAT"],odd:3,explain:"Rat is a mammal; others are insects",cat:"animal",diff:"easy",type:"word"},
+  {items:["BUTTERFLY","MOTH","DRAGONFLY","BAT"],odd:3,explain:"Bat is a mammal; others are winged insects",cat:"animal",diff:"easy",type:"word"},
+
+  // Reptiles
+  {items:["LIZARD","TURTLE","CROCODILE","FISH"],odd:3,explain:"Fish is not a reptile; others are reptiles",cat:"animal",diff:"easy",type:"word"},
+
+  // Wild vs domestic
+  {items:["LION","TIGER","LEOPARD","DOG"],odd:3,explain:"Dog is domestic; others are wild cats",cat:"animal",diff:"easy",type:"word"},
+  {items:["COW","GOAT","SHEEP","WOLF"],odd:3,explain:"Wolf is wild; others are domestic",cat:"animal",diff:"easy",type:"word"},
+
+  // Herbivore vs carnivore
+  {items:["LION","WOLF","TIGER","DEER"],odd:3,explain:"Deer is herbivore; others are carnivores",cat:"animal",diff:"med",type:"word"},
+  {items:["COW","HORSE","GOAT","TIGER"],odd:3,explain:"Tiger is carnivore; others are herbivores",cat:"animal",diff:"med",type:"word"},
+
+  // ========== MORE HARD — WORDS ==========
+  // Polyhedra
+  {items:["TETRAHEDRON","CUBE","OCTAHEDRON","TRIANGLE"],odd:3,explain:"Triangle is 2D; others are 3D polyhedra",cat:"shape",diff:"hard",type:"word"},
+
+  // Prose vs poetry
+  {items:["SONNET","HAIKU","LIMERICK","NOVEL"],odd:3,explain:"Novel is prose; others are poetry forms",cat:"lit",diff:"hard",type:"word"},
+  {items:["EPIC","ODE","BALLAD","ESSAY"],odd:3,explain:"Essay is prose; others are poetry",cat:"lit",diff:"hard",type:"word"},
+
+  // Famous books
+  {items:["RAMAYANA","MAHABHARATA","GITANJALI","PRINCIPIA"],odd:3,explain:"Principia is scientific (Newton); others are Indian literature",cat:"lit",diff:"hard",type:"word"},
+
+  // Indian classical dance
+  {items:["BHARATANATYAM","KATHAK","ODISSI","SALSA"],odd:3,explain:"Salsa is Latin American; others are Indian classical dances",cat:"dance",diff:"med",type:"word"},
+  {items:["KUCHIPUDI","MOHINIYATTAM","MANIPURI","HIPHOP"],odd:3,explain:"Hip-hop is modern Western; others are Indian classical",cat:"dance",diff:"med",type:"word"},
+
+  // Olympic sports
+  {items:["CRICKET","BASEBALL","SOFTBALL","GOLF"],odd:0,explain:"Cricket is NOT in the Olympics; others have been",cat:"sport",diff:"hard",type:"word"},
+
+  // Banking
+  {items:["SBI","PNB","HDFC","UPSC"],odd:3,explain:"UPSC is a commission; others are banks",cat:"misc",diff:"med",type:"word"},
+
+  // Political
+  {items:["BJP","CONGRESS","AAP","NASA"],odd:3,explain:"NASA is a space agency; others are Indian political parties",cat:"misc",diff:"med",type:"word"},
+
+  // Space agencies
+  {items:["NASA","ISRO","ESA","IMF"],odd:3,explain:"IMF is financial; others are space agencies",cat:"misc",diff:"hard",type:"word"},
+
+  // UN orgs
+  {items:["UNICEF","WHO","WTO","UPSC"],odd:3,explain:"UPSC is Indian; others are UN agencies",cat:"misc",diff:"hard",type:"word"},
+
+  // Colors of rainbow (VIBGYOR)
+  {items:["VIOLET","INDIGO","BLUE","WHITE"],odd:3,explain:"White is not in VIBGYOR; others are rainbow colors",cat:"color",diff:"med",type:"word"},
+  {items:["GREEN","YELLOW","ORANGE","BROWN"],odd:3,explain:"Brown is not in VIBGYOR; others are rainbow colors",cat:"color",diff:"med",type:"word"},
+
+  // Indian PMs vs Presidents
+  {items:["NEHRU","SHASTRI","INDIRA","KALAM"],odd:3,explain:"Kalam was President; others were PMs",cat:"people",diff:"hard",type:"word"},
+  {items:["RAJENDRA PRASAD","RADHAKRISHNAN","ZAKIR HUSSAIN","INDIRA GANDHI"],odd:3,explain:"Indira Gandhi was PM; others were Presidents",cat:"people",diff:"hard",type:"word"},
+
+  // Freedom fighters
+  {items:["BHAGAT SINGH","CHANDRA SHEKHAR","SUKHDEV","MANMOHAN SINGH"],odd:3,explain:"Manmohan Singh was a modern PM; others were freedom fighters",cat:"people",diff:"hard",type:"word"},
+
+  // Scientists
+  {items:["NEWTON","EINSTEIN","RAMAN","TAGORE"],odd:3,explain:"Tagore was a poet; others were physicists",cat:"people",diff:"med",type:"word"},
+  {items:["ARCHIMEDES","PYTHAGORAS","EUCLID","SHAKESPEARE"],odd:3,explain:"Shakespeare was a playwright; others were ancient Greek mathematicians",cat:"people",diff:"med",type:"word"},
+
+  // ========== ADDITIONAL MEDIUM NUMBERS ==========
+  // Numbers with digit sum 10
+  {items:["19","28","37","40"],odd:3,explain:"40 has digit sum 4; others have digit sum 10",cat:"num",diff:"hard",type:"number"},
+
+  // Numbers that are sum of two primes
+  {items:["10","14","18","11"],odd:3,explain:"11 is an odd prime (cannot be sum of two primes except 2+9); others are even (Goldbach)",cat:"num",diff:"hard",type:"number"},
+
+  // Powers of 2
+  {items:["4","8","16","20"],odd:3,explain:"20 is not a power of 2; others are 2^2, 2^3, 2^4",cat:"num",diff:"med",type:"number"},
+  {items:["32","64","128","150"],odd:3,explain:"150 is not a power of 2; others are 2^5, 2^6, 2^7",cat:"num",diff:"med",type:"number"},
+
+  // Powers of 3
+  {items:["9","27","81","100"],odd:3,explain:"100 is not a power of 3; others are 3^2, 3^3, 3^4",cat:"num",diff:"med",type:"number"},
+
+  // Squares of primes
+  {items:["4","9","25","36"],odd:3,explain:"36 = 6^2 (6 composite); others are squares of primes 2,3,5",cat:"num",diff:"hard",type:"number"},
+
+  // Even primes
+  {items:["2","11","13","17"],odd:0,explain:"2 is the only even prime; others are odd primes",cat:"num",diff:"hard",type:"number"},
+
+  // Number of sides in polygons (word)
+  {items:["3","4","5","10"],odd:3,explain:"10 is for decagon (not basic triangle/quad/pent); others match common polygon sides",cat:"num",diff:"hard",type:"number"},
+
+  // Consecutive integers
+  {items:["7","8","9","12"],odd:3,explain:"12 breaks the +1 sequence from 7,8,9",cat:"num",diff:"easy",type:"number"},
+  {items:["20","21","22","25"],odd:3,explain:"25 breaks the +1 sequence from 20,21,22",cat:"num",diff:"easy",type:"number"},
+
+  // Large even vs odd
+  {items:["500","600","700","555"],odd:3,explain:"555 is odd; others are even",cat:"num",diff:"easy",type:"number"},
+
+  // Numbers in Fibonacci extended
+  {items:["144","233","377","400"],odd:3,explain:"400 is not Fibonacci; others are",cat:"num",diff:"hard",type:"number"},
+
+  // Sum of two squares
+  {items:["5","13","25","11"],odd:3,explain:"11 cannot be written as sum of two squares; others can (1+4, 4+9, 9+16)",cat:"num",diff:"hard",type:"number"},
+
+  // Multiples of 4 and 6
+  {items:["12","24","36","30"],odd:3,explain:"30 is divisible by 6 but not 4; others are multiples of 12",cat:"num",diff:"hard",type:"number"},
+  {items:["60","72","84","90"],odd:3,explain:"90 is not divisible by 4; others are multiples of 12",cat:"num",diff:"hard",type:"number"},
+
+  // ========== MORE EASY WORDS ==========
+  {items:["CHAIR","BENCH","STOOL","LAPTOP"],odd:3,explain:"Laptop is electronic; others are seats",cat:"furniture",diff:"easy",type:"word"},
+  {items:["PEN","PENCIL","ERASER","BOOK"],odd:3,explain:"Book is reading material; others are writing tools",cat:"misc",diff:"easy",type:"word"},
+  {items:["SOUP","SALAD","DESSERT","SHOE"],odd:3,explain:"Shoe is footwear; others are food courses",cat:"food",diff:"easy",type:"word"},
+  {items:["BREAKFAST","LUNCH","DINNER","MONDAY"],odd:3,explain:"Monday is a day; others are meals",cat:"food",diff:"easy",type:"word"},
+  {items:["TEA","COFFEE","JUICE","BRICK"],odd:3,explain:"Brick is building material; others are beverages",cat:"food",diff:"easy",type:"word"},
+  {items:["SALT","SUGAR","FLOUR","MIRROR"],odd:3,explain:"Mirror is glass; others are kitchen ingredients",cat:"food",diff:"easy",type:"word"},
+
+  // Numbers — divisibility by 11
+  {items:["22","33","44","48"],odd:3,explain:"48 is not a multiple of 11; others are",cat:"num",diff:"med",type:"number"},
+
+  // Numbers with same digit
+  {items:["11","22","33","34"],odd:3,explain:"34 has different digits; others have same digits",cat:"num",diff:"med",type:"number"},
+  {items:["55","66","77","79"],odd:3,explain:"79 has different digits; others have same digits",cat:"num",diff:"med",type:"number"},
+
+  // Two-digit with digit sum 9
+  {items:["18","27","36","40"],odd:3,explain:"40 has digit sum 4; others have digit sum 9",cat:"num",diff:"med",type:"number"},
+
+  // Sequences
+  {items:["3","6","9","13"],odd:3,explain:"13 breaks +3 sequence; 3,6,9 are consecutive multiples of 3",cat:"num",diff:"easy",type:"number"},
+  {items:["5","10","15","22"],odd:3,explain:"22 breaks +5 sequence; others are multiples of 5",cat:"num",diff:"easy",type:"number"},
+
+  // ========== MORE HARD WORD PATTERNS ==========
+  // Words starting with vowel
+  {items:["APPLE","EAGLE","IGLOO","BOAT"],odd:3,explain:"BOAT starts with a consonant; others start with vowels",cat:"lang",diff:"med",type:"word"},
+
+  // Words of 4 letters
+  {items:["CAKE","FISH","TREE","APPLE"],odd:3,explain:"APPLE has 5 letters; others have 4",cat:"lang",diff:"med",type:"word"},
+  {items:["CAT","DOG","MAN","DEER"],odd:3,explain:"DEER has 4 letters; others have 3",cat:"lang",diff:"med",type:"word"},
+
+  // Opposite meanings
+  {items:["HOT","WARM","BOILING","COLD"],odd:3,explain:"COLD is opposite; others describe heat",cat:"lang",diff:"easy",type:"word"},
+  {items:["BIG","LARGE","HUGE","TINY"],odd:3,explain:"TINY is opposite; others mean large",cat:"lang",diff:"easy",type:"word"},
+
+  // Things that give light
+  {items:["SUN","STAR","BULB","STONE"],odd:3,explain:"Stone doesn't emit light; others do",cat:"misc",diff:"easy",type:"word"},
+  {items:["LAMP","TORCH","CANDLE","BOOK"],odd:3,explain:"Book doesn't emit light; others do",cat:"misc",diff:"easy",type:"word"},
+
+  // ========== 50+ FURTHER WORDS ==========
+  // Gems
+  {items:["DIAMOND","RUBY","EMERALD","GRANITE"],odd:3,explain:"Granite is a rock; others are precious gems",cat:"misc",diff:"med",type:"word"},
+  {items:["SAPPHIRE","TOPAZ","OPAL","COAL"],odd:3,explain:"Coal is fossil fuel; others are gems",cat:"misc",diff:"med",type:"word"},
+
+  // Electronics
+  {items:["MOBILE","TABLET","LAPTOP","BOTTLE"],odd:3,explain:"Bottle is not electronic; others are gadgets",cat:"tech",diff:"easy",type:"word"},
+
+  // Spices
+  {items:["CHILLI","TURMERIC","CUMIN","SUGAR"],odd:3,explain:"Sugar is sweetener; others are spices",cat:"food",diff:"med",type:"word"},
+  {items:["CARDAMOM","CLOVE","CINNAMON","RICE"],odd:3,explain:"Rice is grain; others are spices",cat:"food",diff:"med",type:"word"},
+
+  // Nuts
+  {items:["ALMOND","CASHEW","WALNUT","RAISIN"],odd:3,explain:"Raisin is dried grape; others are nuts",cat:"food",diff:"med",type:"word"},
+  {items:["PEANUT","PISTACHIO","HAZELNUT","DATE"],odd:3,explain:"Date is dried fruit; others are nuts",cat:"food",diff:"med",type:"word"},
+
+  // Dry fruits
+  {items:["RAISIN","DATE","FIG","APPLE"],odd:3,explain:"Apple is fresh fruit; others are dried",cat:"food",diff:"med",type:"word"},
+
+  // Indian sweets
+  {items:["GULAB JAMUN","RASGULLA","LADDU","BIRYANI"],odd:3,explain:"Biryani is a main dish; others are sweets",cat:"food",diff:"med",type:"word"},
+
+  // North vs South cuisine
+  {items:["DOSA","IDLI","UTTAPAM","PAROTTA"],odd:3,explain:"Parotta is different; but this may vary — others are typical breakfast South",cat:"food",diff:"hard",type:"word"},
+
+  // ========== EVEN MORE NUMBERS ==========
+  // Numbers < 10 vs > 10
+  {items:["2","5","8","12"],odd:3,explain:"12 is greater than 10; others are less",cat:"num",diff:"easy",type:"number"},
+
+  // Prime counting
+  {items:["2","3","7","12"],odd:3,explain:"12 is composite; others are primes",cat:"num",diff:"easy",type:"number"},
+
+  // 4-digit palindromes
+  {items:["1221","1331","1441","1234"],odd:3,explain:"1234 is not a palindrome; others are",cat:"num",diff:"hard",type:"number"},
+
+  // Square of digit
+  {items:["16","25","64","72"],odd:3,explain:"72 is not a perfect square; others are 4^2, 5^2, 8^2",cat:"num",diff:"med",type:"number"},
+
+  // Sum of consecutive (Triangular)
+  {items:["1","3","6","7"],odd:3,explain:"7 is not triangular; others are T1, T2, T3",cat:"num",diff:"hard",type:"number"},
+
+  // ========== NEW HARD WORD CATEGORIES ==========
+  // Famous battles
+  {items:["PLASSEY","PANIPAT","BUXAR","JODHPUR"],odd:3,explain:"Jodhpur is a city; others are historic battles",cat:"hist",diff:"hard",type:"word"},
+
+  // Kings dynasties
+  {items:["MAURYA","GUPTA","CHOLA","CONGRESS"],odd:3,explain:"Congress is a political party; others are ancient dynasties",cat:"hist",diff:"hard",type:"word"},
+
+  // Presidents vs PMs
+  {items:["PRATIBHA PATIL","PRANAB MUKHERJEE","RAM NATH KOVIND","INDIRA GANDHI"],odd:3,explain:"Indira Gandhi was PM; others were Presidents",cat:"people",diff:"hard",type:"word"},
+
+  // Cricket terms
+  {items:["BAT","BALL","PITCH","GOAL"],odd:3,explain:"Goal is football/hockey; others are cricket",cat:"sport",diff:"med",type:"word"},
+  {items:["WICKET","STUMP","BAIL","NET"],odd:3,explain:"Net is volleyball/tennis; others are cricket parts",cat:"sport",diff:"med",type:"word"},
+
+  // ========== VIBRANT ANIMAL CATEGORIES ==========
+  // Mammals that fly
+  {items:["BAT","BIRD","MOTH","BUTTERFLY"],odd:0,explain:"Bat is a mammal; others are bird/insect fliers (bat = odd)",cat:"animal",diff:"hard",type:"word"},
+
+  // Cold-blooded
+  {items:["FROG","SNAKE","LIZARD","CAT"],odd:3,explain:"Cat is warm-blooded; others are cold-blooded",cat:"animal",diff:"hard",type:"word"},
+
+  // Marsupials
+  {items:["KANGAROO","KOALA","OPOSSUM","DEER"],odd:3,explain:"Deer is placental mammal; others are marsupials",cat:"animal",diff:"hard",type:"word"},
+
+  // ========== ABSTRACT PATTERNS ==========
+  // Vowel-heavy
+  {items:["AEIOU","BCDFG","HJKLM","NPQRS"],odd:0,explain:"AEIOU are vowels; others are consonants",cat:"alphabet",diff:"hard",type:"word"},
+
+  // Consonant clusters
+  {items:["STRONG","TRICK","PRINT","APPLE"],odd:3,explain:"Apple starts with vowel; others start with consonant cluster",cat:"lang",diff:"med",type:"word"},
+
+  // ========== MEDICINE / SCIENCE ==========
+  {items:["ASPIRIN","PARACETAMOL","IBUPROFEN","VITAMIN"],odd:3,explain:"Vitamin is a supplement; others are pain relievers",cat:"science",diff:"hard",type:"word"},
+
+  // Vitamins
+  {items:["VITAMIN A","VITAMIN C","VITAMIN D","INSULIN"],odd:3,explain:"Insulin is a hormone; others are vitamins",cat:"science",diff:"med",type:"word"},
+
+  // ========== MORE NUMBERS ==========
+  // HCF/LCM relevant
+  {items:["6","12","18","20"],odd:3,explain:"20 is not divisible by 6; 6,12,18 share factor 6",cat:"num",diff:"med",type:"number"},
+
+  // Digit product
+  {items:["24","36","42","50"],odd:3,explain:"50 has digit product 0; others have nonzero digit products",cat:"num",diff:"hard",type:"number"},
+
+  // Numbers that are both square and cube
+  {items:["1","64","729","100"],odd:3,explain:"100 is square but not cube; others are both (1, 2^6, 3^6)",cat:"num",diff:"hard",type:"number"},
+
+  // ========== SHAPE & PATTERN (HARD) ==========
+  {items:["REGULAR","IRREGULAR","SIMPLE","TRIANGLE"],odd:3,explain:"Triangle is a shape; others are adjectives describing shapes",cat:"shape",diff:"hard",type:"word"},
+
+  // Hand quarter (analog clock)
+  {items:["12","3","6","7"],odd:3,explain:"7 is not at a 90-degree mark on clock; 12,3,6 are",cat:"num",diff:"hard",type:"number"},
+
+  // ========== SERIES OF ONES ==========
+  {items:["11","111","1111","123"],odd:3,explain:"123 breaks the pattern of repeating 1s",cat:"num",diff:"hard",type:"number"},
+
+  // ========== MIXED / TRICKY ==========
+  {items:["2","4","8","6"],odd:3,explain:"6 is not a power of 2; others are 2^1, 2^2, 2^3",cat:"num",diff:"med",type:"number"},
+  {items:["1","4","9","12"],odd:3,explain:"12 is not a perfect square; others are 1^2, 2^2, 3^2",cat:"num",diff:"easy",type:"number"},
+
+  // ========== FINAL ROUND OF WORDS ==========
+  {items:["MONDAY","TUESDAY","WEDNESDAY","NOVEMBER"],odd:3,explain:"November is a month; others are weekdays",cat:"time",diff:"easy",type:"word"},
+  {items:["JANUARY","FEBRUARY","MARCH","SUNDAY"],odd:3,explain:"Sunday is a day; others are months",cat:"time",diff:"easy",type:"word"},
+
+  {items:["COTTON","WOOL","SILK","STEEL"],odd:3,explain:"Steel is metal; others are natural fabrics",cat:"misc",diff:"med",type:"word"},
+  {items:["NYLON","POLYESTER","ACRYLIC","COTTON"],odd:3,explain:"Cotton is natural; others are synthetic fabrics",cat:"misc",diff:"med",type:"word"},
+
+  {items:["ENGINE","WHEEL","STEERING","PIANO"],odd:3,explain:"Piano is instrument; others are car parts",cat:"transport",diff:"med",type:"word"},
+
+  {items:["OCEAN","SEA","LAKE","MOUNTAIN"],odd:3,explain:"Mountain is land; others are water bodies",cat:"geo",diff:"easy",type:"word"},
+  {items:["POND","RIVER","STREAM","HILL"],odd:3,explain:"Hill is land; others are water bodies",cat:"geo",diff:"easy",type:"word"},
+
+  // More divisibility
+  {items:["14","21","28","35"],odd:3,explain:"All are multiples of 7; but 35 = 5x7 (trick) — actually all are multiples of 7. This is tricky.",cat:"num",diff:"hard",type:"number"},
+
+  // Clean — multiples of 7 vs others
+  {items:["7","14","21","25"],odd:3,explain:"25 is not a multiple of 7; others are",cat:"num",diff:"easy",type:"number"},
+
+  // Dozen
+  {items:["12","24","36","40"],odd:3,explain:"40 is not a multiple of 12; others are",cat:"num",diff:"med",type:"number"},
+
+  // Final catch-up
+  {items:["CAT","BAT","HAT","DOG"],odd:3,explain:"DOG doesn't rhyme; CAT/BAT/HAT rhyme",cat:"lang",diff:"easy",type:"word"},
+  {items:["TREE","FLOWER","LEAF","CHAIR"],odd:3,explain:"Chair is furniture; others are plant parts",cat:"plant",diff:"easy",type:"word"},
+  {items:["PAPER","PEN","NOTEBOOK","POTATO"],odd:3,explain:"Potato is food; others are stationery",cat:"misc",diff:"easy",type:"word"},
+  {items:["BUS","CAR","BIKE","KITE"],odd:3,explain:"Kite is a toy; others are vehicles",cat:"transport",diff:"easy",type:"word"},
+  {items:["STUDENT","TEACHER","PRINCIPAL","PATIENT"],odd:3,explain:"Patient is in hospital; others are in school",cat:"misc",diff:"easy",type:"word"},
+  {items:["BOOK","PEN","ERASER","MOBILE"],odd:3,explain:"Mobile is electronic; others are stationery",cat:"misc",diff:"easy",type:"word"},
+  {items:["KNIFE","FORK","SPOON","COMB"],odd:3,explain:"Comb is for hair; others are cutlery",cat:"misc",diff:"easy",type:"word"},
+
+  // Even more numbers - arithmetic progression
+  {items:["5","10","15","19"],odd:3,explain:"19 breaks the +5 AP; others are in AP",cat:"num",diff:"easy",type:"number"},
+  {items:["2","7","12","16"],odd:3,explain:"16 breaks the +5 AP; others are 2,7,12 with +5",cat:"num",diff:"med",type:"number"},
+  {items:["3","7","11","14"],odd:3,explain:"14 breaks the +4 AP; others are 3,7,11",cat:"num",diff:"med",type:"number"},
+
+  // GP (geometric progression)
+  {items:["2","6","18","50"],odd:3,explain:"50 breaks the x3 GP; others are 2,6,18 with ratio 3",cat:"num",diff:"hard",type:"number"},
+  {items:["1","5","25","100"],odd:3,explain:"100 breaks the x5 GP; others are 1,5,25",cat:"num",diff:"hard",type:"number"},
+  {items:["3","9","27","50"],odd:3,explain:"50 breaks the x3 GP; others are 3,9,27",cat:"num",diff:"hard",type:"number"},
+
+  // Last items - more categories
+  {items:["INDIA","USA","CHINA","EUROPE"],odd:3,explain:"Europe is a continent; others are countries",cat:"geo",diff:"easy",type:"word"},
+  {items:["RUPEE","YEN","EURO","ASIA"],odd:3,explain:"Asia is a continent; others are currencies",cat:"money",diff:"easy",type:"word"},
+  {items:["MOUSE","CHEESE","CAT","ELEPHANT"],odd:1,explain:"Cheese is food; others are animals",cat:"animal",diff:"easy",type:"word"},
+  {items:["BED","PILLOW","BLANKET","CLOCK"],odd:3,explain:"Clock is a device; others are bedding",cat:"furniture",diff:"easy",type:"word"},
+  {items:["FLOOD","DROUGHT","EARTHQUAKE","DINNER"],odd:3,explain:"Dinner is a meal; others are natural disasters",cat:"misc",diff:"easy",type:"word"},
+
+  // Shapes and sides
+  {items:["SQUARE","RECTANGLE","RHOMBUS","TRIANGLE"],odd:3,explain:"Triangle has 3 sides; others are quadrilaterals",cat:"shape",diff:"med",type:"word"},
+
+  // Body of water
+  {items:["ATLANTIC","INDIAN","PACIFIC","CASPIAN"],odd:3,explain:"Caspian is a sea/lake; others are oceans",cat:"geo",diff:"hard",type:"word"},
+
+  // Phone parts
+  {items:["SCREEN","BATTERY","CAMERA","PLATE"],odd:3,explain:"Plate is kitchenware; others are phone parts",cat:"tech",diff:"easy",type:"word"},
+
+  // Final numbers
+  {items:["1","2","4","5"],odd:2,explain:"4 breaks the 1,2,__,5 pattern (missing 3 would fit, 4 doesn't)",cat:"num",diff:"hard",type:"number"},
+  {items:["10","20","50","55"],odd:3,explain:"55 is not a multiple of 10; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["3","33","333","400"],odd:3,explain:"400 breaks the repeating 3s pattern",cat:"num",diff:"hard",type:"number"},
+  {items:["9","99","999","1000"],odd:3,explain:"1000 is not all-9 digits; others are",cat:"num",diff:"hard",type:"number"},
+
+  // More categories
+  {items:["DOG","CAT","PARROT","SHARK"],odd:3,explain:"Shark is wild/oceanic; others are pets",cat:"animal",diff:"easy",type:"word"},
+  {items:["WATER","JUICE","MILK","BREAD"],odd:3,explain:"Bread is food; others are drinks",cat:"food",diff:"easy",type:"word"},
+  {items:["ROSE","DAISY","JASMINE","MANGO"],odd:3,explain:"Mango is fruit; others are flowers",cat:"plant",diff:"easy",type:"word"},
+  {items:["SHIRT","SHOE","SOCKS","BUCKET"],odd:3,explain:"Bucket is container; others are clothing",cat:"cloth",diff:"easy",type:"word"},
+  {items:["HAMMER","NAIL","SCREW","BANANA"],odd:3,explain:"Banana is fruit; others are hardware",cat:"misc",diff:"easy",type:"word"},
+  {items:["PIANO","VIOLIN","GUITAR","SOCCER"],odd:3,explain:"Soccer is a sport; others are instruments",cat:"instrument",diff:"easy",type:"word"},
+  {items:["EARTH","WATER","FIRE","METAL"],odd:3,explain:"Metal is a material; others are classical elements",cat:"element",diff:"med",type:"word"},
+  {items:["CELSIUS","FAHRENHEIT","KELVIN","METER"],odd:3,explain:"Meter is length; others are temperature scales",cat:"unit",diff:"hard",type:"word"},
+  {items:["GRAM","KILOGRAM","POUND","MILE"],odd:3,explain:"Mile is length; others are weight/mass",cat:"unit",diff:"med",type:"word"},
+  {items:["ACUTE","OBTUSE","RIGHT","SQUARE"],odd:3,explain:"Square is a shape; others are types of angles",cat:"shape",diff:"hard",type:"word"},
+
+  // Very last set for 200+ target
+  {items:["40","50","60","65"],odd:3,explain:"65 is not a multiple of 10; others are",cat:"num",diff:"easy",type:"number"},
+  {items:["400","500","600","625"],odd:3,explain:"625 is not a multiple of 100; others are",cat:"num",diff:"med",type:"number"},
+  {items:["6","10","14","15"],odd:3,explain:"15 is odd; others are even (and 6,10,14 differ by 4)",cat:"num",diff:"med",type:"number"},
+  {items:["81","49","64","50"],odd:3,explain:"50 is not a perfect square; 81, 49, 64 are",cat:"num",diff:"med",type:"number"},
+  {items:["12","20","28","33"],odd:3,explain:"33 is odd; others are even",cat:"num",diff:"easy",type:"number"},
+
+  // More words
+  {items:["JAIPUR","AGRA","UDAIPUR","BANGKOK"],odd:3,explain:"Bangkok is in Thailand; others are Indian cities",cat:"geo",diff:"easy",type:"word"},
+  {items:["HORSE","DONKEY","ZEBRA","WHALE"],odd:3,explain:"Whale is marine mammal; others are land equines",cat:"animal",diff:"med",type:"word"},
+  {items:["KANGAROO","KIWI","KOALA","KOHINOOR"],odd:3,explain:"Kohinoor is a diamond; others are Australian natives",cat:"misc",diff:"med",type:"word"},
+  {items:["SUN","HEAT","LIGHT","DARKNESS"],odd:3,explain:"Darkness is absence; others are related to sun",cat:"science",diff:"med",type:"word"},
+
+  // Indian classical singers - misc
+  {items:["LATA MANGESHKAR","KISHORE KUMAR","MUKESH","DHONI"],odd:3,explain:"Dhoni is a cricketer; others are singers",cat:"people",diff:"med",type:"word"},
+  {items:["KISHORE","RAFI","LATA","TENDULKAR"],odd:3,explain:"Tendulkar is a cricketer; others are playback singers",cat:"people",diff:"med",type:"word"}
+];
+
+// Remove the accidental bad entry (odd:-1 placeholder)
+PUZZLES=PUZZLES.filter(function(p){return p.odd>=0 && p.odd<=3});
+
+// ===== DOM refs =====
+var scStart=document.getElementById('scStart');
+var scGame=document.getElementById('scGame');
+var scEnd=document.getElementById('scEnd');
+var bestDisp=document.getElementById('bestDisp');
+var timeVal=document.getElementById('timeVal');
+var scoreVal=document.getElementById('scoreVal');
+var streakVal=document.getElementById('streakVal');
+var tbar=document.getElementById('tbar');
+var qbar=document.getElementById('qbar');
+var comboEl=document.getElementById('combo');
+var catLabel=document.getElementById('catLabel');
+var promptEl=document.getElementById('prompt');
+var explainEl=document.getElementById('explain');
+var itemsWrap=document.getElementById('items');
+var itemBtns=itemsWrap.querySelectorAll('.item');
+var finalScore=document.getElementById('finalScore');
+var statCorrect=document.getElementById('statCorrect');
+var statWrong=document.getElementById('statWrong');
+var statAcc=document.getElementById('statAcc');
+var endBest=document.getElementById('endBest');
+var toast=document.getElementById('toast');
+
+// ===== State =====
+var DURATION=60;         // total round seconds
+var Q_DURATION=10;       // seconds per question
+var difficulty='easy';
+var gameMode='mixed';    // mixed / words / numbers
+var timeLeft=DURATION;
+var qTimeLeft=Q_DURATION;
+var score=0, correct=0, wrong=0, streak=0;
+var currentOdd=0;        // shuffled-index of odd item
+var acceptingInput=false;
+var tickHandle=null;
+var qTickHandle=null;
+var feedbackHandle=null;
+var puzzleQueue=[];
+var puzzleIdx=0;
+
+// ===== Category labels for display =====
+var CAT_LABELS={
+  food:"Food",color:"Colors",animal:"Animals",body:"Body",transport:"Transport",
+  time:"Time",sport:"Sports",instrument:"Instruments",geo:"Geography",
+  science:"Science",people:"People",num:"Numbers",capital:"Capitals",
+  landmark:"Landmarks",cloth:"Clothing",furniture:"Furniture",job:"Jobs",
+  lang:"Language",abstract:"Abstract",religion:"Religion",festival:"Festivals",
+  shape:"Shapes",element:"Elements",weather:"Weather",award:"Awards",
+  unit:"Units",alphabet:"Alphabet",plant:"Plants",tech:"Technology",
+  money:"Currency",misc:"General",dance:"Dance",hist:"History",lit:"Literature"
+};
+
+// ===== Best scores =====
+var bestKeys={easy:'oo_best_easy',med:'oo_best_med',hard:'oo_best_hard'};
+var diffLabels={easy:'Easy',med:'Medium',hard:'Hard'};
+
+function loadBest(d){try{return parseInt(localStorage.getItem(bestKeys[d]))||0}catch(e){return 0}}
+function saveBest(d,v){try{localStorage.setItem(bestKeys[d],v)}catch(e){}}
+function refreshBestDisplay(){bestDisp.textContent=loadBest(difficulty)+' ('+diffLabels[difficulty]+')'}
+
+// ===== Screen toggling =====
+function show(el){scStart.classList.add('hidden');scGame.classList.add('hidden');scEnd.classList.add('hidden');el.classList.remove('hidden')}
+
+// ===== Utilities =====
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+
+// Fisher-Yates shuffle (in place)
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  }
+  return arr;
+}
+
+// Filter puzzles based on current difficulty/mode
+function filterPuzzles(){
+  var list=[];
+  for(var i=0;i<PUZZLES.length;i++){
+    var p=PUZZLES[i];
+    // difficulty filter (easy includes only easy; med includes easy+med; hard includes all)
+    var diffOK=false;
+    if(difficulty==='easy' && p.diff==='easy') diffOK=true;
+    else if(difficulty==='med' && (p.diff==='easy' || p.diff==='med')) diffOK=true;
+    else if(difficulty==='hard') diffOK=true;
+    // mode filter
+    var modeOK=(gameMode==='mixed') || (gameMode==='words' && p.type==='word') || (gameMode==='numbers' && p.type==='number');
+    if(diffOK && modeOK) list.push(p);
+  }
+  return list;
+}
+
+// Build a shuffled queue for this game
+function buildQueue(){
+  var pool=filterPuzzles();
+  // Fall back to all puzzles if filter excludes everything (guard)
+  if(!pool.length) pool=PUZZLES.slice();
+  puzzleQueue=shuffle(pool.slice());
+  puzzleIdx=0;
+}
+
+// ===== Render current puzzle =====
+function nextQuestion(){
+  if(puzzleIdx>=puzzleQueue.length){
+    // Rebuild and continue (exam-style infinite supply)
+    buildQueue();
+  }
+  var p=puzzleQueue[puzzleIdx++];
+  // Deep copy items & odd
+  var items=p.items.slice();
+  var originalOdd=p.odd;
+  var oddItem=items[originalOdd];
+  // Shuffle items in place; track odd's new index
+  shuffle(items);
+  for(var i=0;i<items.length;i++){
+    if(items[i]===oddItem){currentOdd=i;break}
+  }
+  // Display category
+  catLabel.textContent=CAT_LABELS[p.cat]||'Classification';
+  promptEl.textContent='Which one does NOT belong?';
+  promptEl.classList.remove('ok','bad');
+  explainEl.classList.remove('show','bad');
+  explainEl.innerHTML='&nbsp;';
+  for(var k=0;k<4;k++){
+    var btn=itemBtns[k];
+    btn.classList.remove('ok','bad','revealed');
+    btn.removeAttribute('disabled');
+    btn.textContent=items[k];
+    btn.dataset.val=String(k);
+  }
+  // Store explain on prompt for later
+  promptEl.dataset.explain=p.explain||'';
+  promptEl.dataset.oddLabel=oddItem;
+  acceptingInput=true;
+  // Restart question timer
+  startQTimer();
+}
+
+// ===== Answer handling =====
+function chooseAnswer(btn){
+  if(!acceptingInput)return;
+  acceptingInput=false;
+  stopQTimer();
+  var idx=parseInt(btn.dataset.val,10);
+  var isRight=(idx===currentOdd);
+  for(var i=0;i<4;i++) itemBtns[i].setAttribute('disabled','');
+  if(isRight){
+    correct++;
+    streak++;
+    var mult=1;
+    if(streak>=6) mult=3;
+    else if(streak>=3) mult=2;
+    score+=mult;
+    scoreVal.textContent=score;
+    streakVal.textContent=streak;
+    btn.classList.add('ok');
+    promptEl.classList.add('ok');
+    promptEl.textContent='Correct!';
+    if(mult>1){comboEl.textContent='COMBO x'+mult+' !';comboEl.classList.add('show')}
+    else{comboEl.classList.remove('show')}
+    explainEl.innerHTML=promptEl.dataset.explain;
+    explainEl.classList.add('show');
+  } else {
+    wrong++;
+    streak=0;
+    streakVal.textContent=0;
+    btn.classList.add('bad');
+    promptEl.classList.add('bad');
+    promptEl.textContent='Wrong!';
+    // Reveal correct
+    itemBtns[currentOdd].classList.add('revealed');
+    explainEl.innerHTML='Odd one was: <b>'+promptEl.dataset.oddLabel+'</b> &mdash; '+promptEl.dataset.explain;
+    explainEl.classList.add('show','bad');
+    comboEl.classList.remove('show');
+  }
+  // Brief feedback then advance
+  if(feedbackHandle) clearTimeout(feedbackHandle);
+  feedbackHandle=setTimeout(function(){ if(timeLeft>0) nextQuestion() }, isRight?700:1300);
+}
+
+// Called when question timer expires without answer (auto-advance)
+function onQTimeout(){
+  if(!acceptingInput) return;
+  acceptingInput=false;
+  stopQTimer();
+  wrong++;
+  streak=0;
+  streakVal.textContent=0;
+  promptEl.classList.add('bad');
+  promptEl.textContent='Time up!';
+  itemBtns[currentOdd].classList.add('revealed');
+  for(var i=0;i<4;i++) itemBtns[i].setAttribute('disabled','');
+  explainEl.innerHTML='Odd one was: <b>'+promptEl.dataset.oddLabel+'</b> &mdash; '+promptEl.dataset.explain;
+  explainEl.classList.add('show','bad');
+  comboEl.classList.remove('show');
+  if(feedbackHandle) clearTimeout(feedbackHandle);
+  feedbackHandle=setTimeout(function(){ if(timeLeft>0) nextQuestion() }, 1100);
+}
+
+// ===== Timers =====
+function startTimer(){
+  timeLeft=DURATION;
+  timeVal.textContent=timeLeft;
+  timeVal.classList.remove('time-warn');
+  tbar.style.transitionDuration='0s';
+  tbar.style.width='100%';
+  tbar.classList.remove('warn');
+  void tbar.offsetWidth;
+  setTimeout(function(){tbar.style.transitionDuration=DURATION+'s';tbar.style.width='0%'},30);
+  if(tickHandle) clearInterval(tickHandle);
+  tickHandle=setInterval(function(){
+    timeLeft--;
+    timeVal.textContent=timeLeft;
+    if(timeLeft<=10){timeVal.classList.add('time-warn');tbar.classList.add('warn')}
+    if(timeLeft<=0){clearInterval(tickHandle);tickHandle=null;endGame()}
+  },1000);
+}
+
+function startQTimer(){
+  qTimeLeft=Q_DURATION;
+  qbar.style.transitionDuration='0s';
+  qbar.style.width='100%';
+  void qbar.offsetWidth;
+  setTimeout(function(){qbar.style.transitionDuration=Q_DURATION+'s';qbar.style.width='0%'},20);
+  if(qTickHandle) clearInterval(qTickHandle);
+  qTickHandle=setInterval(function(){
+    qTimeLeft--;
+    if(qTimeLeft<=0){clearInterval(qTickHandle);qTickHandle=null;onQTimeout()}
+  },1000);
+}
+
+function stopQTimer(){
+  if(qTickHandle){clearInterval(qTickHandle);qTickHandle=null}
+  qbar.style.transitionDuration='0s';
+  qbar.style.width='0%';
+}
+
+// ===== Game lifecycle =====
+function startGame(){
+  score=0;correct=0;wrong=0;streak=0;
+  scoreVal.textContent=0;streakVal.textContent=0;
+  comboEl.classList.remove('show');
+  buildQueue();
+  tbar.style.transitionDuration='0s';
+  tbar.style.width='100%';
+  show(scGame);
+  setTimeout(function(){nextQuestion();startTimer()},40);
+}
+
+function endGame(){
+  acceptingInput=false;
+  if(feedbackHandle){clearTimeout(feedbackHandle);feedbackHandle=null}
+  if(qTickHandle){clearInterval(qTickHandle);qTickHandle=null}
+  var best=loadBest(difficulty);
+  var isNewBest=score>best;
+  if(isNewBest){saveBest(difficulty,score);best=score}
+  finalScore.textContent=score;
+  statCorrect.textContent=correct;
+  statWrong.textContent=wrong;
+  var total=correct+wrong;
+  var acc=total?Math.round((correct/total)*100):0;
+  statAcc.textContent=acc+'%';
+  var bestHtml='Best ('+diffLabels[difficulty]+'): <b>'+best+'</b>';
+  if(isNewBest && score>0) bestHtml+='<span class="newbest">NEW BEST!</span>';
+  endBest.innerHTML=bestHtml;
+  show(scEnd);
+}
+
+function quitGame(){
+  if(tickHandle){clearInterval(tickHandle);tickHandle=null}
+  if(qTickHandle){clearInterval(qTickHandle);qTickHandle=null}
+  if(feedbackHandle){clearTimeout(feedbackHandle);feedbackHandle=null}
+  refreshBestDisplay();
+  show(scStart);
+}
+
+function goStart(){
+  refreshBestDisplay();
+  show(scStart);
+}
+
+// ===== Share score =====
+function shareScore(){
+  var txt='I scored '+score+' on Odd One Out ('+diffLabels[difficulty]+')! '+correct+' correct, '+statAcc.textContent+' accuracy — can you beat it at fun5games.us?';
+  var showToast=function(){toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1400)};
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(showToast, function(){fallbackCopy(txt);showToast()});
+    } else {
+      fallbackCopy(txt);showToast();
+    }
+  } catch(e){fallbackCopy(txt);showToast()}
+}
+
+function fallbackCopy(txt){
+  try{
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.position='absolute';ta.style.left='-9999px';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  } catch(e){}
+}
+
+// ===== Event wiring =====
+// Difficulty selection
+var diffBtns=document.querySelectorAll('.diff-btn');
+for(var i=0;i<diffBtns.length;i++){
+  diffBtns[i].addEventListener('click',function(e){
+    e.stopPropagation();e.preventDefault();
+    for(var k=0;k<diffBtns.length;k++) diffBtns[k].classList.remove('sel');
+    this.classList.add('sel');
+    difficulty=this.getAttribute('data-d');
+    refreshBestDisplay();
+  });
+}
+
+// Mode selection
+var modeBtns=document.querySelectorAll('.mode-btn');
+for(var i=0;i<modeBtns.length;i++){
+  modeBtns[i].addEventListener('click',function(e){
+    e.stopPropagation();e.preventDefault();
+    for(var k=0;k<modeBtns.length;k++) modeBtns[k].classList.remove('sel');
+    this.classList.add('sel');
+    gameMode=this.getAttribute('data-m');
+  });
+}
+
+// How to play toggle
+document.getElementById('howHd').addEventListener('click',function(e){
+  e.stopPropagation();e.preventDefault();
+  document.getElementById('how').classList.toggle('open');
+});
+
+// Play button
+document.getElementById('playBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();startGame()});
+
+// Item buttons
+for(var i=0;i<itemBtns.length;i++){
+  itemBtns[i].addEventListener('click',function(e){e.stopPropagation();e.preventDefault();chooseAnswer(this)});
+}
+
+// Quit button
+document.getElementById('quitBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();quitGame()});
+
+// End-screen buttons
+document.getElementById('shareBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();shareScore()});
+document.getElementById('againBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();startGame()});
+document.getElementById('changeBtn').addEventListener('click',function(e){e.stopPropagation();e.preventDefault();goStart()});
+
+// Keyboard shortcuts: 1-4 / A-D choose item, Space/Enter to start
+window.addEventListener('keydown',function(e){
+  if(!scGame.classList.contains('hidden') && acceptingInput){
+    var idx=-1;
+    if(e.key==='1'||e.key==='a'||e.key==='A') idx=0;
+    else if(e.key==='2'||e.key==='b'||e.key==='B') idx=1;
+    else if(e.key==='3'||e.key==='c'||e.key==='C') idx=2;
+    else if(e.key==='4'||e.key==='d'||e.key==='D') idx=3;
+    if(idx>=0){e.preventDefault();chooseAnswer(itemBtns[idx])}
+    if(e.key==='Escape'){e.preventDefault();quitGame()}
+  } else if(!scStart.classList.contains('hidden') && (e.key==='Enter'||e.key===' ')){
+    e.preventDefault();startGame();
+  } else if(!scEnd.classList.contains('hidden') && (e.key==='Enter'||e.key===' ')){
+    e.preventDefault();startGame();
+  }
+});
+
+// Prevent iOS scroll
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+
+// Init
+refreshBestDisplay();
+
+})();
+</script>
+</body>
+</html>

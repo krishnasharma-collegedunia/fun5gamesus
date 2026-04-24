@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f23">
+<title>Memory Master</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#0f0f23}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#fff;position:relative}
+
+/* ROOT STAGE */
+.stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.stage.hidden{display:none}
+
+/* START SCREEN */
+.title{font-size:clamp(34px,9.5vw,50px);font-weight:900;letter-spacing:2px;color:#7b2cbf;text-align:center;margin-top:3vh;text-shadow:0 2px 16px rgba(123,44,191,.5);line-height:1}
+.title .ms{color:#ffbe0b;text-shadow:0 2px 16px rgba(255,190,11,.45)}
+.tag{color:#c8d0e8;font-size:clamp(12px,3.4vw,14.5px);text-align:center;margin-top:10px;max-width:340px;line-height:1.45;padding:0 8px}
+
+/* AD SLOT */
+.ad-slot{border:1px dashed #555;background:rgba(255,255,255,0.05);color:#777;font-size:11px;padding:12px;text-align:center;width:100%;max-width:360px;margin:12px 0;border-radius:4px;letter-spacing:1px}
+
+/* HOW TO PLAY */
+.how{width:100%;max-width:360px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;margin-top:2px;overflow:hidden}
+.how-hd{padding:12px 16px;font-size:13px;font-weight:bold;color:#ffbe0b;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.how-hd .arrow{transition:transform .25s}
+.how.open .how-hd .arrow{transform:rotate(180deg)}
+.how-bd{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:12.5px;color:#d5dcef;line-height:1.65}
+.how.open .how-bd{max-height:420px}
+.how-bd-inner{padding:2px 16px 14px 16px}
+.how-bd h4{color:#7b2cbf;font-size:12px;margin-top:8px;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase}
+.how-bd ul{padding-left:18px}
+.how-bd li{margin-bottom:2px}
+
+/* MODE PICKER */
+.mode-label{font-size:11px;color:#8a94b8;margin-top:18px;letter-spacing:3px;text-transform:uppercase}
+.mode-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px;margin-top:10px}
+.mode-btn{background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);color:#fff;padding:14px 16px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;text-align:left;display:flex;flex-direction:column;gap:4px;position:relative;transition:all .2s;overflow:hidden}
+.mode-btn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#7b2cbf;transition:width .2s}
+.mode-btn[data-mode="digit"]::before{background:#7b2cbf}
+.mode-btn[data-mode="pattern"]::before{background:#ffbe0b}
+.mode-btn[data-mode="seq"]::before{background:#22c55e}
+.mode-btn:active{transform:scale(.98)}
+.mode-btn .m-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mode-btn .m-name{font-size:15px;font-weight:900;letter-spacing:1px}
+.mode-btn[data-mode="digit"] .m-name{color:#c89dff}
+.mode-btn[data-mode="pattern"] .m-name{color:#ffdb5c}
+.mode-btn[data-mode="seq"] .m-name{color:#6ee7b7}
+.mode-btn .m-best{font-size:11px;color:#8a94b8;font-weight:normal;letter-spacing:1px}
+.mode-btn .m-best b{color:#ffbe0b;font-weight:900;font-size:13px}
+.mode-btn .m-desc{font-size:11.5px;color:#a8b2d1;font-weight:normal;letter-spacing:.3px}
+
+/* DIGIT SPAN reverse toggle */
+.reverse-row{display:flex;align-items:center;gap:10px;font-size:12px;color:#a8b2d1;margin-top:4px;padding-left:6px}
+.reverse-chk{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:2px solid #7b2cbf;border-radius:4px;background:transparent;cursor:pointer;position:relative;flex-shrink:0}
+.reverse-chk:checked{background:#7b2cbf}
+.reverse-chk:checked::after{content:"";position:absolute;left:4px;top:0px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+/* FOOT NOTE */
+.foot{margin-top:20px;font-size:11px;color:#566080;text-align:center;letter-spacing:1px;padding-bottom:24px}
+
+/* ---------------- GAME SCREEN (shared) ---------------- */
+.hud{width:100%;max-width:460px;display:flex;justify-content:space-between;align-items:center;padding:6px 2px;margin-top:4px}
+.hud-box{text-align:center;flex:1}
+.hud-lbl{font-size:9.5px;color:#8a94b8;letter-spacing:2px;text-transform:uppercase}
+.hud-val{font-size:clamp(20px,5.5vw,26px);font-weight:900;color:#ffbe0b;line-height:1;margin-top:3px}
+.hud-val.purple{color:#c89dff}
+.hud-val.green{color:#6ee7b7}
+.mode-tag{font-size:10px;color:#fff;background:rgba(123,44,191,.4);padding:4px 10px;border-radius:20px;letter-spacing:1px;margin-top:2px}
+.mode-tag.amber{background:rgba(255,190,11,.3);color:#ffdb5c}
+.mode-tag.green{background:rgba(34,197,94,.3);color:#6ee7b7}
+
+.status{font-size:13px;color:#d5dcef;margin-top:10px;text-align:center;min-height:20px;letter-spacing:.5px}
+.status.warn{color:#ff8a8a}
+.status.ok{color:#6ee7b7}
+
+.quit{background:transparent;border:1px solid rgba(255,255,255,0.15);color:#8a94b8;padding:8px 18px;border-radius:8px;font-family:inherit;font-size:12px;margin-top:14px;cursor:pointer;-webkit-appearance:none}
+.quit:active{transform:scale(.96)}
+
+/* ---------------- MODE 1: DIGIT SPAN ---------------- */
+.digit-box{width:100%;max-width:300px;aspect-ratio:3/1;margin-top:22px;background:rgba(255,255,255,0.03);border:2px solid rgba(123,44,191,.3);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:clamp(64px,18vw,100px);font-weight:900;color:#c89dff;letter-spacing:4px;position:relative;box-shadow:0 0 30px rgba(123,44,191,.15)}
+.digit-box.showing{border-color:#7b2cbf;box-shadow:0 0 30px rgba(123,44,191,.4)}
+.digit-box.input{border-color:#ffbe0b;box-shadow:0 0 30px rgba(255,190,11,.2);font-size:clamp(36px,9vw,52px);color:#ffdb5c;letter-spacing:8px}
+.digit-box.ok{border-color:#22c55e;color:#6ee7b7;box-shadow:0 0 40px rgba(34,197,94,.45)}
+.digit-box.bad{border-color:#ef4444;color:#ff8a8a;box-shadow:0 0 40px rgba(239,68,68,.45)}
+.digit-pop{animation:digitPop .18s ease}
+@keyframes digitPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+
+.input-hint{margin-top:12px;font-size:12px;color:#8a94b8;text-align:center;letter-spacing:1px;min-height:16px}
+.input-hint b{color:#ffbe0b}
+
+.numpad{width:100%;max-width:300px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.num-btn{background:rgba(123,44,191,.15);border:2px solid rgba(123,44,191,.35);color:#fff;padding:14px 0;border-radius:12px;font-family:inherit;font-size:22px;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:54px}
+.num-btn:active{transform:scale(.94);background:rgba(123,44,191,.4)}
+.num-btn.wide{grid-column:span 1}
+.num-btn.action{background:rgba(255,190,11,.15);border-color:rgba(255,190,11,.4);color:#ffdb5c;font-size:16px}
+.num-btn.action:active{background:rgba(255,190,11,.3)}
+.num-btn.del{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35);color:#ff8a8a;font-size:18px}
+.num-btn.del:active{background:rgba(239,68,68,.3)}
+.num-btn[disabled]{opacity:.35;pointer-events:none}
+
+/* ---------------- MODE 2: PATTERN GRID ---------------- */
+.pgrid{width:100%;max-width:320px;aspect-ratio:1;margin-top:20px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:7px;padding:7px;background:rgba(255,255,255,0.03);border:2px solid rgba(255,190,11,.3);border-radius:14px}
+.pcell{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.08);border-radius:8px;cursor:pointer;touch-action:manipulation;transition:all .14s;position:relative;display:flex;align-items:center;justify-content:center;color:transparent;font-size:20px;font-weight:900}
+.pcell.hi{background:#ffbe0b;border-color:#ffde80;box-shadow:0 0 20px rgba(255,190,11,.7);transform:scale(1.03)}
+.pcell.tapped{background:rgba(123,44,191,.6);border-color:#c89dff;color:#fff;box-shadow:0 0 16px rgba(123,44,191,.5)}
+.pcell.ok{background:rgba(34,197,94,.55);border-color:#22c55e;color:#fff;box-shadow:0 0 18px rgba(34,197,94,.5)}
+.pcell.bad{background:rgba(239,68,68,.6);border-color:#ef4444;color:#fff;box-shadow:0 0 18px rgba(239,68,68,.6)}
+.pcell:active{transform:scale(.96)}
+.pcell[disabled]{pointer-events:none}
+
+.pgrid.locked .pcell{pointer-events:none}
+
+.progress-row{display:flex;gap:4px;justify-content:center;margin-top:12px;flex-wrap:wrap;max-width:320px;width:100%}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);transition:all .2s}
+.prog-dot.done{background:#ffbe0b;border-color:#ffde80;box-shadow:0 0 6px rgba(255,190,11,.5)}
+
+/* ---------------- MODE 3: SEQUENCE (Simon) ---------------- */
+.simon-wrap{width:100%;max-width:320px;aspect-ratio:1;margin-top:20px;position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:12px;border-radius:50%;background:rgba(255,255,255,0.02);border:2px solid rgba(34,197,94,.2)}
+.simon-btn{border:4px solid rgba(0,0,0,.35);cursor:pointer;touch-action:manipulation;transition:all .1s;position:relative;overflow:hidden}
+.simon-btn[data-color="red"]{background:#c92a2a;border-top-left-radius:100%}
+.simon-btn[data-color="green"]{background:#2f9e44;border-top-right-radius:100%}
+.simon-btn[data-color="blue"]{background:#1c7ed6;border-bottom-left-radius:100%}
+.simon-btn[data-color="yellow"]{background:#e67700;border-bottom-right-radius:100%}
+
+.simon-btn.lit[data-color="red"]{background:#ff4c4c;box-shadow:0 0 40px rgba(255,76,76,.8)}
+.simon-btn.lit[data-color="green"]{background:#51cf66;box-shadow:0 0 40px rgba(81,207,102,.8)}
+.simon-btn.lit[data-color="blue"]{background:#4dabf7;box-shadow:0 0 40px rgba(77,171,247,.8)}
+.simon-btn.lit[data-color="yellow"]{background:#ffd43b;box-shadow:0 0 40px rgba(255,212,59,.8)}
+.simon-btn:active{transform:scale(.97)}
+.simon-btn[disabled]{pointer-events:none}
+.simon-wrap.locked .simon-btn{pointer-events:none}
+
+.simon-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:35%;height:35%;border-radius:50%;background:#0f0f23;border:3px solid rgba(255,190,11,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffbe0b;font-size:11px;font-weight:900;letter-spacing:1px;pointer-events:none;z-index:2}
+.simon-center .sc-val{font-size:28px;color:#ffdb5c;line-height:1;margin-top:2px}
+
+/* ---------------- END SCREEN ---------------- */
+.end-title{font-size:clamp(30px,8.5vw,42px);font-weight:900;color:#7b2cbf;letter-spacing:2px;margin-top:3vh;text-align:center;animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+.end-sub{font-size:13px;color:#a8b2d1;margin-top:4px;text-align:center;letter-spacing:1px}
+.big-score{font-size:clamp(60px,16vw,92px);font-weight:900;color:#ffbe0b;line-height:1;margin-top:12px;text-shadow:0 2px 16px rgba(255,190,11,.4);animation:pop .7s ease}
+.score-lbl{font-size:11px;color:#8a94b8;letter-spacing:3px;text-transform:uppercase;margin-top:4px}
+.stats{display:flex;gap:10px;margin-top:18px;width:100%;max-width:340px;justify-content:center;flex-wrap:wrap}
+.stat-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;min-width:88px;text-align:center;flex:1}
+.stat-v{font-size:18px;font-weight:900;color:#fff}
+.stat-v.green{color:#6ee7b7}.stat-v.gold{color:#ffbe0b}.stat-v.purple{color:#c89dff}
+.stat-l{font-size:9.5px;color:#8a94b8;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.end-best{font-size:13px;color:#8a94b8;margin-top:14px;text-align:center}
+.end-best b{color:#ffbe0b;font-size:15px}
+.end-best .newbest{color:#6ee7b7;font-weight:bold;display:block;margin-top:4px;animation:pop .6s ease}
+
+.end-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;width:100%;max-width:340px}
+.btn-sec{background:linear-gradient(180deg,#9d4dd9,#7b2cbf);color:#fff;border:none;padding:14px 18px;font-family:inherit;font-size:14px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;-webkit-appearance:none;flex:1;min-width:130px}
+.btn-sec.alt{background:rgba(255,255,255,0.08);color:#fff}
+.btn-sec.share{background:rgba(34,197,94,.18);color:#6ee7b7;border:1px solid #22c55e}
+.btn-sec:active{transform:scale(.96)}
+
+/* BIG PLAY BUTTON */
+.play-btn{background:linear-gradient(180deg,#9d4dd9,#7b2cbf);color:#fff;border:none;padding:16px 50px;font-family:inherit;font-size:18px;font-weight:900;letter-spacing:3px;border-radius:12px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;box-shadow:0 8px 24px rgba(123,44,191,.45);margin-top:14px;min-width:220px}
+.play-btn:active{transform:scale(.96)}
+
+/* TOAST */
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(34,197,94,.95);color:#0f0f23;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:bold;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+.toast.show{opacity:1}
+
+/* COUNTDOWN overlay */
+.countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(15,15,35,.85);z-index:20;font-size:100px;font-weight:900;color:#ffbe0b;text-shadow:0 0 40px rgba(255,190,11,.5)}
+.countdown.hidden{display:none}
+.countdown .cd-num{animation:cdpop .9s ease forwards}
+@keyframes cdpop{0%{transform:scale(.3);opacity:0}30%{transform:scale(1.1);opacity:1}100%{transform:scale(1);opacity:0}}
+
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div class="stage" id="scStart">
+  <div class="title">MEMORY<span class="ms"> MASTER</span></div>
+  <div class="tag">Train your working memory for complex exams like UPSC, CAT and Banking</div>
+
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="how" id="howPanel">
+    <div class="how-hd" id="howToggle" ontouchstart="">
+      <span>HOW TO PLAY</span>
+      <span class="arrow">&#9660;</span>
+    </div>
+    <div class="how-bd">
+      <div class="how-bd-inner">
+        <h4>Digit Span</h4>
+        <ul>
+          <li>Watch digits flash one-by-one</li>
+          <li>Type them in order using the keypad</li>
+          <li>Each correct answer adds a digit</li>
+        </ul>
+        <h4>Pattern Grid</h4>
+        <ul>
+          <li>Cells light up in a 4x4 grid</li>
+          <li>Tap them back in the same order</li>
+          <li>One extra cell added per round</li>
+        </ul>
+        <h4>Sequence</h4>
+        <ul>
+          <li>Watch the colours flash in sequence</li>
+          <li>Repeat by tapping in the same order</li>
+          <li>Each round gets one step longer</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-label">CHOOSE A MODE</div>
+  <div class="mode-list">
+    <button class="mode-btn" data-mode="digit" ontouchstart="">
+      <div class="m-row">
+        <span class="m-name">DIGIT SPAN</span>
+        <span class="m-best">BEST: <b id="bDigit">0</b></span>
+      </div>
+      <span class="m-desc">Memorise sequences of digits</span>
+      <label class="reverse-row" ontouchstart="">
+        <input type="checkbox" class="reverse-chk" id="revChk">
+        <span>Reverse mode (type in reverse order)</span>
+      </label>
+    </button>
+    <button class="mode-btn" data-mode="pattern" ontouchstart="">
+      <div class="m-row">
+        <span class="m-name">PATTERN GRID</span>
+        <span class="m-best">BEST: <b id="bPattern">0</b></span>
+      </div>
+      <span class="m-desc">Remember highlighted grid cells</span>
+    </button>
+    <button class="mode-btn" data-mode="seq" ontouchstart="">
+      <div class="m-row">
+        <span class="m-name">SEQUENCE</span>
+        <span class="m-best">BEST: <b id="bSeq">0</b></span>
+      </div>
+      <span class="m-desc">Simon-says with lights and sounds</span>
+    </button>
+  </div>
+
+  <div class="foot">TAP A MODE TO START</div>
+</div>
+
+<!-- DIGIT SPAN SCREEN -->
+<div class="stage hidden" id="scDigit">
+  <div class="hud">
+    <div class="hud-box">
+      <div class="hud-lbl">LENGTH</div>
+      <div class="hud-val purple" id="dLen">3</div>
+    </div>
+    <div class="hud-box">
+      <div class="mode-tag" id="dMode">DIGIT SPAN</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-lbl">BEST</div>
+      <div class="hud-val" id="dBest">0</div>
+    </div>
+  </div>
+  <div class="status" id="dStatus">Watch the digits</div>
+  <div class="digit-box" id="dBox">&nbsp;</div>
+  <div class="input-hint" id="dHint">&nbsp;</div>
+  <div class="numpad" id="dPad">
+    <button class="num-btn" data-n="1" ontouchstart="">1</button>
+    <button class="num-btn" data-n="2" ontouchstart="">2</button>
+    <button class="num-btn" data-n="3" ontouchstart="">3</button>
+    <button class="num-btn" data-n="4" ontouchstart="">4</button>
+    <button class="num-btn" data-n="5" ontouchstart="">5</button>
+    <button class="num-btn" data-n="6" ontouchstart="">6</button>
+    <button class="num-btn" data-n="7" ontouchstart="">7</button>
+    <button class="num-btn" data-n="8" ontouchstart="">8</button>
+    <button class="num-btn" data-n="9" ontouchstart="">9</button>
+    <button class="num-btn del" data-act="del" ontouchstart="">DEL</button>
+    <button class="num-btn" data-n="0" ontouchstart="">0</button>
+    <button class="num-btn action" data-act="enter" ontouchstart="">OK</button>
+  </div>
+  <button class="quit" id="dQuit" ontouchstart="">QUIT</button>
+</div>
+
+<!-- PATTERN SCREEN -->
+<div class="stage hidden" id="scPattern">
+  <div class="hud">
+    <div class="hud-box">
+      <div class="hud-lbl">CELLS</div>
+      <div class="hud-val" id="pCount">3</div>
+    </div>
+    <div class="hud-box">
+      <div class="mode-tag amber">PATTERN</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-lbl">BEST</div>
+      <div class="hud-val" id="pBest">0</div>
+    </div>
+  </div>
+  <div class="status" id="pStatus">Memorise the pattern</div>
+  <div class="pgrid locked" id="pGrid"></div>
+  <div class="progress-row" id="pProg"></div>
+  <button class="quit" id="pQuit" ontouchstart="">QUIT</button>
+</div>
+
+<!-- SEQUENCE SCREEN -->
+<div class="stage hidden" id="scSeq">
+  <div class="hud">
+    <div class="hud-box">
+      <div class="hud-lbl">ROUND</div>
+      <div class="hud-val green" id="sRound">1</div>
+    </div>
+    <div class="hud-box">
+      <div class="mode-tag green">SEQUENCE</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-lbl">BEST</div>
+      <div class="hud-val" id="sBest">0</div>
+    </div>
+  </div>
+  <div class="status" id="sStatus">Watch the pattern</div>
+  <div class="simon-wrap locked" id="sWrap">
+    <button class="simon-btn" data-color="red" ontouchstart=""></button>
+    <button class="simon-btn" data-color="green" ontouchstart=""></button>
+    <button class="simon-btn" data-color="blue" ontouchstart=""></button>
+    <button class="simon-btn" data-color="yellow" ontouchstart=""></button>
+    <div class="simon-center">
+      <div>STEP</div>
+      <div class="sc-val" id="sStep">0</div>
+    </div>
+  </div>
+  <button class="quit" id="sQuit" ontouchstart="">QUIT</button>
+</div>
+
+<!-- END SCREEN -->
+<div class="stage hidden" id="scEnd">
+  <div class="end-title" id="eTitle">GAME OVER</div>
+  <div class="end-sub" id="eSub">Digit Span</div>
+  <div class="big-score" id="eScore">0</div>
+  <div class="score-lbl" id="eScoreLbl">LEVEL REACHED</div>
+
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-v gold" id="eStat1">0</div>
+      <div class="stat-l" id="eStat1L">Rounds</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-v green" id="eStat2">0</div>
+      <div class="stat-l" id="eStat2L">Correct</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-v purple" id="eStat3">0</div>
+      <div class="stat-l" id="eStat3L">Best</div>
+    </div>
+  </div>
+
+  <div class="end-best" id="eBestMsg">Best: <b id="eBest">0</b></div>
+
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="end-btns">
+    <button class="btn-sec" id="eAgain" ontouchstart="">PLAY AGAIN</button>
+    <button class="btn-sec alt" id="eMenu" ontouchstart="">MENU</button>
+    <button class="btn-sec share" id="eShare" ontouchstart="">SHARE</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+<div class="countdown hidden" id="countdown"><span class="cd-num" id="cdNum">3</span></div>
+
+<script>
+(function(){
+'use strict';
+
+// ----- GLOBAL TOUCH PREVENT -----
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+// ----- UTILS -----
+function $(id){return document.getElementById(id);}
+function qs(sel,root){return (root||document).querySelector(sel);}
+function qsa(sel,root){return Array.prototype.slice.call((root||document).querySelectorAll(sel));}
+function show(el){el.classList.remove('hidden');}
+function hide(el){el.classList.add('hidden');}
+function randInt(n){return Math.floor(Math.random()*n);}
+
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,String(v));}catch(e){}}
+
+// ----- WEB AUDIO (subtle) -----
+var audioCtx=null;
+function initAudio(){
+  if(audioCtx)return;
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(AC)audioCtx=new AC();
+  }catch(e){audioCtx=null;}
+}
+function beep(freq,dur,type){
+  if(!audioCtx)return;
+  try{
+    var o=audioCtx.createOscillator();
+    var g=audioCtx.createGain();
+    o.type=type||'sine';
+    o.frequency.value=freq;
+    g.gain.value=0;
+    o.connect(g);g.connect(audioCtx.destination);
+    var t=audioCtx.currentTime;
+    g.gain.linearRampToValueAtTime(0.12,t+0.01);
+    g.gain.linearRampToValueAtTime(0,t+(dur/1000));
+    o.start(t);
+    o.stop(t+(dur/1000)+0.02);
+  }catch(e){}
+}
+function tickBeep(){beep(660,60,'square');}
+function goodBeep(){beep(880,120,'sine');}
+function badBeep(){beep(160,260,'sawtooth');}
+
+// ----- BEST SCORES -----
+var bests={
+  digit:parseInt(lsGet('mm_best_digit','0'),10)||0,
+  pattern:parseInt(lsGet('mm_best_pattern','0'),10)||0,
+  seq:parseInt(lsGet('mm_best_seq','0'),10)||0
+};
+function refreshBest(){
+  $('bDigit').textContent=bests.digit;
+  $('bPattern').textContent=bests.pattern;
+  $('bSeq').textContent=bests.seq;
+}
+refreshBest();
+
+// ----- SCREEN SWITCHING -----
+var screens={
+  start:$('scStart'),
+  digit:$('scDigit'),
+  pattern:$('scPattern'),
+  seq:$('scSeq'),
+  end:$('scEnd')
+};
+function goTo(name){
+  for(var k in screens){if(screens.hasOwnProperty(k)){hide(screens[k]);}}
+  show(screens[name]);
+}
+
+// ----- HOW TO PLAY TOGGLE -----
+$('howToggle').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  $('howPanel').classList.toggle('open');
+});
+
+// ----- REVERSE CHECKBOX -----
+var reverseMode=false;
+$('revChk').addEventListener('pointerdown',function(e){
+  e.stopPropagation();
+});
+$('revChk').addEventListener('change',function(){
+  reverseMode=$('revChk').checked;
+});
+// Prevent card click from triggering when hitting the checkbox
+qsa('.reverse-row').forEach(function(row){
+  row.addEventListener('pointerdown',function(e){e.stopPropagation();});
+});
+
+// ----- MODE BUTTONS -----
+qsa('.mode-btn').forEach(function(btn){
+  btn.addEventListener('pointerdown',function(e){
+    // Allow child (checkbox/label) taps to propagate their own behaviour
+    if(e.target.classList.contains('reverse-chk'))return;
+    if(e.target.closest('.reverse-row')&&btn.getAttribute('data-mode')==='digit')return;
+    e.stopPropagation();e.preventDefault();
+    initAudio();
+    var mode=btn.getAttribute('data-mode');
+    if(mode==='digit')startDigit();
+    else if(mode==='pattern')startPattern();
+    else if(mode==='seq')startSeq();
+  });
+});
+
+// ----- COUNTDOWN -----
+function countdown(cb){
+  var cd=$('countdown');
+  var cdNum=$('cdNum');
+  var n=3;
+  show(cd);
+  cdNum.textContent=n;
+  cdNum.style.animation='none';
+  void cdNum.offsetWidth;
+  cdNum.style.animation='';
+  tickBeep();
+  var iv=setInterval(function(){
+    n--;
+    if(n<=0){
+      clearInterval(iv);
+      hide(cd);
+      cb();
+      return;
+    }
+    cdNum.textContent=n;
+    cdNum.style.animation='none';
+    void cdNum.offsetWidth;
+    cdNum.style.animation='';
+    tickBeep();
+  },900);
+}
+
+// ----- TOAST -----
+function toast(msg){
+  var t=$('toast');
+  t.textContent=msg||'Copied to clipboard';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},1400);
+}
+
+// ========================================================
+//  MODE 1: DIGIT SPAN
+// ========================================================
+var digitState={
+  seq:[],
+  inputBuf:'',
+  level:3,
+  roundsCompleted:0,
+  correctCount:0,
+  phase:'idle', // showing | input | done
+  reverse:false,
+  showIndex:0,
+  showTimer:null
+};
+
+function startDigit(){
+  digitState.level=3;
+  digitState.roundsCompleted=0;
+  digitState.correctCount=0;
+  digitState.reverse=reverseMode;
+  $('dBest').textContent=bests.digit;
+  $('dLen').textContent='3';
+  $('dMode').textContent=digitState.reverse?'REVERSE':'DIGIT SPAN';
+  $('dStatus').textContent='Watch the digits';
+  $('dStatus').className='status';
+  $('dBox').textContent='\u00A0';
+  $('dBox').className='digit-box';
+  $('dHint').textContent='\u00A0';
+  goTo('digit');
+  countdown(function(){playDigitRound();});
+}
+
+function playDigitRound(){
+  // Build random digit sequence
+  digitState.seq=[];
+  for(var i=0;i<digitState.level;i++){
+    digitState.seq.push(randInt(10));
+  }
+  digitState.inputBuf='';
+  digitState.phase='showing';
+  digitState.showIndex=0;
+  $('dLen').textContent=String(digitState.level);
+  $('dStatus').textContent='Watch carefully...';
+  $('dStatus').className='status';
+  $('dBox').className='digit-box showing';
+  $('dBox').textContent='\u00A0';
+  $('dHint').textContent='Showing '+digitState.level+' digits';
+  disableNumpad(true);
+  showNextDigit();
+}
+
+function showNextDigit(){
+  if(digitState.showIndex>=digitState.seq.length){
+    // All shown, switch to input
+    $('dBox').classList.remove('showing');
+    $('dBox').classList.add('input');
+    $('dBox').textContent='\u00A0';
+    digitState.phase='input';
+    digitState.inputBuf='';
+    $('dStatus').textContent=digitState.reverse?'Type in REVERSE order':'Type in order';
+    $('dHint').innerHTML='<b>0</b> / '+digitState.level+' digits';
+    disableNumpad(false);
+    return;
+  }
+  var d=digitState.seq[digitState.showIndex];
+  $('dBox').textContent=String(d);
+  $('dBox').classList.remove('digit-pop');
+  void $('dBox').offsetWidth;
+  $('dBox').classList.add('digit-pop');
+  tickBeep();
+  digitState.showIndex++;
+  digitState.showTimer=setTimeout(function(){
+    // Brief blank between digits
+    $('dBox').textContent='\u00A0';
+    setTimeout(showNextDigit,160);
+  },820);
+}
+
+function disableNumpad(disable){
+  qsa('#dPad .num-btn').forEach(function(b){
+    if(disable)b.setAttribute('disabled','');
+    else b.removeAttribute('disabled');
+  });
+}
+
+qsa('#dPad .num-btn').forEach(function(btn){
+  btn.addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();
+    if(digitState.phase!=='input')return;
+    var n=btn.getAttribute('data-n');
+    var act=btn.getAttribute('data-act');
+    if(act==='del'){
+      if(digitState.inputBuf.length>0){
+        digitState.inputBuf=digitState.inputBuf.slice(0,-1);
+        tickBeep();
+        refreshDigitInput();
+      }
+    }else if(act==='enter'){
+      submitDigit();
+    }else if(n!==null){
+      if(digitState.inputBuf.length>=digitState.level)return;
+      digitState.inputBuf+=n;
+      tickBeep();
+      refreshDigitInput();
+      if(digitState.inputBuf.length>=digitState.level){
+        // auto-submit after brief pause
+        setTimeout(submitDigit,180);
+      }
+    }
+  });
+});
+
+function refreshDigitInput(){
+  $('dBox').textContent=digitState.inputBuf||'\u00A0';
+  $('dHint').innerHTML='<b>'+digitState.inputBuf.length+'</b> / '+digitState.level+' digits';
+}
+
+function submitDigit(){
+  if(digitState.phase!=='input')return;
+  if(digitState.inputBuf.length!==digitState.level){
+    $('dHint').innerHTML='<b>Enter all '+digitState.level+' digits</b>';
+    return;
+  }
+  // Build expected
+  var expected=digitState.seq.slice();
+  if(digitState.reverse)expected.reverse();
+  var typed=digitState.inputBuf;
+  var target=expected.join('');
+  digitState.phase='done';
+  disableNumpad(true);
+  if(typed===target){
+    digitState.roundsCompleted++;
+    digitState.correctCount+=digitState.level;
+    $('dBox').className='digit-box ok';
+    $('dBox').textContent=typed;
+    $('dStatus').textContent='Correct!';
+    $('dStatus').className='status ok';
+    goodBeep();
+    if(digitState.level>bests.digit){
+      bests.digit=digitState.level;
+      lsSet('mm_best_digit',bests.digit);
+      refreshBest();
+    }
+    setTimeout(function(){
+      digitState.level++;
+      if(digitState.level>16){
+        // cap — win screen
+        endDigit(true);
+        return;
+      }
+      playDigitRound();
+    },1000);
+  }else{
+    $('dBox').className='digit-box bad';
+    $('dBox').textContent=typed;
+    $('dStatus').textContent='Wrong! Correct: '+target;
+    $('dStatus').className='status warn';
+    badBeep();
+    setTimeout(function(){endDigit(false);},1600);
+  }
+}
+
+function endDigit(won){
+  if(digitState.showTimer)clearTimeout(digitState.showTimer);
+  var achieved=digitState.roundsCompleted>0?(digitState.roundsCompleted+2):0;
+  showEnd({
+    mode:'digit',
+    modeName:digitState.reverse?'Reverse Digit Span':'Digit Span',
+    score:achieved,scoreLbl:'LONGEST SPAN',
+    s1:digitState.roundsCompleted,s1L:'Rounds',
+    s2:digitState.correctCount,s2L:'Digits',
+    s3:bests.digit,s3L:'Best',
+    best:bests.digit,
+    newBest:achieved>0 && achieved>=bests.digit
+  });
+}
+
+$('dQuit').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  if(digitState.showTimer)clearTimeout(digitState.showTimer);
+  digitState.phase='idle';
+  goTo('start');
+});
+
+// ========================================================
+//  MODE 2: PATTERN GRID
+// ========================================================
+var patternState={
+  seq:[],
+  inputIdx:0,
+  level:3,
+  roundsCompleted:0,
+  phase:'idle',
+  showTimer:null
+};
+
+function buildGrid(){
+  var grid=$('pGrid');
+  grid.innerHTML='';
+  for(var i=0;i<16;i++){
+    var c=document.createElement('div');
+    c.className='pcell';
+    c.setAttribute('data-idx',String(i));
+    c.setAttribute('ontouchstart','');
+    grid.appendChild(c);
+  }
+  // Attach handlers
+  qsa('.pcell',grid).forEach(function(cell){
+    cell.addEventListener('pointerdown',function(e){
+      e.stopPropagation();e.preventDefault();
+      handlePatternTap(parseInt(cell.getAttribute('data-idx'),10),cell);
+    });
+  });
+}
+buildGrid();
+
+function startPattern(){
+  patternState.level=3;
+  patternState.roundsCompleted=0;
+  $('pBest').textContent=bests.pattern;
+  $('pCount').textContent='3';
+  $('pStatus').textContent='Memorise the pattern';
+  $('pStatus').className='status';
+  resetGridDisplay();
+  renderProgress();
+  goTo('pattern');
+  countdown(function(){playPatternRound();});
+}
+
+function resetGridDisplay(){
+  qsa('.pcell').forEach(function(c){
+    c.className='pcell';
+    c.textContent='';
+  });
+  $('pGrid').classList.add('locked');
+}
+
+function renderProgress(){
+  var row=$('pProg');
+  row.innerHTML='';
+  for(var i=0;i<patternState.level;i++){
+    var d=document.createElement('div');
+    d.className='prog-dot';
+    if(i<patternState.inputIdx)d.classList.add('done');
+    row.appendChild(d);
+  }
+}
+
+function playPatternRound(){
+  resetGridDisplay();
+  patternState.seq=[];
+  // Pick N unique random cells
+  var pool=[];for(var i=0;i<16;i++)pool.push(i);
+  for(var j=0;j<patternState.level;j++){
+    var idx=randInt(pool.length);
+    patternState.seq.push(pool[idx]);
+    pool.splice(idx,1);
+  }
+  patternState.inputIdx=0;
+  patternState.phase='showing';
+  $('pCount').textContent=String(patternState.level);
+  $('pStatus').textContent='Memorise '+patternState.level+' cells...';
+  $('pStatus').className='status';
+  $('pGrid').classList.add('locked');
+  renderProgress();
+  // Show pattern — first light each in sequence, then hold, then clear
+  var step=0;
+  var showDelay=Math.max(420,650-patternState.level*20);
+  function showStep(){
+    if(step>=patternState.seq.length){
+      // Hold all visible briefly, then clear
+      patternState.showTimer=setTimeout(function(){
+        qsa('.pcell').forEach(function(c){c.classList.remove('hi');});
+        patternState.phase='input';
+        patternState.inputIdx=0;
+        $('pStatus').textContent='Tap the cells in order';
+        $('pStatus').className='status';
+        $('pGrid').classList.remove('locked');
+        renderProgress();
+      },900);
+      return;
+    }
+    var cells=qsa('.pcell');
+    var cIdx=patternState.seq[step];
+    cells[cIdx].classList.add('hi');
+    cells[cIdx].textContent=String(step+1);
+    tickBeep();
+    step++;
+    patternState.showTimer=setTimeout(showStep,showDelay);
+  }
+  showStep();
+}
+
+function handlePatternTap(idx,cell){
+  if(patternState.phase!=='input')return;
+  var expected=patternState.seq[patternState.inputIdx];
+  if(idx===expected){
+    cell.classList.add('tapped');
+    cell.textContent=String(patternState.inputIdx+1);
+    tickBeep();
+    patternState.inputIdx++;
+    renderProgress();
+    if(patternState.inputIdx>=patternState.seq.length){
+      // Round complete
+      patternState.phase='done';
+      $('pGrid').classList.add('locked');
+      qsa('.pcell').forEach(function(c){
+        if(c.classList.contains('tapped')){
+          c.classList.remove('tapped');
+          c.classList.add('ok');
+        }
+      });
+      goodBeep();
+      patternState.roundsCompleted++;
+      $('pStatus').textContent='Correct!';
+      $('pStatus').className='status ok';
+      if(patternState.level>bests.pattern){
+        bests.pattern=patternState.level;
+        lsSet('mm_best_pattern',bests.pattern);
+        refreshBest();
+      }
+      setTimeout(function(){
+        patternState.level++;
+        if(patternState.level>10){
+          endPattern(true);
+          return;
+        }
+        playPatternRound();
+      },1000);
+    }
+  }else{
+    // Wrong cell
+    patternState.phase='done';
+    $('pGrid').classList.add('locked');
+    cell.classList.add('bad');
+    cell.textContent='X';
+    // Reveal expected
+    qsa('.pcell').forEach(function(c,i){
+      if(patternState.seq.indexOf(i)>=0 && !c.classList.contains('bad')){
+        var pos=patternState.seq.indexOf(i);
+        c.classList.add('hi');
+        c.textContent=String(pos+1);
+      }
+    });
+    badBeep();
+    $('pStatus').textContent='Wrong cell!';
+    $('pStatus').className='status warn';
+    setTimeout(function(){endPattern(false);},1800);
+  }
+}
+
+function endPattern(won){
+  if(patternState.showTimer)clearTimeout(patternState.showTimer);
+  var achieved=patternState.roundsCompleted>0?(patternState.roundsCompleted+2):0;
+  var totalCells=patternState.roundsCompleted*(patternState.roundsCompleted+5)/2|0;
+  showEnd({
+    mode:'pattern',modeName:'Pattern Grid',
+    score:achieved,scoreLbl:'CELLS CLEARED',
+    s1:patternState.roundsCompleted,s1L:'Rounds',
+    s2:totalCells,s2L:'Cells',
+    s3:bests.pattern,s3L:'Best',
+    best:bests.pattern,
+    newBest:achieved>0 && achieved>=bests.pattern
+  });
+}
+
+$('pQuit').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  if(patternState.showTimer)clearTimeout(patternState.showTimer);
+  patternState.phase='idle';
+  goTo('start');
+});
+
+// ========================================================
+//  MODE 3: SEQUENCE (Simon Says)
+// ========================================================
+var COLORS=['red','green','blue','yellow'];
+var COLOR_FREQ={red:329.63,green:440.0,blue:554.37,yellow:659.25};
+var seqState={
+  seq:[],
+  inputIdx:0,
+  round:1,
+  phase:'idle',
+  playTimer:null
+};
+
+function startSeq(){
+  seqState.seq=[];
+  seqState.inputIdx=0;
+  seqState.round=1;
+  seqState.phase='idle';
+  $('sBest').textContent=bests.seq;
+  $('sRound').textContent='1';
+  $('sStep').textContent='0';
+  $('sStatus').textContent='Watch the pattern';
+  $('sStatus').className='status';
+  $('sWrap').classList.add('locked');
+  goTo('seq');
+  countdown(function(){
+    // Initial sequence — add 3 to start
+    seqState.seq.push(randInt(4));
+    seqState.seq.push(randInt(4));
+    seqState.seq.push(randInt(4));
+    playSeqRound();
+  });
+}
+
+function flashSimonBtn(color,dur,cb){
+  var btn=document.querySelector('.simon-btn[data-color="'+color+'"]');
+  if(!btn){if(cb)cb();return;}
+  btn.classList.add('lit');
+  beep(COLOR_FREQ[color]||440,dur*0.8,'sine');
+  setTimeout(function(){
+    btn.classList.remove('lit');
+    if(cb)setTimeout(cb,120);
+  },dur);
+}
+
+function playSeqRound(){
+  seqState.phase='showing';
+  seqState.inputIdx=0;
+  $('sRound').textContent=String(seqState.round);
+  $('sStep').textContent='0';
+  $('sStatus').textContent='Watch carefully...';
+  $('sStatus').className='status';
+  $('sWrap').classList.add('locked');
+  var step=0;
+  var flashDur=Math.max(260,440-seqState.round*12);
+  function next(){
+    if(step>=seqState.seq.length){
+      seqState.phase='input';
+      $('sStatus').textContent='Your turn — repeat!';
+      $('sStatus').className='status';
+      $('sWrap').classList.remove('locked');
+      return;
+    }
+    var cIdx=seqState.seq[step];
+    var color=COLORS[cIdx];
+    flashSimonBtn(color,flashDur,function(){
+      step++;
+      seqState.playTimer=setTimeout(next,80);
+    });
+  }
+  seqState.playTimer=setTimeout(next,600);
+}
+
+qsa('.simon-btn').forEach(function(btn){
+  btn.addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();
+    if(seqState.phase!=='input')return;
+    var color=btn.getAttribute('data-color');
+    var expectedIdx=seqState.seq[seqState.inputIdx];
+    var expectedColor=COLORS[expectedIdx];
+    flashSimonBtn(color,240,null);
+    if(color===expectedColor){
+      seqState.inputIdx++;
+      $('sStep').textContent=String(seqState.inputIdx);
+      if(seqState.inputIdx>=seqState.seq.length){
+        // Round complete
+        seqState.phase='done';
+        $('sWrap').classList.add('locked');
+        $('sStatus').textContent='Correct!';
+        $('sStatus').className='status ok';
+        goodBeep();
+        if(seqState.seq.length>bests.seq){
+          bests.seq=seqState.seq.length;
+          lsSet('mm_best_seq',bests.seq);
+          refreshBest();
+        }
+        setTimeout(function(){
+          seqState.round++;
+          seqState.seq.push(randInt(4));
+          if(seqState.seq.length>30){
+            endSeq(true);
+            return;
+          }
+          playSeqRound();
+        },900);
+      }
+    }else{
+      // Wrong
+      seqState.phase='done';
+      $('sWrap').classList.add('locked');
+      $('sStatus').textContent='Wrong! Expected '+expectedColor.toUpperCase();
+      $('sStatus').className='status warn';
+      badBeep();
+      // Flash correct one briefly
+      setTimeout(function(){
+        flashSimonBtn(expectedColor,420,null);
+      },250);
+      setTimeout(function(){endSeq(false);},1800);
+    }
+  });
+});
+
+function endSeq(won){
+  if(seqState.playTimer)clearTimeout(seqState.playTimer);
+  var completed=seqState.round>1?seqState.seq.length-1:0;
+  if(completed<0)completed=0;
+  showEnd({
+    mode:'seq',modeName:'Sequence',
+    score:completed,scoreLbl:'LONGEST SEQUENCE',
+    s1:seqState.round-1,s1L:'Rounds',
+    s2:completed,s2L:'Steps',
+    s3:bests.seq,s3L:'Best',
+    best:bests.seq,
+    newBest:completed>0 && completed>=bests.seq
+  });
+}
+
+$('sQuit').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  if(seqState.playTimer)clearTimeout(seqState.playTimer);
+  seqState.phase='idle';
+  goTo('start');
+});
+
+// ========================================================
+//  END SCREEN
+// ========================================================
+var lastEnd={mode:'digit',modeName:'Digit Span',score:0};
+
+function showEnd(info){
+  lastEnd=info;
+  $('eTitle').textContent='GAME OVER';
+  $('eSub').textContent=info.modeName;
+  $('eScore').textContent=String(info.score);
+  $('eScoreLbl').textContent=info.scoreLbl;
+  $('eStat1').textContent=String(info.s1);
+  $('eStat1L').textContent=info.s1L;
+  $('eStat2').textContent=String(info.s2);
+  $('eStat2L').textContent=info.s2L;
+  $('eStat3').textContent=String(info.s3);
+  $('eStat3L').textContent=info.s3L;
+
+  if(info.newBest){
+    $('eBestMsg').innerHTML='Best: <b>'+info.best+'</b><span class="newbest">NEW BEST!</span>';
+  }else{
+    $('eBestMsg').innerHTML='Best: <b>'+info.best+'</b>';
+  }
+  goTo('end');
+}
+
+$('eAgain').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  if(lastEnd.mode==='digit')startDigit();
+  else if(lastEnd.mode==='pattern')startPattern();
+  else if(lastEnd.mode==='seq')startSeq();
+});
+
+$('eMenu').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  goTo('start');
+});
+
+$('eShare').addEventListener('pointerdown',function(e){
+  e.stopPropagation();e.preventDefault();
+  var msg='I scored '+lastEnd.score+' on Memory Master ('+lastEnd.modeName+') at fun5games.us — can you beat it?';
+  var copied=false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(msg).then(function(){
+        toast('Copied to clipboard!');
+      },function(){
+        fallbackCopy(msg);
+      });
+      copied=true;
+    }
+  }catch(err){}
+  if(!copied)fallbackCopy(msg);
+});
+
+function fallbackCopy(text){
+  try{
+    var ta=document.createElement('textarea');
+    ta.value=text;
+    ta.style.position='absolute';
+    ta.style.left='-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Copied to clipboard!');
+  }catch(e){
+    toast('Share: '+text.substr(0,30)+'...');
+  }
+}
+
+// ========================================================
+//  KEYBOARD SUPPORT
+// ========================================================
+document.addEventListener('keydown',function(e){
+  // Digit span numpad
+  if(!screens.digit.classList.contains('hidden') && digitState.phase==='input'){
+    if(e.key>='0' && e.key<='9'){
+      if(digitState.inputBuf.length<digitState.level){
+        digitState.inputBuf+=e.key;
+        tickBeep();
+        refreshDigitInput();
+        if(digitState.inputBuf.length>=digitState.level){
+          setTimeout(submitDigit,180);
+        }
+      }
+    }else if(e.key==='Backspace'){
+      if(digitState.inputBuf.length>0){
+        digitState.inputBuf=digitState.inputBuf.slice(0,-1);
+        refreshDigitInput();
+      }
+    }else if(e.key==='Enter'){
+      submitDigit();
+    }
+  }
+  // Sequence color keys: 1-4 = R G B Y
+  if(!screens.seq.classList.contains('hidden') && seqState.phase==='input'){
+    var map={'1':'red','2':'green','3':'blue','4':'yellow'};
+    var color=map[e.key];
+    if(color){
+      var btn=document.querySelector('.simon-btn[data-color="'+color+'"]');
+      if(btn){
+        var ev=new Event('pointerdown',{bubbles:true,cancelable:true});
+        btn.dispatchEvent(ev);
+      }
+    }
+  }
+  // Start screen shortcuts
+  if(!screens.start.classList.contains('hidden')){
+    if(e.key==='1'){initAudio();startDigit();}
+    else if(e.key==='2'){initAudio();startPattern();}
+    else if(e.key==='3'){initAudio();startSeq();}
+  }
+  // End screen
+  if(!screens.end.classList.contains('hidden')){
+    if(e.key==='Enter'){
+      $('eAgain').dispatchEvent(new Event('pointerdown',{bubbles:true,cancelable:true}));
+    }else if(e.key==='Escape'){
+      goTo('start');
+    }
+  }
+});
+
+// Initial render
+goTo('start');
+
+})();
+</script>
+
+</body>
+</html>

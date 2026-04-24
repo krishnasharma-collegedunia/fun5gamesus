@@ -4,7 +4,7 @@
     {
       "name": "playzone",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["-y", "http-server", "/Users/dell/Library/Mobile Documents/com~apple~CloudDocs/Claude code/PlayZone", "-c-1", "--cors"],
+      "runtimeArgs": ["-y", "http-server", "/tmp/pztest", "-c-1", "--cors"],
       "port": 8080,
       "autoPort": true
     }

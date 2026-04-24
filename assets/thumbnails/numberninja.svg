@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#1a1a2e"/>
+<g font-family="Arial Black, sans-serif" font-weight="900" text-anchor="middle">
+<rect x="30" y="80" width="56" height="56" rx="8" fill="#00ffd0" opacity="0.15" stroke="#00ffd0" stroke-width="2"/>
+<text x="58" y="118" font-size="28" fill="#00ffd0">2</text>
+<rect x="96" y="80" width="56" height="56" rx="8" fill="#00ffd0" opacity="0.15" stroke="#00ffd0" stroke-width="2"/>
+<text x="124" y="118" font-size="28" fill="#00ffd0">6</text>
+<rect x="162" y="80" width="56" height="56" rx="8" fill="#00ffd0" opacity="0.15" stroke="#00ffd0" stroke-width="2"/>
+<text x="190" y="118" font-size="28" fill="#00ffd0">12</text>
+<rect x="228" y="80" width="56" height="56" rx="8" fill="#00ffd0" opacity="0.15" stroke="#00ffd0" stroke-width="2"/>
+<text x="256" y="118" font-size="28" fill="#00ffd0">20</text>
+<rect x="294" y="80" width="56" height="56" rx="8" fill="#f39c12"/>
+<text x="322" y="118" font-size="32" fill="#1a1a2e">?</text>
+<text x="200" y="175" font-size="16" font-weight="700" fill="#fff">Next in the pattern?</text>
+<rect x="30" y="195" width="72" height="36" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(243,156,18,0.4)"/>
+<text x="66" y="219" font-size="16" fill="#fff">24</text>
+<rect x="110" y="195" width="72" height="36" rx="6" fill="#f39c12"/>
+<text x="146" y="219" font-size="16" fill="#1a1a2e">30</text>
+<rect x="190" y="195" width="72" height="36" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(243,156,18,0.4)"/>
+<text x="226" y="219" font-size="16" fill="#fff">28</text>
+<rect x="270" y="195" width="72" height="36" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(243,156,18,0.4)"/>
+<text x="306" y="219" font-size="16" fill="#fff">32</text>
+<text x="200" y="255" font-size="12" fill="#00ffd0">⚡ STREAK ×3</text>
+<text x="200" y="285" font-size="30" fill="#f39c12">NUMBER NINJA</text>
+</g>
+</svg>

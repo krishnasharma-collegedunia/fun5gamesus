@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#f8fafc"/>
+<g font-family="Georgia, serif" text-anchor="middle">
+<rect x="30" y="25" width="340" height="35" rx="18" fill="#6366f1"/>
+<text x="200" y="49" font-size="15" font-weight="700" fill="#fff">SYNONYMS · ANTONYMS · ANALOGIES</text>
+<text x="200" y="95" font-size="12" font-weight="700" fill="#f59e0b" font-family="Arial" letter-spacing="3">FIND A SYNONYM</text>
+<text x="200" y="128" font-size="38" font-weight="900" fill="#1e293b" font-style="italic">MAGNANIMOUS</text>
+<rect x="50" y="155" width="140" height="42" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="120" y="180" font-size="14" fill="#475569">SELFISH</text>
+<rect x="210" y="155" width="140" height="42" rx="8" fill="#22c55e"/>
+<text x="280" y="180" font-size="14" font-weight="700" fill="#fff">GENEROUS ✓</text>
+<rect x="50" y="205" width="140" height="42" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="120" y="230" font-size="14" fill="#475569">HARSH</text>
+<rect x="210" y="205" width="140" height="42" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="280" y="230" font-size="14" fill="#475569">TIMID</text>
+<text x="200" y="283" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#6366f1">WORD WISE</text>
+</g>
+</svg>
