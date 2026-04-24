@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f8fafc">
+<title>Word Wise</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#f8fafc;font-family:Georgia,"Times New Roman",serif;color:#1e293b}
+body{display:flex;flex-direction:column;align-items:center;height:100dvh;position:relative}
+.wrap{width:100%;max-width:560px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden;background:#f8fafc}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 14px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.scr.hidden{display:none}
+.title{font-size:clamp(42px,11vw,66px);font-weight:900;letter-spacing:6px;text-align:center;color:#6366f1;line-height:1;margin-top:14px;text-shadow:0 2px 0 rgba(99,102,241,.15)}
+.tag{font-size:clamp(12px,3vw,15px);text-align:center;color:#64748b;margin-top:8px;letter-spacing:2px;font-style:italic}
+.ad-slot{border:1px dashed #cbd5e1;color:#94a3b8;text-align:center;padding:12px;font-size:11px;letter-spacing:2px;border-radius:8px;margin:14px 4px;text-transform:uppercase;background:rgba(255,255,255,.6)}
+.sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6366f1;margin:18px 4px 8px;font-weight:bold;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.mode-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 4px}
+.mode-btn{background:#fff;border:2px solid #e2e8f0;color:#475569;padding:14px 6px;font-size:12px;font-weight:bold;font-family:-apple-system,"Segoe UI",Arial,sans-serif;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-align:center;text-transform:uppercase}
+.mode-btn.active{background:linear-gradient(180deg,#6366f1,#4f46e5);color:#fff;border-color:#4338ca;box-shadow:0 4px 14px rgba(99,102,241,.35)}
+.mode-desc{font-size:11px;color:#64748b;padding:0 4px;margin-top:6px;text-align:center;font-style:italic}
+.diff-row{display:flex;gap:8px;padding:0 4px}
+.diff-btn{flex:1;background:#fff;border:2px solid #e2e8f0;color:#475569;padding:12px 6px;font-size:12px;font-weight:bold;font-family:-apple-system,"Segoe UI",Arial,sans-serif;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-align:center;text-transform:uppercase}
+.diff-btn.active{background:linear-gradient(180deg,#f59e0b,#d97706);color:#fff;border-color:#b45309;box-shadow:0 4px 14px rgba(245,158,11,.35)}
+.play-btn{display:block;margin:22px auto 10px;background:linear-gradient(180deg,#6366f1,#4338ca);color:#fff;border:none;padding:18px 60px;font:900 clamp(20px,5.5vw,26px) -apple-system,"Segoe UI",Arial,sans-serif;border-radius:50px;letter-spacing:4px;box-shadow:0 8px 24px rgba(99,102,241,.4);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.play-btn:active{transform:scale(.96)}
+.best-line{text-align:center;font-size:13px;color:#6366f1;margin-top:8px;letter-spacing:1px;font-family:-apple-system,"Segoe UI",Arial,sans-serif;font-weight:bold}
+.howto-box{margin:14px 4px 8px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;overflow:hidden}
+.howto-head{padding:12px 14px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#6366f1;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.howto-body{padding:0 14px 14px;font-size:13px;line-height:1.7;color:#475569;display:none;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.howto-body.open{display:block}
+.howto-body ul{list-style:none;padding:0}
+.howto-body li{padding:3px 0}
+.howto-body li:before{content:"• ";color:#f59e0b;margin-right:4px;font-weight:bold}
+
+/* Quiz screen */
+.q-head{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 10px;gap:8px}
+.q-info{display:flex;gap:6px;align-items:center}
+.q-counter{font-size:13px;font-weight:bold;color:#6366f1;letter-spacing:1px;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.q-mode{font-size:10px;padding:4px 10px;border-radius:10px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#4f46e5;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.q-score{font-size:14px;font-weight:900;background:linear-gradient(180deg,#f59e0b,#d97706);color:#fff;padding:5px 14px;border-radius:10px;letter-spacing:1px;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.timer-bar{position:relative;height:8px;background:#e2e8f0;border-radius:4px;margin:4px 4px 12px;overflow:hidden}
+.timer-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);border-radius:4px;transition:width .2s linear}
+.qtime{text-align:center;font-size:12px;font-weight:bold;color:#64748b;margin:-6px 0 8px;letter-spacing:1px;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.prompt-lbl{text-align:center;font-size:11px;color:#64748b;letter-spacing:3px;text-transform:uppercase;margin:8px 0 4px;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.q-word{font-size:clamp(26px,7.2vw,40px);font-weight:900;letter-spacing:3px;color:#1e293b;text-align:center;padding:20px 10px;background:#fff;border:2px solid #e2e8f0;border-radius:14px;margin:4px 4px 14px;min-height:90px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(15,23,42,.06)}
+.q-word.flash-ok{background:linear-gradient(180deg,#dcfce7,#bbf7d0);border-color:#22c55e;color:#15803d;transition:background .25s,border-color .25s,color .25s}
+.q-word.flash-no{background:linear-gradient(180deg,#fee2e2,#fecaca);border-color:#ef4444;color:#b91c1c;transition:background .25s,border-color .25s,color .25s}
+.q-opts{display:flex;flex-direction:column;gap:10px;padding:0 4px}
+.q-opt{position:relative;background:#fff;border:2px solid #e2e8f0;color:#1e293b;padding:14px 14px 14px 46px;font-size:clamp(14px,3.8vw,17px);font-weight:bold;font-family:Georgia,"Times New Roman",serif;border-radius:12px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;text-align:left;line-height:1.3;transition:background .12s,border-color .12s,transform .12s;letter-spacing:1px}
+.q-opt .letter{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:8px;background:rgba(99,102,241,.15);color:#6366f1;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.q-opt:active{transform:scale(.98)}
+.q-opt.correct{background:linear-gradient(180deg,#dcfce7,#bbf7d0);border-color:#22c55e;color:#15803d}
+.q-opt.correct .letter{background:#22c55e;color:#fff}
+.q-opt.wrong{background:linear-gradient(180deg,#fee2e2,#fecaca);border-color:#ef4444;color:#b91c1c}
+.q-opt.wrong .letter{background:#ef4444;color:#fff}
+.q-opt.disabled{pointer-events:none;opacity:.85}
+.feedback-pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);font-size:52px;font-weight:900;pointer-events:none;z-index:30;text-shadow:0 4px 16px rgba(0,0,0,.15);transition:transform .25s cubic-bezier(.5,1.6,.6,1);font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.feedback-pop.show{transform:translate(-50%,-50%) scale(1)}
+.feedback-pop.ok{color:#22c55e}
+.feedback-pop.no{color:#ef4444}
+.def-box{margin:12px 4px 0;padding:14px 16px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;font-size:14px;line-height:1.5;color:#78350f;display:none;font-style:italic;text-align:center}
+.def-box.show{display:block}
+.def-box b{font-style:normal;color:#b45309;letter-spacing:1px;font-family:-apple-system,"Segoe UI",Arial,sans-serif;font-size:12px;text-transform:uppercase;display:block;margin-bottom:4px}
+.prog-bar{position:relative;height:6px;background:#e2e8f0;border-radius:3px;margin:4px 4px 10px;overflow:hidden}
+.prog-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#6366f1,#f59e0b);border-radius:3px;transition:width .3s}
+
+/* End screen */
+.end-title{font-size:clamp(36px,9vw,56px);font-weight:900;letter-spacing:4px;text-align:center;color:#6366f1;margin-top:10px;line-height:1}
+.end-score{font-size:clamp(60px,16vw,96px);font-weight:900;color:#1e293b;text-align:center;line-height:1;margin:16px 0 4px;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.end-score .out-of{font-size:40%;color:#64748b;font-weight:bold;margin-left:4px}
+.end-lbl{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#6366f1;text-align:center;font-weight:bold;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.end-stats{display:flex;gap:10px;padding:0 4px;margin-top:18px}
+.end-stat{flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 6px;text-align:center;box-shadow:0 2px 6px rgba(15,23,42,.04)}
+.es-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#64748b;font-weight:bold;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.es-val{font-size:clamp(20px,5.5vw,26px);font-weight:900;color:#1e293b;margin-top:4px;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.end-best{text-align:center;font-size:13px;color:#f59e0b;margin-top:14px;letter-spacing:1px;font-weight:bold;font-family:-apple-system,"Segoe UI",Arial,sans-serif}
+.end-best.new{color:#22c55e;font-size:15px}
+.end-btns{display:flex;gap:8px;padding:0 4px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+.e-btn{flex:1;min-width:130px;background:linear-gradient(180deg,#6366f1,#4338ca);color:#fff;border:none;padding:14px 16px;font:900 13px -apple-system,"Segoe UI",Arial,sans-serif;border-radius:26px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase;box-shadow:0 4px 14px rgba(99,102,241,.3)}
+.e-btn.alt{background:#fff;color:#6366f1;border:2px solid #6366f1;box-shadow:none}
+.e-btn:active{transform:scale(.96)}
+.share-btn{display:block;margin:10px auto 0;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4);color:#b45309;padding:11px 28px;font:bold 12px -apple-system,"Segoe UI",Arial,sans-serif;border-radius:22px;letter-spacing:2px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase}
+.share-btn.copied{background:rgba(34,197,94,.18);border-color:#22c55e;color:#15803d}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Start Screen -->
+<div id="startScr" class="scr">
+  <div class="title">WORD WISE</div>
+  <div class="tag">Master Exam Vocabulary</div>
+  <div class="ad-slot">Advertisement</div>
+
+  <div class="sec-label">Select Mode</div>
+  <div class="mode-row">
+    <button class="mode-btn active" data-mode="syn" ontouchstart="">Synonyms</button>
+    <button class="mode-btn" data-mode="ant" ontouchstart="">Antonyms</button>
+    <button class="mode-btn" data-mode="ana" ontouchstart="">Analogies</button>
+  </div>
+  <div class="mode-desc" id="modeDesc">Find the word with the closest meaning</div>
+
+  <div class="sec-label">Difficulty</div>
+  <div class="diff-row">
+    <button class="diff-btn active" data-diff="easy" ontouchstart="">Easy</button>
+    <button class="diff-btn" data-diff="med" ontouchstart="">Medium</button>
+    <button class="diff-btn" data-diff="hard" ontouchstart="">Hard</button>
+  </div>
+  <div class="mode-desc" id="diffDesc">18 sec per question</div>
+
+  <button class="play-btn" id="playBtn" ontouchstart="">PLAY</button>
+  <div class="best-line" id="bestLine">Best: 0 / 10</div>
+
+  <div class="howto-box">
+    <div class="howto-head" id="howtoHead" ontouchstart="">
+      <span>How to Play</span>
+      <span id="howtoArrow">+</span>
+    </div>
+    <div class="howto-body" id="howtoBody">
+      <ul>
+        <li><b>10 questions</b> per round</li>
+        <li><b>Synonyms:</b> pick word with closest meaning</li>
+        <li><b>Antonyms:</b> pick the opposite meaning</li>
+        <li><b>Analogies:</b> pick the matching relationship pair</li>
+        <li>Timer auto-advances on timeout</li>
+        <li>Correct shows a brief definition hint</li>
+        <li>Score tracked per mode &amp; difficulty</li>
+        <li>Built for SSC, Banking &amp; UPSC aspirants</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Game Screen -->
+<div id="gameScr" class="scr hidden">
+  <div class="q-head">
+    <div class="q-info">
+      <span class="q-counter" id="qCounter">Q 1/10</span>
+      <span class="q-mode" id="qMode">SYN</span>
+    </div>
+    <span class="q-score" id="qScore">0</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+  <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+  <div class="qtime" id="qTime">15s</div>
+  <div class="prompt-lbl" id="promptLbl">Find the synonym of</div>
+  <div class="q-word" id="qWord">ABUNDANT</div>
+  <div class="q-opts" id="qOpts"></div>
+  <div class="def-box" id="defBox"></div>
+  <div class="feedback-pop" id="fbPop"></div>
+</div>
+
+<!-- End Screen -->
+<div id="endScr" class="scr hidden">
+  <div class="end-title">ROUND OVER</div>
+  <div class="end-lbl">Score</div>
+  <div class="end-score"><span id="endScore">0</span><span class="out-of">/10</span></div>
+  <div class="end-stats">
+    <div class="end-stat"><div class="es-lbl">Correct</div><div class="es-val" id="esCorrect">0</div></div>
+    <div class="end-stat"><div class="es-lbl">Wrong</div><div class="es-val" id="esWrong">0</div></div>
+    <div class="end-stat"><div class="es-lbl">Accuracy</div><div class="es-val" id="esAcc">0%</div></div>
+  </div>
+  <div class="end-best" id="endBest">Best: 0 / 10</div>
+  <div class="ad-slot">Advertisement</div>
+  <div class="end-btns">
+    <button class="e-btn" id="againBtn" ontouchstart="">Play Again</button>
+    <button class="e-btn alt" id="homeBtn" ontouchstart="">Home</button>
+  </div>
+  <button class="share-btn" id="shareBtn" ontouchstart="">Share Score</button>
+</div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+document.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+
+/* =============== DATA =============== */
+var SYN = [
+{w:"ABUNDANT",c:"PLENTIFUL",w3:["SCARCE","LIMITED","TINY"],d:"Existing in large quantities"},
+{w:"BENEVOLENT",c:"KIND",w3:["CRUEL","HARSH","STERN"],d:"Well-meaning and charitable"},
+{w:"CANDID",c:"FRANK",w3:["DEVIOUS","SLY","RESERVED"],d:"Truthful and straightforward"},
+{w:"DILIGENT",c:"HARDWORKING",w3:["LAZY","IDLE","SLACK"],d:"Showing careful persistent effort"},
+{w:"EPHEMERAL",c:"SHORT-LIVED",w3:["ETERNAL","LASTING","PERMANENT"],d:"Lasting for a very short time"},
+{w:"FRUGAL",c:"THRIFTY",w3:["LAVISH","WASTEFUL","EXTRAVAGANT"],d:"Sparing with money or resources"},
+{w:"GARRULOUS",c:"TALKATIVE",w3:["SILENT","QUIET","RESERVED"],d:"Excessively talkative"},
+{w:"HAUGHTY",c:"ARROGANT",w3:["HUMBLE","MEEK","MODEST"],d:"Disdainfully proud"},
+{w:"INDOLENT",c:"LAZY",w3:["ACTIVE","ENERGETIC","BUSY"],d:"Avoiding activity or effort"},
+{w:"JUBILANT",c:"JOYFUL",w3:["GLOOMY","SAD","MOURNFUL"],d:"Feeling great happiness"},
+{w:"LACONIC",c:"BRIEF",w3:["WORDY","VERBOSE","LENGTHY"],d:"Using very few words"},
+{w:"MAGNANIMOUS",c:"GENEROUS",w3:["SELFISH","PETTY","MEAN"],d:"Noble and generous in spirit"},
+{w:"NOSTALGIC",c:"SENTIMENTAL",w3:["CURRENT","MODERN","FORGETFUL"],d:"Longing for the past"},
+{w:"OPULENT",c:"WEALTHY",w3:["POOR","DESTITUTE","MEAGER"],d:"Ostentatiously rich"},
+{w:"PLACID",c:"CALM",w3:["STORMY","AGITATED","TURBULENT"],d:"Peaceful and untroubled"},
+{w:"QUIESCENT",c:"INACTIVE",w3:["ACTIVE","BUSY","LIVELY"],d:"In a state of inactivity"},
+{w:"RESILIENT",c:"TOUGH",w3:["FRAGILE","WEAK","BRITTLE"],d:"Able to recover quickly"},
+{w:"STOIC",c:"UNEMOTIONAL",w3:["EMOTIONAL","SENSITIVE","VOLATILE"],d:"Enduring without complaint"},
+{w:"TACITURN",c:"RESERVED",w3:["TALKATIVE","LOUD","CHATTY"],d:"Saying little, quiet"},
+{w:"UBIQUITOUS",c:"OMNIPRESENT",w3:["RARE","LIMITED","ABSENT"],d:"Present everywhere"},
+{w:"VORACIOUS",c:"INSATIABLE",w3:["CONTENT","SATISFIED","MILD"],d:"Wanting a lot, greedy"},
+{w:"WARY",c:"CAUTIOUS",w3:["RECKLESS","TRUSTING","CARELESS"],d:"Watchful of trouble"},
+{w:"XENOPHOBIC",c:"INTOLERANT",w3:["WELCOMING","ACCEPTING","OPEN"],d:"Fearing foreigners"},
+{w:"YIELDING",c:"SUBMISSIVE",w3:["RIGID","FIRM","STUBBORN"],d:"Giving way readily"},
+{w:"ZEALOUS",c:"ENTHUSIASTIC",w3:["APATHETIC","INDIFFERENT","COOL"],d:"Showing great energy"},
+{w:"VERBOSE",c:"WORDY",w3:["CONCISE","BRIEF","TERSE"],d:"Using more words than needed"},
+{w:"SUCCINCT",c:"CONCISE",w3:["WORDY","VERBOSE","LENGTHY"],d:"Briefly expressed"},
+{w:"PETULANT",c:"IRRITABLE",w3:["CHEERFUL","GOOD-NATURED","CALM"],d:"Childishly sulky"},
+{w:"TENACIOUS",c:"PERSISTENT",w3:["WEAK","YIELDING","UNCERTAIN"],d:"Holding firmly"},
+{w:"CIRCUMSPECT",c:"PRUDENT",w3:["RECKLESS","CARELESS","RASH"],d:"Careful to consider all circumstances"},
+{w:"PRAGMATIC",c:"PRACTICAL",w3:["IDEALISTIC","DREAMY","THEORETICAL"],d:"Dealing sensibly with matters"},
+{w:"LUCID",c:"CLEAR",w3:["CONFUSED","VAGUE","MURKY"],d:"Easy to understand"},
+{w:"MELANCHOLY",c:"SAD",w3:["CHEERFUL","JOYFUL","ELATED"],d:"Feeling pensive sadness"},
+{w:"PERNICIOUS",c:"HARMFUL",w3:["BENEFICIAL","HELPFUL","SAFE"],d:"Having harmful effect"},
+{w:"SPORADIC",c:"OCCASIONAL",w3:["CONSTANT","FREQUENT","REGULAR"],d:"Occurring at irregular intervals"},
+{w:"TRANSIENT",c:"TEMPORARY",w3:["PERMANENT","LASTING","FIXED"],d:"Lasting a short time"},
+{w:"UNANIMOUS",c:"AGREED",w3:["DIVIDED","SPLIT","OPPOSED"],d:"Fully in agreement"},
+{w:"VIGILANT",c:"ALERT",w3:["CARELESS","DROWSY","DISTRACTED"],d:"Keeping careful watch"},
+{w:"WHIMSICAL",c:"PLAYFUL",w3:["SERIOUS","DULL","SOLEMN"],d:"Playfully quaint"},
+{w:"APATHY",c:"INDIFFERENCE",w3:["INTEREST","CONCERN","PASSION"],d:"Lack of interest"},
+{w:"BELITTLE",c:"DISPARAGE",w3:["PRAISE","EXALT","ADMIRE"],d:"Dismiss as unimportant"},
+{w:"COMPLIANT",c:"OBEDIENT",w3:["DEFIANT","REBELLIOUS","STUBBORN"],d:"Willing to comply"},
+{w:"DEFERENTIAL",c:"RESPECTFUL",w3:["RUDE","DISRESPECTFUL","HAUGHTY"],d:"Showing respect"},
+{w:"EVASIVE",c:"ELUSIVE",w3:["DIRECT","FRANK","OPEN"],d:"Avoiding commitment"},
+{w:"FERVENT",c:"PASSIONATE",w3:["APATHETIC","COOL","INDIFFERENT"],d:"Having great warmth of feeling"},
+{w:"GULLIBLE",c:"NAIVE",w3:["SHREWD","SKEPTICAL","WARY"],d:"Easily persuaded"},
+{w:"HINDER",c:"OBSTRUCT",w3:["HELP","ASSIST","AID"],d:"Create difficulties"},
+{w:"IMPLICIT",c:"IMPLIED",w3:["EXPLICIT","STATED","CLEAR"],d:"Understood without being stated"},
+{w:"JEOPARDIZE",c:"ENDANGER",w3:["PROTECT","SAFEGUARD","SECURE"],d:"Put at risk"},
+{w:"KEEN",c:"EAGER",w3:["DULL","APATHETIC","BORED"],d:"Having strong interest"},
+{w:"LUCRATIVE",c:"PROFITABLE",w3:["UNPROFITABLE","LOSING","BARREN"],d:"Producing much money"},
+{w:"MITIGATE",c:"ALLEVIATE",w3:["AGGRAVATE","WORSEN","INTENSIFY"],d:"Make less severe"},
+{w:"NOVICE",c:"BEGINNER",w3:["EXPERT","VETERAN","MASTER"],d:"A newcomer"},
+{w:"OBSTINATE",c:"STUBBORN",w3:["FLEXIBLE","COMPLIANT","YIELDING"],d:"Refusing to change opinion"},
+{w:"PACIFY",c:"APPEASE",w3:["PROVOKE","AGITATE","ANGER"],d:"Bring peace to"},
+{w:"QUELL",c:"SUPPRESS",w3:["INCITE","ENCOURAGE","PROVOKE"],d:"Put an end to"},
+{w:"RELUCTANT",c:"HESITANT",w3:["EAGER","WILLING","READY"],d:"Unwilling and hesitant"},
+{w:"SCRUTINIZE",c:"EXAMINE",w3:["IGNORE","OVERLOOK","SKIM"],d:"Examine closely"},
+{w:"TIMID",c:"SHY",w3:["BOLD","BRAVE","CONFIDENT"],d:"Lacking courage"},
+{w:"URGENT",c:"PRESSING",w3:["TRIVIAL","MINOR","CASUAL"],d:"Requiring immediate action"},
+{w:"VINDICATE",c:"JUSTIFY",w3:["BLAME","ACCUSE","CONDEMN"],d:"Clear from blame"},
+{w:"WITHER",c:"SHRIVEL",w3:["BLOOM","FLOURISH","THRIVE"],d:"Become dry and shrunken"},
+{w:"ADAMANT",c:"UNYIELDING",w3:["FLEXIBLE","YIELDING","COMPLIANT"],d:"Refusing to be persuaded"},
+{w:"BOISTEROUS",c:"ROWDY",w3:["CALM","QUIET","SERENE"],d:"Noisy and lively"},
+{w:"CLANDESTINE",c:"SECRET",w3:["OPEN","PUBLIC","OVERT"],d:"Kept secret"},
+{w:"DEBILITATE",c:"WEAKEN",w3:["STRENGTHEN","EMPOWER","FORTIFY"],d:"Make weak"},
+{w:"ELUSIVE",c:"EVASIVE",w3:["OBVIOUS","CLEAR","FOUND"],d:"Difficult to catch"},
+{w:"FLAMBOYANT",c:"SHOWY",w3:["MODEST","PLAIN","DULL"],d:"Attractively showy"},
+{w:"GREGARIOUS",c:"SOCIABLE",w3:["SOLITARY","RECLUSIVE","SHY"],d:"Fond of company"},
+{w:"HOSTILE",c:"ANTAGONISTIC",w3:["FRIENDLY","KIND","AMIABLE"],d:"Showing opposition"},
+{w:"IMPEDE",c:"OBSTRUCT",w3:["ASSIST","HELP","PROMOTE"],d:"Delay or prevent"},
+{w:"JOVIAL",c:"CHEERFUL",w3:["GLOOMY","SOMBER","MOROSE"],d:"Cheerful and friendly"},
+{w:"KINDLE",c:"IGNITE",w3:["EXTINGUISH","QUENCH","SMOTHER"],d:"Light a fire or feeling"},
+{w:"LETHARGIC",c:"SLUGGISH",w3:["ENERGETIC","ACTIVE","LIVELY"],d:"Lacking energy"},
+{w:"MUNDANE",c:"ORDINARY",w3:["EXTRAORDINARY","EXCITING","UNIQUE"],d:"Lacking interest"},
+{w:"NEFARIOUS",c:"WICKED",w3:["VIRTUOUS","GOOD","HONEST"],d:"Wicked or criminal"},
+{w:"OSTENTATIOUS",c:"SHOWY",w3:["MODEST","HUMBLE","RESERVED"],d:"Pretentiously showy"},
+{w:"PROLIFIC",c:"PRODUCTIVE",w3:["UNPRODUCTIVE","BARREN","SPARSE"],d:"Producing abundantly"},
+{w:"QUAINT",c:"CHARMING",w3:["ORDINARY","MODERN","USUAL"],d:"Attractively unusual"},
+{w:"RAMPANT",c:"UNCONTROLLED",w3:["CONTROLLED","LIMITED","RARE"],d:"Flourishing unchecked"},
+{w:"SAGACIOUS",c:"WISE",w3:["FOOLISH","NAIVE","STUPID"],d:"Having keen insight"},
+{w:"TERSE",c:"CONCISE",w3:["VERBOSE","WORDY","LENGTHY"],d:"Sparing in words"},
+{w:"UNCOUTH",c:"CRUDE",w3:["REFINED","POLITE","ELEGANT"],d:"Lacking good manners"},
+{w:"VIVACIOUS",c:"LIVELY",w3:["DULL","LETHARGIC","BORING"],d:"Attractively lively"},
+{w:"WILY",c:"CUNNING",w3:["HONEST","NAIVE","GUILELESS"],d:"Skilled in gaining advantage"},
+{w:"AFFABLE",c:"FRIENDLY",w3:["UNFRIENDLY","RUDE","HOSTILE"],d:"Good-natured and sociable"},
+{w:"BRAZEN",c:"BOLD",w3:["SHY","MEEK","TIMID"],d:"Shamelessly bold"},
+{w:"COPIOUS",c:"ABUNDANT",w3:["SCANTY","MEAGER","FEW"],d:"Plentiful in quantity"},
+{w:"DORMANT",c:"INACTIVE",w3:["ACTIVE","AWAKE","LIVELY"],d:"In sleep-like state"},
+{w:"ECCENTRIC",c:"UNCONVENTIONAL",w3:["NORMAL","CONVENTIONAL","TYPICAL"],d:"Unconventional and strange"},
+{w:"FUTILE",c:"USELESS",w3:["USEFUL","FRUITFUL","EFFECTIVE"],d:"Incapable of producing result"},
+{w:"GHASTLY",c:"HORRIBLE",w3:["PLEASANT","LOVELY","BEAUTIFUL"],d:"Causing great horror"},
+{w:"HACKNEYED",c:"OVERUSED",w3:["FRESH","ORIGINAL","NOVEL"],d:"Lacking originality"},
+{w:"ILLICIT",c:"ILLEGAL",w3:["LEGAL","LAWFUL","PERMITTED"],d:"Forbidden by law"},
+{w:"JADED",c:"WEARY",w3:["FRESH","ENERGETIC","EAGER"],d:"Tired and unenthusiastic"},
+{w:"KNACK",c:"TALENT",w3:["INEPTITUDE","WEAKNESS","CLUMSINESS"],d:"Acquired skill"},
+{w:"LAVISH",c:"EXTRAVAGANT",w3:["FRUGAL","STINGY","MEAGER"],d:"Very generous"},
+{w:"MEANDER",c:"WANDER",w3:["RUSH","HURRY","DASH"],d:"Follow winding course"},
+{w:"NIMBLE",c:"AGILE",w3:["CLUMSY","AWKWARD","STIFF"],d:"Quick and light"},
+{w:"OMINOUS",c:"THREATENING",w3:["PROMISING","AUSPICIOUS","HOPEFUL"],d:"Suggesting evil"},
+{w:"PARSIMONIOUS",c:"STINGY",w3:["GENEROUS","LAVISH","FREE"],d:"Extremely sparing"},
+{w:"QUIBBLE",c:"ARGUE",w3:["AGREE","CONCUR","ACCEPT"],d:"Argue about trivial matter"},
+{w:"RECALCITRANT",c:"DEFIANT",w3:["OBEDIENT","COMPLIANT","DOCILE"],d:"Stubbornly uncooperative"},
+{w:"SLANDER",c:"DEFAME",w3:["PRAISE","COMPLIMENT","COMMEND"],d:"Speak falsely about"},
+{w:"TRIVIAL",c:"UNIMPORTANT",w3:["IMPORTANT","SIGNIFICANT","VITAL"],d:"Of little value"},
+{w:"UTOPIAN",c:"IDEALISTIC",w3:["REALISTIC","PRACTICAL","CYNICAL"],d:"Modeled on utopia"},
+{w:"VORTEX",c:"WHIRLPOOL",w3:["CALM","STILLNESS","PEACE"],d:"A whirling mass"},
+{w:"WRETCHED",c:"MISERABLE",w3:["JOYFUL","BLISSFUL","CONTENT"],d:"Very unhappy"},
+{w:"ZENITH",c:"PEAK",w3:["NADIR","BOTTOM","LOW"],d:"The highest point"},
+{w:"ABATE",c:"DIMINISH",w3:["INCREASE","INTENSIFY","GROW"],d:"Become less intense"},
+{w:"BUOYANT",c:"CHEERFUL",w3:["DEPRESSED","HEAVY","SINKING"],d:"Light-hearted and cheerful"},
+{w:"CONDONE",c:"OVERLOOK",w3:["CONDEMN","PUNISH","CENSURE"],d:"Accept offensive behavior"},
+{w:"DEARTH",c:"SHORTAGE",w3:["ABUNDANCE","PLENTY","EXCESS"],d:"A scarcity"},
+{w:"EXACERBATE",c:"WORSEN",w3:["IMPROVE","ALLEVIATE","SOOTHE"],d:"Make worse"},
+{w:"FALLACIOUS",c:"MISLEADING",w3:["TRUE","ACCURATE","CORRECT"],d:"Based on a false idea"},
+{w:"GAUNT",c:"THIN",w3:["PLUMP","CHUBBY","STOUT"],d:"Lean and haggard"},
+{w:"HARBINGER",c:"HERALD",w3:["FOLLOWER","RESULT","CONSEQUENCE"],d:"A forerunner"},
+{w:"INNATE",c:"INBORN",w3:["ACQUIRED","LEARNED","EXTERNAL"],d:"Inborn, natural"},
+{w:"JUXTAPOSE",c:"COMPARE",w3:["SEPARATE","ISOLATE","DIVIDE"],d:"Place side by side"},
+{w:"KUDOS",c:"PRAISE",w3:["CRITICISM","INSULT","BLAME"],d:"Praise received"},
+{w:"LAMENT",c:"MOURN",w3:["CELEBRATE","REJOICE","EXULT"],d:"Express grief"},
+{w:"MALICE",c:"SPITE",w3:["KINDNESS","BENEVOLENCE","GOODWILL"],d:"Intention to do harm"},
+{w:"NOVICE",c:"AMATEUR",w3:["EXPERT","PRO","VETERAN"],d:"Person new to activity"},
+{w:"OBSOLETE",c:"OUTDATED",w3:["MODERN","CURRENT","NEW"],d:"No longer used"},
+{w:"PALTRY",c:"TRIVIAL",w3:["SIGNIFICANT","HUGE","AMPLE"],d:"Small or worthless"},
+{w:"QUAGMIRE",c:"PREDICAMENT",w3:["SOLUTION","RELIEF","EASE"],d:"Difficult situation"},
+{w:"RANCOR",c:"BITTERNESS",w3:["KINDNESS","AFFECTION","LOVE"],d:"Bitter resentment"},
+{w:"SUPERFLUOUS",c:"UNNECESSARY",w3:["ESSENTIAL","NEEDED","VITAL"],d:"Unnecessary excess"},
+{w:"TACIT",c:"UNSPOKEN",w3:["SPOKEN","EXPRESSED","EXPLICIT"],d:"Understood without being said"},
+{w:"UPBRAID",c:"SCOLD",w3:["PRAISE","COMMEND","APPLAUD"],d:"Find fault with"},
+{w:"VENERATE",c:"REVERE",w3:["DESPISE","SCORN","DISRESPECT"],d:"Regard with deep respect"},
+{w:"WANE",c:"DECREASE",w3:["INCREASE","WAX","GROW"],d:"Decrease in strength"},
+{w:"YEN",c:"DESIRE",w3:["DISLIKE","AVERSION","HATRED"],d:"A longing"},
+{w:"ZEAL",c:"PASSION",w3:["APATHY","INDIFFERENCE","DISINTEREST"],d:"Great energy for cause"},
+{w:"ADROIT",c:"SKILLFUL",w3:["CLUMSY","INEPT","AWKWARD"],d:"Clever or skillful"},
+{w:"BANAL",c:"COMMONPLACE",w3:["ORIGINAL","UNIQUE","FRESH"],d:"Unoriginal and dull"},
+{w:"CAJOLE",c:"PERSUADE",w3:["COMPEL","FORCE","BULLY"],d:"Persuade by flattery"},
+{w:"DEFT",c:"SKILLFUL",w3:["CLUMSY","AWKWARD","BUNGLING"],d:"Quick and skillful"},
+{w:"EMBEZZLE",c:"STEAL",w3:["RETURN","GIVE","PROVIDE"],d:"Misappropriate funds"},
+{w:"FEIGN",c:"PRETEND",w3:["REVEAL","DISCLOSE","SHOW"],d:"Pretend to feel"},
+{w:"GLIB",c:"SMOOTH",w3:["SINCERE","HONEST","THOUGHTFUL"],d:"Fluent but insincere"},
+{w:"HOVER",c:"LINGER",w3:["DEPART","LEAVE","SETTLE"],d:"Remain in one place in air"},
+{w:"INEPT",c:"INCOMPETENT",w3:["SKILLED","CAPABLE","ADEPT"],d:"Having no skill"},
+{w:"JARGON",c:"TERMINOLOGY",w3:["SIMPLICITY","PLAINSPEAK","COMMONWORDS"],d:"Special words of a group"},
+{w:"KEEN",c:"SHARP",w3:["DULL","BLUNT","VAGUE"],d:"Having sharp edge"},
+{w:"LOATHE",c:"DETEST",w3:["LOVE","ADORE","CHERISH"],d:"Feel intense dislike"},
+{w:"MEEK",c:"HUMBLE",w3:["BOLD","ARROGANT","FIERCE"],d:"Quiet and gentle"},
+{w:"NOXIOUS",c:"HARMFUL",w3:["HARMLESS","SAFE","BENIGN"],d:"Harmful or poisonous"},
+{w:"OPAQUE",c:"UNCLEAR",w3:["TRANSPARENT","CLEAR","OBVIOUS"],d:"Not transparent"},
+{w:"PROFOUND",c:"DEEP",w3:["SHALLOW","SUPERFICIAL","TRIVIAL"],d:"Very great or intense"},
+{w:"QUELL",c:"SUBDUE",w3:["INCITE","AROUSE","STIR"],d:"Put down forcibly"},
+{w:"REFUTE",c:"DISPROVE",w3:["CONFIRM","PROVE","SUPPORT"],d:"Prove to be wrong"},
+{w:"SALIENT",c:"PROMINENT",w3:["MINOR","TRIVIAL","UNIMPORTANT"],d:"Most noticeable"},
+{w:"TENUOUS",c:"WEAK",w3:["STRONG","FIRM","ROBUST"],d:"Very weak or slight"},
+{w:"UPHOLD",c:"SUPPORT",w3:["OPPOSE","REJECT","ABANDON"],d:"Confirm or support"},
+{w:"VAGUE",c:"UNCLEAR",w3:["PRECISE","DEFINITE","CLEAR"],d:"Not clearly expressed"},
+{w:"WEARY",c:"TIRED",w3:["ENERGETIC","FRESH","LIVELY"],d:"Feeling tired"},
+{w:"YIELD",c:"PRODUCE",w3:["WITHHOLD","REFUSE","DENY"],d:"Produce or provide"}
+];
+
+var ANT = [
+{w:"PROLIFIC",c:"UNPRODUCTIVE",w3:["CREATIVE","FERTILE","ABUNDANT"],d:"Opposite of producing abundantly"},
+{w:"OBSCURE",c:"CLEAR",w3:["HIDDEN","VAGUE","UNKNOWN"],d:"Opposite of unclear"},
+{w:"SUCCINCT",c:"VERBOSE",w3:["BRIEF","CONCISE","TERSE"],d:"Opposite of concise"},
+{w:"FRUGAL",c:"EXTRAVAGANT",w3:["THRIFTY","ECONOMICAL","SPARING"],d:"Opposite of thrifty"},
+{w:"BENEVOLENT",c:"MALICIOUS",w3:["KIND","CHARITABLE","GENEROUS"],d:"Opposite of kind-hearted"},
+{w:"CANDID",c:"DECEPTIVE",w3:["HONEST","FRANK","OPEN"],d:"Opposite of truthful"},
+{w:"DILIGENT",c:"LAZY",w3:["CAREFUL","PERSISTENT","HARDWORKING"],d:"Opposite of hardworking"},
+{w:"EPHEMERAL",c:"PERMANENT",w3:["FLEETING","BRIEF","SHORT"],d:"Opposite of short-lived"},
+{w:"GARRULOUS",c:"QUIET",w3:["TALKATIVE","CHATTY","WORDY"],d:"Opposite of talkative"},
+{w:"HAUGHTY",c:"HUMBLE",w3:["PROUD","ARROGANT","SNOBBISH"],d:"Opposite of arrogant"},
+{w:"INDOLENT",c:"ACTIVE",w3:["LAZY","IDLE","SLOTHFUL"],d:"Opposite of lazy"},
+{w:"JUBILANT",c:"SORROWFUL",w3:["JOYFUL","HAPPY","DELIGHTED"],d:"Opposite of joyful"},
+{w:"LACONIC",c:"VERBOSE",w3:["BRIEF","CONCISE","TERSE"],d:"Opposite of brief"},
+{w:"MAGNANIMOUS",c:"PETTY",w3:["GENEROUS","NOBLE","FORGIVING"],d:"Opposite of generous"},
+{w:"OPULENT",c:"IMPOVERISHED",w3:["WEALTHY","LAVISH","RICH"],d:"Opposite of wealthy"},
+{w:"PLACID",c:"TURBULENT",w3:["CALM","PEACEFUL","SERENE"],d:"Opposite of peaceful"},
+{w:"QUIESCENT",c:"ACTIVE",w3:["DORMANT","STILL","SILENT"],d:"Opposite of inactive"},
+{w:"RESILIENT",c:"FRAGILE",w3:["TOUGH","FLEXIBLE","STRONG"],d:"Opposite of tough"},
+{w:"STOIC",c:"EMOTIONAL",w3:["UNEMOTIONAL","CALM","PATIENT"],d:"Opposite of unemotional"},
+{w:"TACITURN",c:"TALKATIVE",w3:["RESERVED","QUIET","SILENT"],d:"Opposite of reserved"},
+{w:"UBIQUITOUS",c:"SCARCE",w3:["COMMON","OMNIPRESENT","PERVASIVE"],d:"Opposite of everywhere"},
+{w:"VORACIOUS",c:"SATISFIED",w3:["GREEDY","HUNGRY","EAGER"],d:"Opposite of greedy"},
+{w:"WARY",c:"TRUSTING",w3:["CAUTIOUS","VIGILANT","ALERT"],d:"Opposite of cautious"},
+{w:"XENOPHOBIC",c:"WELCOMING",w3:["PREJUDICED","INTOLERANT","FEARFUL"],d:"Opposite of foreigner-fearing"},
+{w:"ZEALOUS",c:"APATHETIC",w3:["EAGER","PASSIONATE","DEVOTED"],d:"Opposite of enthusiastic"},
+{w:"VERBOSE",c:"CONCISE",w3:["WORDY","TALKATIVE","LONG-WINDED"],d:"Opposite of wordy"},
+{w:"PETULANT",c:"CHEERFUL",w3:["IRRITABLE","SULKY","PEEVISH"],d:"Opposite of sulky"},
+{w:"TENACIOUS",c:"IRRESOLUTE",w3:["PERSISTENT","STUBBORN","FIRM"],d:"Opposite of persistent"},
+{w:"CIRCUMSPECT",c:"RECKLESS",w3:["PRUDENT","CAREFUL","WARY"],d:"Opposite of cautious"},
+{w:"PRAGMATIC",c:"IDEALISTIC",w3:["PRACTICAL","REALISTIC","SENSIBLE"],d:"Opposite of practical"},
+{w:"LUCID",c:"CONFUSING",w3:["CLEAR","RATIONAL","PLAIN"],d:"Opposite of clear"},
+{w:"MELANCHOLY",c:"CHEERFUL",w3:["SAD","GLOOMY","DOWNCAST"],d:"Opposite of sad"},
+{w:"PERNICIOUS",c:"BENEFICIAL",w3:["HARMFUL","DAMAGING","TOXIC"],d:"Opposite of harmful"},
+{w:"SPORADIC",c:"CONSTANT",w3:["OCCASIONAL","IRREGULAR","SCATTERED"],d:"Opposite of occasional"},
+{w:"TRANSIENT",c:"PERMANENT",w3:["TEMPORARY","BRIEF","FLEETING"],d:"Opposite of temporary"},
+{w:"UNANIMOUS",c:"DIVIDED",w3:["AGREED","HARMONIOUS","UNITED"],d:"Opposite of agreed"},
+{w:"VIGILANT",c:"NEGLIGENT",w3:["ALERT","WATCHFUL","OBSERVANT"],d:"Opposite of watchful"},
+{w:"WHIMSICAL",c:"SERIOUS",w3:["PLAYFUL","QUIRKY","FANCIFUL"],d:"Opposite of playful"},
+{w:"APATHY",c:"ENTHUSIASM",w3:["INDIFFERENCE","BOREDOM","COOLNESS"],d:"Opposite of indifference"},
+{w:"BELITTLE",c:"PRAISE",w3:["DEMEAN","MOCK","DIMINISH"],d:"Opposite of disparage"},
+{w:"COMPLIANT",c:"DEFIANT",w3:["OBEDIENT","DOCILE","MEEK"],d:"Opposite of obedient"},
+{w:"EVASIVE",c:"DIRECT",w3:["SHIFTY","ELUSIVE","AMBIGUOUS"],d:"Opposite of elusive"},
+{w:"FERVENT",c:"COOL",w3:["PASSIONATE","INTENSE","EAGER"],d:"Opposite of passionate"},
+{w:"GULLIBLE",c:"SKEPTICAL",w3:["NAIVE","TRUSTING","CREDULOUS"],d:"Opposite of naive"},
+{w:"HINDER",c:"FACILITATE",w3:["BLOCK","OBSTRUCT","DELAY"],d:"Opposite of obstruct"},
+{w:"IMPLICIT",c:"EXPLICIT",w3:["IMPLIED","UNSTATED","INHERENT"],d:"Opposite of implied"},
+{w:"JEOPARDIZE",c:"PROTECT",w3:["ENDANGER","THREATEN","IMPERIL"],d:"Opposite of endanger"},
+{w:"LUCRATIVE",c:"UNPROFITABLE",w3:["PROFITABLE","REWARDING","GAINFUL"],d:"Opposite of profitable"},
+{w:"MITIGATE",c:"AGGRAVATE",w3:["LESSEN","ALLEVIATE","REDUCE"],d:"Opposite of alleviate"},
+{w:"NOVICE",c:"EXPERT",w3:["BEGINNER","LEARNER","AMATEUR"],d:"Opposite of beginner"},
+{w:"OBSTINATE",c:"FLEXIBLE",w3:["STUBBORN","RIGID","HEADSTRONG"],d:"Opposite of stubborn"},
+{w:"PACIFY",c:"PROVOKE",w3:["CALM","SOOTHE","APPEASE"],d:"Opposite of calm"},
+{w:"QUELL",c:"INCITE",w3:["SUPPRESS","SUBDUE","CRUSH"],d:"Opposite of suppress"},
+{w:"RELUCTANT",c:"EAGER",w3:["HESITANT","UNWILLING","AVERSE"],d:"Opposite of unwilling"},
+{w:"SCRUTINIZE",c:"OVERLOOK",w3:["EXAMINE","INSPECT","ANALYZE"],d:"Opposite of examine"},
+{w:"TIMID",c:"BOLD",w3:["SHY","FEARFUL","MEEK"],d:"Opposite of shy"},
+{w:"URGENT",c:"TRIVIAL",w3:["PRESSING","CRITICAL","IMMEDIATE"],d:"Opposite of pressing"},
+{w:"VINDICATE",c:"CONDEMN",w3:["JUSTIFY","EXONERATE","DEFEND"],d:"Opposite of justify"},
+{w:"WITHER",c:"FLOURISH",w3:["SHRIVEL","FADE","DECAY"],d:"Opposite of shrivel"},
+{w:"ADAMANT",c:"YIELDING",w3:["FIRM","RESOLUTE","INFLEXIBLE"],d:"Opposite of unyielding"},
+{w:"BOISTEROUS",c:"QUIET",w3:["ROWDY","NOISY","UNRULY"],d:"Opposite of noisy"},
+{w:"CLANDESTINE",c:"OPEN",w3:["SECRET","HIDDEN","COVERT"],d:"Opposite of secret"},
+{w:"DEBILITATE",c:"STRENGTHEN",w3:["WEAKEN","DRAIN","UNDERMINE"],d:"Opposite of weaken"},
+{w:"ELUSIVE",c:"OBVIOUS",w3:["EVASIVE","SLIPPERY","INDEFINABLE"],d:"Opposite of evasive"},
+{w:"FLAMBOYANT",c:"MODEST",w3:["SHOWY","FLASHY","OSTENTATIOUS"],d:"Opposite of showy"},
+{w:"GREGARIOUS",c:"RECLUSIVE",w3:["SOCIABLE","OUTGOING","FRIENDLY"],d:"Opposite of sociable"},
+{w:"HOSTILE",c:"FRIENDLY",w3:["ANTAGONISTIC","AGGRESSIVE","OPPOSED"],d:"Opposite of antagonistic"},
+{w:"IMPEDE",c:"ASSIST",w3:["HINDER","OBSTRUCT","BLOCK"],d:"Opposite of hinder"},
+{w:"JOVIAL",c:"GLOOMY",w3:["CHEERFUL","MERRY","JOLLY"],d:"Opposite of cheerful"},
+{w:"KINDLE",c:"EXTINGUISH",w3:["IGNITE","AROUSE","SPARK"],d:"Opposite of ignite"},
+{w:"LETHARGIC",c:"ENERGETIC",w3:["SLUGGISH","DROWSY","WEARY"],d:"Opposite of sluggish"},
+{w:"MUNDANE",c:"EXTRAORDINARY",w3:["ORDINARY","DULL","ROUTINE"],d:"Opposite of ordinary"},
+{w:"NEFARIOUS",c:"VIRTUOUS",w3:["WICKED","EVIL","SINISTER"],d:"Opposite of wicked"},
+{w:"OSTENTATIOUS",c:"MODEST",w3:["SHOWY","PRETENTIOUS","BOASTFUL"],d:"Opposite of showy"},
+{w:"QUAINT",c:"MODERN",w3:["CHARMING","PICTURESQUE","OLD-FASHIONED"],d:"Opposite of old-fashioned charm"},
+{w:"RAMPANT",c:"CONTROLLED",w3:["WILD","UNCHECKED","PREVALENT"],d:"Opposite of unchecked"},
+{w:"SAGACIOUS",c:"FOOLISH",w3:["WISE","SHREWD","ASTUTE"],d:"Opposite of wise"},
+{w:"TERSE",c:"WORDY",w3:["CONCISE","BRIEF","ABRUPT"],d:"Opposite of concise"},
+{w:"UNCOUTH",c:"REFINED",w3:["CRUDE","RUDE","BOORISH"],d:"Opposite of crude"},
+{w:"VIVACIOUS",c:"DULL",w3:["LIVELY","ANIMATED","SPIRITED"],d:"Opposite of lively"},
+{w:"WILY",c:"NAIVE",w3:["CUNNING","CRAFTY","SLY"],d:"Opposite of cunning"},
+{w:"AFFABLE",c:"UNFRIENDLY",w3:["FRIENDLY","SOCIABLE","CORDIAL"],d:"Opposite of friendly"},
+{w:"BRAZEN",c:"BASHFUL",w3:["BOLD","SHAMELESS","AUDACIOUS"],d:"Opposite of bold"},
+{w:"COPIOUS",c:"SCANT",w3:["ABUNDANT","PLENTIFUL","AMPLE"],d:"Opposite of abundant"},
+{w:"DORMANT",c:"ACTIVE",w3:["INACTIVE","SLEEPING","LATENT"],d:"Opposite of inactive"},
+{w:"ECCENTRIC",c:"CONVENTIONAL",w3:["UNUSUAL","ODD","QUIRKY"],d:"Opposite of unconventional"},
+{w:"FUTILE",c:"EFFECTIVE",w3:["USELESS","VAIN","POINTLESS"],d:"Opposite of useless"},
+{w:"GHASTLY",c:"LOVELY",w3:["HORRIBLE","DREADFUL","GRIM"],d:"Opposite of horrible"},
+{w:"HACKNEYED",c:"ORIGINAL",w3:["TRITE","CLICHED","STALE"],d:"Opposite of overused"},
+{w:"ILLICIT",c:"LAWFUL",w3:["ILLEGAL","UNLAWFUL","FORBIDDEN"],d:"Opposite of illegal"},
+{w:"JADED",c:"ENERGETIC",w3:["WEARY","TIRED","CYNICAL"],d:"Opposite of weary"},
+{w:"KNACK",c:"INEPTITUDE",w3:["TALENT","SKILL","KNACK"],d:"Opposite of talent"},
+{w:"LAVISH",c:"STINGY",w3:["EXTRAVAGANT","GENEROUS","OPULENT"],d:"Opposite of extravagant"},
+{w:"MEANDER",c:"RUSH",w3:["WANDER","ROAM","RAMBLE"],d:"Opposite of wander slowly"},
+{w:"NIMBLE",c:"CLUMSY",w3:["AGILE","QUICK","SPRY"],d:"Opposite of agile"},
+{w:"OMINOUS",c:"AUSPICIOUS",w3:["THREATENING","FORBIDDING","SINISTER"],d:"Opposite of threatening"},
+{w:"PARSIMONIOUS",c:"GENEROUS",w3:["STINGY","MISERLY","TIGHT"],d:"Opposite of stingy"},
+{w:"RECALCITRANT",c:"COMPLIANT",w3:["DEFIANT","UNRULY","STUBBORN"],d:"Opposite of defiant"},
+{w:"SLANDER",c:"PRAISE",w3:["DEFAME","SMEAR","LIBEL"],d:"Opposite of defame"},
+{w:"TRIVIAL",c:"IMPORTANT",w3:["MINOR","PETTY","INSIGNIFICANT"],d:"Opposite of unimportant"},
+{w:"UTOPIAN",c:"REALISTIC",w3:["IDEALISTIC","VISIONARY","PERFECT"],d:"Opposite of idealistic"},
+{w:"WRETCHED",c:"JOYFUL",w3:["MISERABLE","DISMAL","PITIFUL"],d:"Opposite of miserable"},
+{w:"ZENITH",c:"NADIR",w3:["PEAK","APEX","SUMMIT"],d:"Opposite of peak"},
+{w:"ABATE",c:"INTENSIFY",w3:["DIMINISH","REDUCE","LESSEN"],d:"Opposite of diminish"},
+{w:"BUOYANT",c:"DEPRESSED",w3:["CHEERFUL","FLOATING","LIGHT"],d:"Opposite of cheerful"},
+{w:"CONDONE",c:"CONDEMN",w3:["OVERLOOK","FORGIVE","ACCEPT"],d:"Opposite of overlook"},
+{w:"DEARTH",c:"ABUNDANCE",w3:["SHORTAGE","LACK","SCARCITY"],d:"Opposite of shortage"},
+{w:"EXACERBATE",c:"ALLEVIATE",w3:["WORSEN","AGGRAVATE","INTENSIFY"],d:"Opposite of worsen"},
+{w:"FALLACIOUS",c:"VALID",w3:["MISLEADING","FALSE","ERRONEOUS"],d:"Opposite of misleading"},
+{w:"GAUNT",c:"PLUMP",w3:["THIN","LEAN","HAGGARD"],d:"Opposite of thin"},
+{w:"HARBINGER",c:"SUCCESSOR",w3:["HERALD","OMEN","FORERUNNER"],d:"Opposite of forerunner"},
+{w:"INNATE",c:"ACQUIRED",w3:["INBORN","NATURAL","INHERENT"],d:"Opposite of inborn"},
+{w:"LAMENT",c:"CELEBRATE",w3:["MOURN","GRIEVE","WAIL"],d:"Opposite of mourn"},
+{w:"MALICE",c:"BENEVOLENCE",w3:["SPITE","ILL-WILL","VENOM"],d:"Opposite of spite"},
+{w:"OBSOLETE",c:"CURRENT",w3:["OUTDATED","ANTIQUATED","PASSE"],d:"Opposite of outdated"},
+{w:"PALTRY",c:"SIGNIFICANT",w3:["TRIVIAL","MEAGER","SMALL"],d:"Opposite of trivial"},
+{w:"RANCOR",c:"AFFECTION",w3:["BITTERNESS","HOSTILITY","HATRED"],d:"Opposite of bitterness"},
+{w:"SUPERFLUOUS",c:"ESSENTIAL",w3:["EXCESSIVE","REDUNDANT","SURPLUS"],d:"Opposite of unnecessary"},
+{w:"TACIT",c:"EXPLICIT",w3:["UNSPOKEN","IMPLIED","SILENT"],d:"Opposite of unspoken"},
+{w:"UPBRAID",c:"COMMEND",w3:["SCOLD","REBUKE","REPROACH"],d:"Opposite of scold"},
+{w:"VENERATE",c:"SCORN",w3:["REVERE","HONOR","WORSHIP"],d:"Opposite of revere"},
+{w:"WANE",c:"WAX",w3:["DECREASE","DIMINISH","FADE"],d:"Opposite of decrease"},
+{w:"ZEAL",c:"INDIFFERENCE",w3:["PASSION","FERVOR","EAGERNESS"],d:"Opposite of passion"},
+{w:"ADROIT",c:"CLUMSY",w3:["SKILLFUL","DEXTEROUS","DEFT"],d:"Opposite of skillful"},
+{w:"BANAL",c:"ORIGINAL",w3:["COMMONPLACE","TRITE","DULL"],d:"Opposite of commonplace"},
+{w:"CAJOLE",c:"COMPEL",w3:["PERSUADE","COAX","WHEEDLE"],d:"Opposite of coax"},
+{w:"DEFT",c:"CLUMSY",w3:["SKILLFUL","ADROIT","NIMBLE"],d:"Opposite of skillful"},
+{w:"FEIGN",c:"REVEAL",w3:["PRETEND","FAKE","SIMULATE"],d:"Opposite of pretend"},
+{w:"GLIB",c:"SINCERE",w3:["SMOOTH","SLICK","FLUENT"],d:"Opposite of smooth-talking"},
+{w:"INEPT",c:"COMPETENT",w3:["UNSKILLED","INCOMPETENT","CLUMSY"],d:"Opposite of incompetent"},
+{w:"LOATHE",c:"ADORE",w3:["DETEST","ABHOR","DESPISE"],d:"Opposite of detest"},
+{w:"MEEK",c:"BOLD",w3:["HUMBLE","MILD","DOCILE"],d:"Opposite of humble"},
+{w:"NOXIOUS",c:"HARMLESS",w3:["HARMFUL","TOXIC","POISONOUS"],d:"Opposite of harmful"},
+{w:"OPAQUE",c:"TRANSPARENT",w3:["UNCLEAR","CLOUDED","MURKY"],d:"Opposite of unclear"},
+{w:"PROFOUND",c:"SHALLOW",w3:["DEEP","INTENSE","SERIOUS"],d:"Opposite of deep"},
+{w:"REFUTE",c:"CONFIRM",w3:["DISPROVE","DENY","REBUT"],d:"Opposite of disprove"},
+{w:"SALIENT",c:"TRIVIAL",w3:["PROMINENT","STRIKING","NOTABLE"],d:"Opposite of prominent"},
+{w:"TENUOUS",c:"STRONG",w3:["WEAK","FLIMSY","SLENDER"],d:"Opposite of weak"},
+{w:"UPHOLD",c:"REJECT",w3:["SUPPORT","MAINTAIN","DEFEND"],d:"Opposite of support"},
+{w:"VAGUE",c:"PRECISE",w3:["UNCLEAR","AMBIGUOUS","HAZY"],d:"Opposite of unclear"},
+{w:"YIELD",c:"RESIST",w3:["SURRENDER","PRODUCE","SUBMIT"],d:"Opposite of surrender"},
+{w:"AMPLE",c:"MEAGER",w3:["ABUNDANT","PLENTIFUL","SUFFICIENT"],d:"Opposite of plentiful"},
+{w:"BRISK",c:"SLUGGISH",w3:["QUICK","LIVELY","ENERGETIC"],d:"Opposite of lively"},
+{w:"COARSE",c:"REFINED",w3:["ROUGH","CRUDE","UNPOLISHED"],d:"Opposite of rough"},
+{w:"DIVERGE",c:"CONVERGE",w3:["SEPARATE","DIFFER","BRANCH"],d:"Opposite of converge"},
+{w:"ENIGMATIC",c:"OBVIOUS",w3:["PUZZLING","MYSTERIOUS","CRYPTIC"],d:"Opposite of mysterious"},
+{w:"FERTILE",c:"BARREN",w3:["PRODUCTIVE","RICH","FRUITFUL"],d:"Opposite of productive"},
+{w:"GENEROUS",c:"STINGY",w3:["GIVING","LIBERAL","UNSELFISH"],d:"Opposite of liberal with giving"},
+{w:"HUMBLE",c:"ARROGANT",w3:["MEEK","MODEST","LOWLY"],d:"Opposite of modest"},
+{w:"IRATE",c:"PLEASED",w3:["ANGRY","FURIOUS","ENRAGED"],d:"Opposite of angry"},
+{w:"JUSTIFY",c:"CONDEMN",w3:["DEFEND","VINDICATE","EXCUSE"],d:"Opposite of defend"},
+{w:"KEEN",c:"DULL",w3:["SHARP","EAGER","ACUTE"],d:"Opposite of sharp"}
+];
+
+var ANA = [
+{q:"BOOK : LIBRARY",c:"TREE : FOREST",w3:["CAR : ROAD","FISH : OCEAN","BIRD : SKY"],d:"Part to whole collection"},
+{q:"TEACHER : SCHOOL",c:"DOCTOR : HOSPITAL",w3:["CHEF : KITCHEN","ACTOR : THEATER","ARTIST : STUDIO"],d:"Worker to workplace"},
+{q:"CAT : KITTEN",c:"DOG : PUPPY",w3:["COW : CALF","HEN : CHICK","HORSE : FOAL"],d:"Adult to young"},
+{q:"BIRD : NEST",c:"BEE : HIVE",w3:["SPIDER : WEB","FOX : DEN","RABBIT : BURROW"],d:"Animal to home"},
+{q:"PEN : WRITE",c:"KNIFE : CUT",w3:["SPOON : EAT","SCISSORS : SNIP","HAMMER : POUND"],d:"Tool to function"},
+{q:"HOT : COLD",c:"TALL : SHORT",w3:["DAY : NIGHT","BIG : SMALL","FAT : THIN"],d:"Opposite pairs"},
+{q:"HAPPY : JOYFUL",c:"SAD : MOURNFUL",w3:["ANGRY : FURIOUS","COLD : CHILLY","WARM : HOT"],d:"Synonym pair"},
+{q:"WATER : THIRST",c:"FOOD : HUNGER",w3:["SLEEP : FATIGUE","BOOK : CURIOSITY","MUSIC : BOREDOM"],d:"Remedy to need"},
+{q:"FISH : SCALES",c:"BIRD : FEATHERS",w3:["HORSE : HAIR","SNAKE : SKIN","BEAR : FUR"],d:"Animal to covering"},
+{q:"KING : QUEEN",c:"PRINCE : PRINCESS",w3:["ACTOR : ACTRESS","LION : LIONESS","WAITER : WAITRESS"],d:"Male to female pair"},
+{q:"FIRE : SMOKE",c:"RAIN : WET",w3:["SUN : HEAT","WIND : BREEZE","COLD : ICE"],d:"Cause to effect"},
+{q:"SEED : PLANT",c:"EGG : BIRD",w3:["CATERPILLAR : BUTTERFLY","TADPOLE : FROG","CUB : BEAR"],d:"Origin to result"},
+{q:"CARPENTER : WOOD",c:"TAILOR : CLOTH",w3:["MASON : STONE","SCULPTOR : CLAY","POET : WORDS"],d:"Craftsman to material"},
+{q:"CAR : DRIVER",c:"PLANE : PILOT",w3:["SHIP : CAPTAIN","BUS : CONDUCTOR","TRAIN : ENGINEER"],d:"Vehicle to operator"},
+{q:"FOOT : SHOE",c:"HAND : GLOVE",w3:["HEAD : HAT","EYE : GLASSES","EAR : EARRING"],d:"Body part to accessory"},
+{q:"LAWYER : COURT",c:"JUDGE : BENCH",w3:["TEACHER : CLASS","PRIEST : CHURCH","SOLDIER : BARRACKS"],d:"Role to location"},
+{q:"LIGHT : DARK",c:"DAY : NIGHT",w3:["SUN : MOON","FIRE : WATER","WHITE : BLACK"],d:"Opposite concepts"},
+{q:"DICTIONARY : WORDS",c:"ATLAS : MAPS",w3:["ENCYCLOPEDIA : FACTS","ALBUM : PHOTOS","MENU : DISHES"],d:"Reference to content"},
+{q:"GRAPE : WINE",c:"MILK : CHEESE",w3:["WHEAT : BREAD","APPLE : JUICE","CREAM : BUTTER"],d:"Raw to product"},
+{q:"NEEDLE : THREAD",c:"PEN : INK",w3:["KEY : LOCK","BULB : ELECTRICITY","LAMP : OIL"],d:"Tool and substance"},
+{q:"ARTIST : BRUSH",c:"CARPENTER : HAMMER",w3:["SURGEON : SCALPEL","WRITER : PEN","FARMER : PLOW"],d:"Worker to tool"},
+{q:"POVERTY : WEALTH",c:"DISEASE : HEALTH",w3:["WAR : PEACE","FAILURE : SUCCESS","DARKNESS : LIGHT"],d:"Antonym pair"},
+{q:"HIVE : BEE",c:"ANTHILL : ANT",w3:["NEST : BIRD","DEN : LION","BURROW : RABBIT"],d:"Colony to insect"},
+{q:"OCEAN : LAKE",c:"MOUNTAIN : HILL",w3:["RIVER : STREAM","JUNGLE : GROVE","STORM : BREEZE"],d:"Large to small"},
+{q:"SECOND : MINUTE",c:"MINUTE : HOUR",w3:["HOUR : DAY","DAY : WEEK","WEEK : MONTH"],d:"Time unit ascending"},
+{q:"GLOVE : HAND",c:"SOCK : FOOT",w3:["SCARF : NECK","HAT : HEAD","BELT : WAIST"],d:"Garment to body part"},
+{q:"PLAYWRIGHT : PLAY",c:"NOVELIST : NOVEL",w3:["POET : POEM","COMPOSER : SYMPHONY","PAINTER : PAINTING"],d:"Creator to creation"},
+{q:"SHEPHERD : SHEEP",c:"COWBOY : CATTLE",w3:["BEEKEEPER : BEES","JOCKEY : HORSE","GROOM : HORSES"],d:"Keeper to animal"},
+{q:"OAR : BOAT",c:"WHEEL : CAR",w3:["WING : PLANE","SAIL : SHIP","ENGINE : TRAIN"],d:"Part to vehicle"},
+{q:"EYE : SEE",c:"EAR : HEAR",w3:["NOSE : SMELL","TONGUE : TASTE","SKIN : TOUCH"],d:"Sense organ to function"},
+{q:"BRUSH : PAINT",c:"BROOM : SWEEP",w3:["SHOVEL : DIG","KNIFE : CUT","FORK : PIERCE"],d:"Tool to action"},
+{q:"FROG : AMPHIBIAN",c:"SNAKE : REPTILE",w3:["SHARK : FISH","EAGLE : BIRD","DOG : MAMMAL"],d:"Animal to class"},
+{q:"MELT : LIQUID",c:"FREEZE : SOLID",w3:["BOIL : GAS","CONDENSE : LIQUID","EVAPORATE : GAS"],d:"Process to state"},
+{q:"INFANT : CHILD",c:"SEEDLING : TREE",w3:["CHICK : CHICKEN","CUB : BEAR","LARVA : INSECT"],d:"Young stage"},
+{q:"COMPOSER : MUSIC",c:"CHEF : FOOD",w3:["POET : POETRY","AUTHOR : BOOK","DESIGNER : CLOTHES"],d:"Creator to product"},
+{q:"VERBOSE : CONCISE",c:"ABUNDANT : SCARCE",w3:["RICH : POOR","HAPPY : SAD","FAST : SLOW"],d:"Antonym relationship"},
+{q:"CLOCK : TIME",c:"THERMOMETER : TEMPERATURE",w3:["SCALE : WEIGHT","RULER : LENGTH","BAROMETER : PRESSURE"],d:"Instrument to measurement"},
+{q:"FLOCK : SHEEP",c:"HERD : CATTLE",w3:["PACK : WOLVES","SWARM : BEES","SCHOOL : FISH"],d:"Group to members"},
+{q:"DRY : ARID",c:"WET : DAMP",w3:["HOT : WARM","COLD : COOL","BIG : LARGE"],d:"Synonym intensity"},
+{q:"GUN : BULLET",c:"BOW : ARROW",w3:["CANNON : SHELL","RIFLE : CARTRIDGE","SLINGSHOT : STONE"],d:"Weapon to projectile"},
+{q:"CHAPTER : BOOK",c:"SCENE : PLAY",w3:["VERSE : POEM","TRACK : ALBUM","EPISODE : SERIES"],d:"Part of work"},
+{q:"BAKER : BREAD",c:"POTTER : POT",w3:["COBBLER : SHOES","BLACKSMITH : IRON","CARPENTER : FURNITURE"],d:"Maker to product"},
+{q:"GALLERY : PAINTINGS",c:"MUSEUM : ARTIFACTS",w3:["LIBRARY : BOOKS","AQUARIUM : FISH","ZOO : ANIMALS"],d:"Venue to exhibits"},
+{q:"AUTHOR : BOOK",c:"SCULPTOR : STATUE",w3:["ARCHITECT : BUILDING","DESIGNER : DRESS","ENGINEER : MACHINE"],d:"Creator to work"},
+{q:"ROOT : TREE",c:"FOUNDATION : BUILDING",w3:["BASE : COLUMN","STEM : FLOWER","KEEL : SHIP"],d:"Support to structure"},
+{q:"MOUTH : FACE",c:"WINDOW : HOUSE",w3:["DOOR : ROOM","HANDLE : DOOR","LID : BOX"],d:"Opening to whole"},
+{q:"DRIZZLE : RAIN",c:"BREEZE : WIND",w3:["RIPPLE : WAVE","FLURRY : BLIZZARD","TREMOR : EARTHQUAKE"],d:"Mild to intense"},
+{q:"STEP : STAIR",c:"RUNG : LADDER",w3:["LINK : CHAIN","BEAD : NECKLACE","PAGE : BOOK"],d:"Unit to structure"},
+{q:"CALF : COW",c:"PUPPY : DOG",w3:["FOAL : HORSE","KITTEN : CAT","CUB : BEAR"],d:"Offspring to parent"},
+{q:"TRIANGLE : THREE",c:"SQUARE : FOUR",w3:["PENTAGON : FIVE","HEXAGON : SIX","OCTAGON : EIGHT"],d:"Shape to sides"},
+{q:"INK : PEN",c:"LEAD : PENCIL",w3:["PAINT : BRUSH","CHALK : BLACKBOARD","FILM : CAMERA"],d:"Medium to tool"},
+{q:"COW : MOO",c:"DOG : BARK",w3:["CAT : MEOW","LION : ROAR","DUCK : QUACK"],d:"Animal to sound"},
+{q:"ORANGE : CITRUS",c:"APPLE : POME",w3:["BANANA : BERRY","STRAWBERRY : BERRY","PEACH : STONE"],d:"Fruit to family"},
+{q:"CANVAS : PAINTER",c:"MARBLE : SCULPTOR",w3:["PAGE : WRITER","WOOD : CARVER","STAGE : ACTOR"],d:"Medium to artist"},
+{q:"STETHOSCOPE : DOCTOR",c:"TELESCOPE : ASTRONOMER",w3:["MICROSCOPE : BIOLOGIST","GAVEL : JUDGE","COMPASS : SAILOR"],d:"Tool to profession"},
+{q:"GLASS : BRITTLE",c:"RUBBER : ELASTIC",w3:["STEEL : HARD","COTTON : SOFT","SILK : SMOOTH"],d:"Material to property"},
+{q:"BIRD : FLY",c:"FISH : SWIM",w3:["SNAKE : SLITHER","HORSE : GALLOP","FROG : HOP"],d:"Animal to movement"},
+{q:"CANDLE : WAX",c:"TIRE : RUBBER",w3:["CABLE : STEEL","WINDOW : GLASS","TABLE : WOOD"],d:"Object to material"},
+{q:"NIGHT : MOON",c:"DAY : SUN",w3:["SKY : STAR","SEA : WAVE","CLOUD : RAIN"],d:"Time to feature"},
+{q:"HIVE : HONEY",c:"MINE : COAL",w3:["QUARRY : STONE","OIL : WELL","FARM : CROPS"],d:"Source to produce"},
+{q:"RIVER : DELTA",c:"GLACIER : MORAINE",w3:["VOLCANO : LAVA","STORM : DEBRIS","WAVE : SHORE"],d:"Feature to deposit"},
+{q:"GEOLOGIST : ROCKS",c:"BOTANIST : PLANTS",w3:["ZOOLOGIST : ANIMALS","HISTORIAN : EVENTS","LINGUIST : LANGUAGES"],d:"Scientist to study"},
+{q:"MERCURY : PLANET",c:"SUN : STAR",w3:["MOON : SATELLITE","EARTH : PLANET","MARS : PLANET"],d:"Body to class"},
+{q:"WORD : SENTENCE",c:"BRICK : WALL",w3:["NOTE : SONG","STITCH : FABRIC","LETTER : WORD"],d:"Unit to structure"},
+{q:"CLOUD : SKY",c:"WAVE : SEA",w3:["SAND : DESERT","LEAF : TREE","PEBBLE : BEACH"],d:"Feature to expanse"},
+{q:"LIBRARIAN : BOOKS",c:"CURATOR : ARTIFACTS",w3:["ARCHIVIST : RECORDS","TEACHER : STUDENTS","PHARMACIST : DRUGS"],d:"Keeper to items"},
+{q:"MICROSCOPE : SMALL",c:"TELESCOPE : FAR",w3:["BINOCULARS : DISTANT","MAGNIFIER : TINY","PERISCOPE : HIDDEN"],d:"Instrument to viewing"},
+{q:"WARDROBE : CLOTHES",c:"GARAGE : CARS",w3:["CUPBOARD : DISHES","DRAWER : PAPERS","PANTRY : FOOD"],d:"Storage to contents"},
+{q:"SMILE : HAPPY",c:"FROWN : ANGRY",w3:["LAUGH : AMUSED","CRY : SAD","YAWN : TIRED"],d:"Expression to emotion"},
+{q:"CHEETAH : FAST",c:"SLOTH : SLOW",w3:["OWL : WISE","FOX : CUNNING","LION : BRAVE"],d:"Animal to trait"},
+{q:"SALT : SAVORY",c:"SUGAR : SWEET",w3:["LEMON : SOUR","CHILI : SPICY","COFFEE : BITTER"],d:"Substance to taste"},
+{q:"POLICEMAN : CRIME",c:"DOCTOR : DISEASE",w3:["SOLDIER : WAR","FIREMAN : FIRE","JUDGE : DISPUTE"],d:"Fighter to problem"},
+{q:"EAR : SOUND",c:"EYE : LIGHT",w3:["NOSE : ODOR","TONGUE : FLAVOR","SKIN : PRESSURE"],d:"Organ to stimulus"},
+{q:"WALL : BRICKS",c:"NECKLACE : BEADS",w3:["CHAIN : LINKS","FENCE : POSTS","BRIDGE : PLANKS"],d:"Whole to units"},
+{q:"AUTHOR : PLAGIARIZE",c:"THIEF : STEAL",w3:["MURDERER : KILL","LIAR : DECEIVE","CHEATER : DEFRAUD"],d:"Agent to wrong"},
+{q:"CAR : GARAGE",c:"PLANE : HANGAR",w3:["HORSE : STABLE","BOAT : DOCK","TRAIN : DEPOT"],d:"Vehicle to storage"},
+{q:"LIGHT : CANDLE",c:"HEAT : STOVE",w3:["WATER : TAP","SOUND : SPEAKER","AIR : FAN"],d:"Output to source"},
+{q:"DAY : WEEK",c:"MONTH : YEAR",w3:["HOUR : DAY","MINUTE : HOUR","DECADE : CENTURY"],d:"Smaller to larger time"},
+{q:"ETYMOLOGY : WORDS",c:"ENTOMOLOGY : INSECTS",w3:["GEOLOGY : ROCKS","ASTRONOMY : STARS","BIOLOGY : LIFE"],d:"Study of subject"},
+{q:"QUART : GALLON",c:"INCH : FOOT",w3:["OUNCE : POUND","CENT : DOLLAR","GRAM : KILOGRAM"],d:"Smaller to larger unit"},
+{q:"CHISEL : SCULPTOR",c:"TROWEL : MASON",w3:["WAND : WIZARD","PEN : WRITER","BRUSH : PAINTER"],d:"Implement to user"},
+{q:"PINE : TREE",c:"TROUT : FISH",w3:["ROSE : FLOWER","OAK : TREE","TULIP : FLOWER"],d:"Species to category"},
+{q:"CARDIOLOGIST : HEART",c:"NEUROLOGIST : BRAIN",w3:["PODIATRIST : FOOT","DERMATOLOGIST : SKIN","PULMONOLOGIST : LUNGS"],d:"Specialist to organ"},
+{q:"SCALPEL : SURGEON",c:"GAVEL : JUDGE",w3:["WRENCH : MECHANIC","STETHOSCOPE : NURSE","PLIERS : ELECTRICIAN"],d:"Tool of trade"},
+{q:"COMEDY : LAUGH",c:"TRAGEDY : CRY",w3:["THRILLER : TENSE","ROMANCE : SIGH","HORROR : SCREAM"],d:"Genre to reaction"},
+{q:"SHRUB : PLANT",c:"PUPPY : DOG",w3:["FINCH : BIRD","COLT : HORSE","KITTEN : CAT"],d:"Smaller to category"},
+{q:"DESERT : ARID",c:"JUNGLE : HUMID",w3:["TUNDRA : FROZEN","SAVANNAH : DRY","WETLAND : MARSHY"],d:"Biome to climate"},
+{q:"GUITAR : STRING",c:"DRUM : SKIN",w3:["FLUTE : AIR","PIANO : KEY","HARP : STRING"],d:"Instrument to component"},
+{q:"MANUSCRIPT : BOOK",c:"SKETCH : PAINTING",w3:["BLUEPRINT : BUILDING","DRAFT : ESSAY","DEMO : SONG"],d:"Early stage to final"},
+{q:"WHEEL : CIRCULAR",c:"RULER : STRAIGHT",w3:["BALL : ROUND","BOX : SQUARE","CUBE : BOXY"],d:"Object to shape"},
+{q:"TREE : ORCHARD",c:"VINE : VINEYARD",w3:["FLOWER : GARDEN","GRASS : LAWN","WHEAT : FIELD"],d:"Plant to cultivation"},
+{q:"ENGINEER : BRIDGE",c:"ARCHITECT : BUILDING",w3:["DESIGNER : GARMENT","PILOT : PLANE","DRIVER : CAR"],d:"Designer to creation"},
+{q:"CELLO : BOW",c:"GUN : TRIGGER",w3:["DRUM : STICK","PIANO : KEY","VIOLIN : STRING"],d:"Object to activator"},
+{q:"WINTER : SNOW",c:"SUMMER : SUN",w3:["SPRING : BLOOM","AUTUMN : LEAVES","MONSOON : RAIN"],d:"Season to element"},
+{q:"HISTORIAN : PAST",c:"FUTURIST : FUTURE",w3:["PROPHET : EVENT","JOURNALIST : PRESENT","POET : EMOTION"],d:"Role to focus"},
+{q:"GLOBE : EARTH",c:"MODEL : CAR",w3:["DOLL : PERSON","MAP : LAND","REPLICA : ORIGINAL"],d:"Miniature to real"},
+{q:"CACHE : STORAGE",c:"DEN : LAIR",w3:["VAULT : SAFE","NOOK : SPACE","BUNKER : SHELTER"],d:"Synonym spaces"},
+{q:"SAILOR : SEA",c:"PILOT : AIR",w3:["DRIVER : ROAD","ASTRONAUT : SPACE","CYCLIST : TRAIL"],d:"Traveler to element"},
+{q:"POUND : WEIGHT",c:"ACRE : AREA",w3:["GALLON : VOLUME","HOUR : TIME","DEGREE : ANGLE"],d:"Unit to measure"},
+{q:"POLITICS : MINISTER",c:"LAW : JUDGE",w3:["SCIENCE : SCIENTIST","ART : PAINTER","SPORT : ATHLETE"],d:"Field to practitioner"},
+{q:"NEWS : REPORTER",c:"PRESCRIPTION : DOCTOR",w3:["LAW : LAWYER","DEFENSE : SOLDIER","SCULPTURE : ARTIST"],d:"Output to professional"},
+{q:"DIAMOND : HARDNESS",c:"GOLD : LUSTER",w3:["STEEL : STRENGTH","IRON : WEIGHT","COPPER : COLOR"],d:"Material to property"},
+{q:"HERB : MEDICINE",c:"GRAIN : BREAD",w3:["COTTON : CLOTH","WOOD : FURNITURE","SAND : GLASS"],d:"Raw to product"},
+{q:"MUSICIAN : ORCHESTRA",c:"PLAYER : TEAM",w3:["SOLDIER : ARMY","STUDENT : CLASS","BEE : HIVE"],d:"Member to group"},
+{q:"TENT : CAMPER",c:"IGLOO : ESKIMO",w3:["HUT : VILLAGER","PALACE : KING","CABIN : LUMBERJACK"],d:"Dwelling to dweller"},
+{q:"LARVA : BUTTERFLY",c:"TADPOLE : FROG",w3:["CATERPILLAR : MOTH","EGG : CHICK","SEED : TREE"],d:"Stage to adult"},
+{q:"FERTILIZER : SOIL",c:"VITAMIN : BODY",w3:["OIL : ENGINE","FUEL : CAR","WATER : PLANT"],d:"Enhancer to entity"},
+{q:"SCIENCE : LABORATORY",c:"SPORT : STADIUM",w3:["ART : GALLERY","MUSIC : HALL","DRAMA : STAGE"],d:"Activity to venue"},
+{q:"LOCOMOTIVE : TRAIN",c:"ENGINE : CAR",w3:["HEART : BODY","MOTOR : MACHINE","CPU : COMPUTER"],d:"Powerhouse to whole"}
+];
+
+/* =============== CORE STATE =============== */
+var mode='syn',diff='easy';
+var data=null,deck=[],qi=0,score=0,correct=0,wrong=0;
+var timer=null,tLeft=0,tMax=15;
+var locked=false;
+var els={};
+
+function $(id){return document.getElementById(id);}
+
+function init(){
+  els.startScr=$('startScr');els.gameScr=$('gameScr');els.endScr=$('endScr');
+  els.qCounter=$('qCounter');els.qMode=$('qMode');els.qScore=$('qScore');
+  els.timerFill=$('timerFill');els.qTime=$('qTime');els.progFill=$('progFill');
+  els.promptLbl=$('promptLbl');els.qWord=$('qWord');els.qOpts=$('qOpts');
+  els.defBox=$('defBox');els.fbPop=$('fbPop');
+  els.endScore=$('endScore');els.esCorrect=$('esCorrect');els.esWrong=$('esWrong');
+  els.esAcc=$('esAcc');els.endBest=$('endBest');els.bestLine=$('bestLine');
+  els.modeDesc=$('modeDesc');els.diffDesc=$('diffDesc');
+
+  bindStart();
+  updateBestLine();
+}
+
+/* =============== STORAGE =============== */
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function bestKey(){return 'ww_best_'+mode+'_'+diff;}
+function getBest(){var v=parseInt(lsGet(bestKey()));return isNaN(v)?0:v;}
+function setBest(v){lsSet(bestKey(),String(v));}
+
+function updateBestLine(){
+  var b=getBest();
+  var modeName=mode==='syn'?'Synonyms':(mode==='ant'?'Antonyms':'Analogies');
+  var diffName=diff==='easy'?'Easy':(diff==='med'?'Medium':'Hard');
+  els.bestLine.textContent='Best ('+modeName+' · '+diffName+'): '+b+' / 10';
+}
+
+/* =============== START SCREEN =============== */
+function bindStart(){
+  var modeBtns=document.querySelectorAll('.mode-btn');
+  for(var i=0;i<modeBtns.length;i++){
+    (function(btn){
+      btn.addEventListener('pointerdown',function(e){
+        e.stopPropagation();e.preventDefault();
+        setMode(btn.getAttribute('data-mode'));
+      });
+    })(modeBtns[i]);
+  }
+  var diffBtns=document.querySelectorAll('.diff-btn');
+  for(var j=0;j<diffBtns.length;j++){
+    (function(btn){
+      btn.addEventListener('pointerdown',function(e){
+        e.stopPropagation();e.preventDefault();
+        setDiff(btn.getAttribute('data-diff'));
+      });
+    })(diffBtns[j]);
+  }
+
+  $('playBtn').addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();startRound();
+  });
+
+  $('howtoHead').addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();
+    var body=$('howtoBody');var arrow=$('howtoArrow');
+    if(body.classList.contains('open')){body.classList.remove('open');arrow.textContent='+';}
+    else{body.classList.add('open');arrow.textContent='-';}
+  });
+
+  document.addEventListener('keydown',function(e){
+    if(!els.gameScr.classList.contains('hidden')&&!locked){
+      var k=e.key;
+      if(k>='1'&&k<='4'){
+        var opts=document.querySelectorAll('.q-opt');
+        var idx=parseInt(k)-1;
+        if(opts[idx]){opts[idx].click();}
+      }
+    }
+    if(!els.startScr.classList.contains('hidden')&&(e.key==='Enter'||e.key===' ')){
+      e.preventDefault();startRound();
+    }
+  });
+}
+
+function setMode(m){
+  mode=m;
+  var btns=document.querySelectorAll('.mode-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle('active',btns[i].getAttribute('data-mode')===m);
+  }
+  var descs={syn:'Find the word with the closest meaning',ant:'Find the word with the opposite meaning',ana:'Find the pair with the same relationship'};
+  els.modeDesc.textContent=descs[m];
+  updateBestLine();
+}
+
+function setDiff(d){
+  diff=d;
+  var btns=document.querySelectorAll('.diff-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle('active',btns[i].getAttribute('data-diff')===d);
+  }
+  var times={easy:18,med:15,hard:10};
+  tMax=times[d];
+  els.diffDesc.textContent=tMax+' sec per question';
+  updateBestLine();
+}
+
+/* =============== ROUND FLOW =============== */
+function startRound(){
+  data=mode==='syn'?SYN:(mode==='ant'?ANT:ANA);
+  var pool=data.slice();
+  shuffle(pool);
+  deck=pool.slice(0,10);
+  qi=0;score=0;correct=0;wrong=0;locked=false;
+  showScreen('game');
+  els.qMode.textContent=mode==='syn'?'SYN':(mode==='ant'?'ANT':'ANA');
+  renderQ();
+}
+
+function renderQ(){
+  locked=false;
+  var q=deck[qi];
+  els.qCounter.textContent='Q '+(qi+1)+'/10';
+  els.qScore.textContent=String(score);
+  els.progFill.style.width=((qi)/10*100)+'%';
+  els.defBox.classList.remove('show');
+  els.defBox.innerHTML='';
+  els.qWord.classList.remove('flash-ok','flash-no');
+  els.fbPop.classList.remove('show','ok','no');
+
+  if(mode==='ana'){
+    els.promptLbl.textContent='Pick the matching analogy';
+    els.qWord.textContent=q.q;
+  }else{
+    els.promptLbl.textContent=mode==='syn'?'Find the synonym of':'Find the antonym of';
+    els.qWord.textContent=q.w;
+  }
+
+  var options=[q.c].concat(q.w3.slice(0,3));
+  shuffle(options);
+  els.qOpts.innerHTML='';
+  var letters=['A','B','C','D'];
+  for(var i=0;i<options.length;i++){
+    (function(opt,idx){
+      var btn=document.createElement('button');
+      btn.className='q-opt';
+      btn.setAttribute('ontouchstart','');
+      btn.innerHTML='<span class="letter">'+letters[idx]+'</span>'+opt;
+      btn.addEventListener('pointerdown',function(e){
+        e.stopPropagation();e.preventDefault();
+        onAnswer(opt,btn);
+      });
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();e.preventDefault();
+      });
+      els.qOpts.appendChild(btn);
+    })(options[i],i);
+  }
+
+  startTimer();
+}
+
+function startTimer(){
+  tLeft=tMax;
+  els.timerFill.style.width='100%';
+  els.timerFill.style.transition='none';
+  els.qTime.textContent=tLeft+'s';
+  setTimeout(function(){
+    els.timerFill.style.transition='width .2s linear';
+  },30);
+  if(timer)clearInterval(timer);
+  var startT=Date.now();
+  timer=setInterval(function(){
+    var elapsed=(Date.now()-startT)/1000;
+    tLeft=Math.max(0,tMax-elapsed);
+    var pct=(tLeft/tMax)*100;
+    els.timerFill.style.width=pct+'%';
+    els.qTime.textContent=Math.ceil(tLeft)+'s';
+    if(tLeft<=0){onTimeout();}
+  },100);
+}
+
+function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+
+function onTimeout(){
+  if(locked)return;
+  locked=true;stopTimer();
+  var q=deck[qi];
+  var opts=document.querySelectorAll('.q-opt');
+  for(var i=0;i<opts.length;i++){
+    opts[i].classList.add('disabled');
+    var text=opts[i].textContent;
+    if(text===q.c){opts[i].classList.add('correct');}
+  }
+  wrong++;
+  flashWord(false);
+  showFbPop(false);
+  showDef(q,false);
+  setTimeout(nextQ,1500);
+}
+
+function onAnswer(pick,btn){
+  if(locked)return;
+  locked=true;stopTimer();
+  var q=deck[qi];
+  var ok=(pick===q.c);
+  var opts=document.querySelectorAll('.q-opt');
+  for(var i=0;i<opts.length;i++){
+    opts[i].classList.add('disabled');
+    var text=opts[i].textContent;
+    if(text===q.c){opts[i].classList.add('correct');}
+    else if(text===pick){opts[i].classList.add('wrong');}
+  }
+  if(ok){
+    score++;correct++;
+    flashWord(true);
+    showFbPop(true);
+    showDef(q,true);
+    setTimeout(nextQ,900);
+  }else{
+    wrong++;
+    flashWord(false);
+    showFbPop(false);
+    showDef(q,false);
+    setTimeout(nextQ,1500);
+  }
+}
+
+function flashWord(ok){
+  els.qWord.classList.remove('flash-ok','flash-no');
+  els.qWord.classList.add(ok?'flash-ok':'flash-no');
+}
+
+function showFbPop(ok){
+  els.fbPop.classList.remove('ok','no');
+  els.fbPop.textContent=ok?'✓':'✕';
+  els.fbPop.classList.add(ok?'ok':'no');
+  els.fbPop.classList.add('show');
+  setTimeout(function(){els.fbPop.classList.remove('show');},700);
+}
+
+function showDef(q,ok){
+  var label=ok?'Well done':'Correct answer';
+  var answer=mode==='ana'?q.c:q.c;
+  var head='';
+  if(mode==='ana'){
+    head='<b>'+label+'</b>'+q.q+' :: '+q.c;
+  }else{
+    head='<b>'+label+'</b>'+q.w+' = '+q.c;
+  }
+  els.defBox.innerHTML=head+'<div style="margin-top:4px">'+q.d+'</div>';
+  els.defBox.classList.add('show');
+}
+
+function nextQ(){
+  qi++;
+  els.qScore.textContent=String(score);
+  if(qi>=10){endRound();return;}
+  renderQ();
+}
+
+function endRound(){
+  stopTimer();
+  els.progFill.style.width='100%';
+  var best=getBest();
+  var isNewBest=score>best;
+  if(isNewBest)setBest(score);
+  els.endScore.textContent=String(score);
+  els.esCorrect.textContent=String(correct);
+  els.esWrong.textContent=String(wrong);
+  var acc=correct+wrong>0?Math.round((correct/(correct+wrong))*100):0;
+  els.esAcc.textContent=acc+'%';
+  var finalBest=getBest();
+  els.endBest.textContent=isNewBest?'NEW BEST! '+finalBest+' / 10':'Best: '+finalBest+' / 10';
+  els.endBest.classList.toggle('new',isNewBest);
+  showScreen('end');
+  bindEnd();
+  updateBestLine();
+}
+
+function bindEnd(){
+  var a=$('againBtn'),h=$('homeBtn'),s=$('shareBtn');
+  a.onclick=null;h.onclick=null;s.onclick=null;
+  a.addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();startRound();
+  },{once:true});
+  h.addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();showScreen('start');updateBestLine();
+  },{once:true});
+  s.addEventListener('pointerdown',function(e){
+    e.stopPropagation();e.preventDefault();shareScore(s);
+  });
+}
+
+function shareScore(btn){
+  var modeName=mode==='syn'?'Synonyms':(mode==='ant'?'Antonyms':'Analogies');
+  var msg='I scored '+score+'/10 on Word Wise ('+modeName+') at fun5games.us — can you beat it?';
+  var done=function(){
+    btn.classList.add('copied');
+    btn.textContent='Copied!';
+    setTimeout(function(){btn.classList.remove('copied');btn.textContent='Share Score';},1600);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(done,function(){legacyCopy(msg);done();});
+  }else{legacyCopy(msg);done();}
+}
+
+function legacyCopy(text){
+  try{
+    var ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='absolute';ta.style.left='-9999px';
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+  }catch(e){}
+}
+
+/* =============== UTIL =============== */
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  }
+}
+
+function showScreen(which){
+  els.startScr.classList.toggle('hidden',which!=='start');
+  els.gameScr.classList.toggle('hidden',which!=='game');
+  els.endScr.classList.toggle('hidden',which!=='end');
+}
+
+init();
+})();
+</script>
+</body>
+</html>

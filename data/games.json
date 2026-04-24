@@ -98,6 +98,20 @@
     "rating": 4.9
   },
   {
+    "id": 20,
+    "title": "Word Wise",
+    "slug": "wordwise",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/wordwise.svg",
+    "game_url": "public/games/wordwise.html",
+    "description": "Master exam vocabulary: Synonyms, Antonyms, and Analogies. 419 hand-curated word pairs targeting SSC, Banking, and UPSC English section.",
+    "featured": true,
+    "trending": true,
+    "tags": ["brain", "vocabulary", "english", "exam-prep"],
+    "controls": "Tap the matching word. 10-18 seconds per question depending on difficulty.",
+    "rating": 4.8
+  },
+  {
     "id": 21,
     "title": "India Map Master",
     "slug": "indiamap",
