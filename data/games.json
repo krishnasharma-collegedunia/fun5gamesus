@@ -1,5 +1,185 @@
 [
   {
+    "id": 2,
+    "title": "Snake.Go",
+    "slug": "snakego",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/snakego.svg",
+    "game_url": "public/games/snakego.html",
+    "description": "A neon retro snake reimagined! Glide across a pixel grid, eat glowing apples, and grow longer.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "snake",
+      "retro",
+      "arcade"
+    ],
+    "controls": "Arrow keys or swipe to change direction",
+    "rating": 4.8
+  },
+  {
+    "id": 10,
+    "title": "2048 Merge",
+    "slug": "2048merge",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/2048merge.svg",
+    "game_url": "public/games/2048merge.html",
+    "description": "Slide and merge numbered tiles to reach 2048! The iconic addictive puzzle.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "puzzle",
+      "numbers",
+      "casual"
+    ],
+    "controls": "Arrow keys or swipe to slide tiles",
+    "rating": 4.9
+  },
+  {
+    "id": 1,
+    "title": "Fruit Slice Master",
+    "slug": "fruitninjanew",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/fruitninjanew.svg",
+    "game_url": "public/games/fruitninjanew.html",
+    "description": "Slice flying fruits with lightning-fast swipes! Juicy physics, combo multipliers, and explosive bombs.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "arcade",
+      "slicing",
+      "casual"
+    ],
+    "controls": "Swipe or click and drag to slice fruits. Avoid bombs!",
+    "rating": 4.9
+  },
+  {
+    "id": 3,
+    "title": "Pixel Flap",
+    "slug": "pixelflap",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/pixelflap.svg",
+    "game_url": "public/games/pixelflap.html",
+    "description": "Tap to flap your wings and weave through endless pipes! Classic side-scroller with pixel-art charm.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "arcade",
+      "casual",
+      "endless"
+    ],
+    "controls": "Tap / Click / Space to flap",
+    "rating": 4.7
+  },
+  {
+    "id": 9,
+    "title": "Block Drop",
+    "slug": "blockdrop",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/blockdrop.svg",
+    "game_url": "public/games/blockdrop.html",
+    "description": "Classic block-stacking puzzle! Arrange falling tetrominoes to clear lines. Speed increases as you level up.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "puzzle",
+      "classic",
+      "arcade"
+    ],
+    "controls": "Arrow keys or swipe to move. Tap or Up arrow to rotate.",
+    "rating": 4.9
+  },
+  {
+    "id": 6,
+    "title": "Bubble Shooter",
+    "slug": "bubbleshoot",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/bubbleshoot.svg",
+    "game_url": "public/games/bubbleshoot.html",
+    "description": "Aim and shoot colored bubbles to match 3 or more! Classic bubble shooter with chain reactions.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "puzzle",
+      "shooter",
+      "casual"
+    ],
+    "controls": "Aim with mouse/touch, tap or click to shoot.",
+    "rating": 4.9
+  },
+  {
+    "id": 14,
+    "title": "Sudoku Pro",
+    "slug": "sudoku",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/sudoku.svg",
+    "game_url": "public/games/sudoku.html",
+    "description": "Classic 9x9 Sudoku with 4 difficulty levels. Hints, pencil marks, mistake counter, auto-save.",
+    "featured": true,
+    "trending": false,
+    "tags": [
+      "brain",
+      "puzzle",
+      "logic"
+    ],
+    "controls": "Tap a cell, then tap a number 1-9.",
+    "rating": 4.9
+  },
+  {
+    "id": 5,
+    "title": "Brick Smash",
+    "slug": "bricksmash",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/bricksmash.svg",
+    "game_url": "public/games/bricksmash.html",
+    "description": "Smash through colorful neon bricks with a bouncing ball. Progress through levels.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "arcade",
+      "breakout",
+      "classic"
+    ],
+    "controls": "Drag or Arrow keys to move paddle. Tap / Space to launch.",
+    "rating": 4.8
+  },
+  {
+    "id": 11,
+    "title": "Memory Flip",
+    "slug": "memoryflip",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/memoryflip.svg",
+    "game_url": "public/games/memoryflip.html",
+    "description": "Flip cards and match pairs to clear the board. Choose 4x4 or 6x6 difficulty.",
+    "featured": false,
+    "trending": true,
+    "tags": [
+      "puzzle",
+      "memory",
+      "cards"
+    ],
+    "controls": "Tap or click cards to flip and match pairs",
+    "rating": 4.5
+  },
+  {
+    "id": 7,
+    "title": "Color Sort",
+    "slug": "colorsort",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/colorsort.svg",
+    "game_url": "public/games/colorsort.html",
+    "description": "Sort colored liquids into matching tubes! A relaxing yet challenging puzzle.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "puzzle",
+      "sorting",
+      "casual"
+    ],
+    "controls": "Tap a tube to pick up liquid, tap another to pour.",
+    "rating": 4.7
+  },
+  {
     "id": 36,
     "title": "Heart Match",
     "slug": "heartmatch",
@@ -16,6 +196,42 @@
     ],
     "controls": "Swap adjacent pieces to match 3+ in a row. Build combos!",
     "rating": 4.9
+  },
+  {
+    "id": 30,
+    "title": "Galaxy Hole",
+    "slug": "galaxyhole",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/galaxyhole.svg",
+    "game_url": "public/games/galaxyhole.html",
+    "description": "Drag a black hole around the city to consume cars, buildings, and asteroids! Grow bigger as you devour everything in sight.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "casual",
+      "arcade",
+      "addictive"
+    ],
+    "controls": "Drag to move the hole. Consume objects smaller than you to grow bigger.",
+    "rating": 4.9
+  },
+  {
+    "id": 8,
+    "title": "Stack Tower",
+    "slug": "stacktower",
+    "category": "arcade",
+    "thumbnail": "assets/thumbnails/stacktower.svg",
+    "game_url": "public/games/stacktower.html",
+    "description": "Tap to stack blocks and build the tallest tower! Time your drops for PERFECT combos.",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "arcade",
+      "timing",
+      "casual"
+    ],
+    "controls": "Tap or click to drop the block.",
+    "rating": 4.8
   },
   {
     "id": 32,
@@ -51,6 +267,24 @@
       "endless"
     ],
     "controls": "Drag to steer left/right. Tap to use turbo.",
+    "rating": 4.8
+  },
+  {
+    "id": 31,
+    "title": "Goal Keeper",
+    "slug": "goalkeeper",
+    "category": "action",
+    "thumbnail": "assets/thumbnails/goalkeeper.svg",
+    "game_url": "public/games/goalkeeper.html",
+    "description": "Block flying soccer balls with quick reflexes! Drag to dive, tap to jump. How many shots can you save?",
+    "featured": true,
+    "trending": true,
+    "tags": [
+      "action",
+      "sports",
+      "soccer"
+    ],
+    "controls": "Drag to move keeper. Tap to jump. Block the ball!",
     "rating": 4.8
   },
   {
@@ -90,96 +324,6 @@
     "rating": 4.7
   },
   {
-    "id": 30,
-    "title": "Galaxy Hole",
-    "slug": "galaxyhole",
-    "category": "casual",
-    "thumbnail": "assets/thumbnails/galaxyhole.svg",
-    "game_url": "public/games/galaxyhole.html",
-    "description": "Drag a black hole around the city to consume cars, buildings, and asteroids! Grow bigger as you devour everything in sight.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "casual",
-      "arcade",
-      "addictive"
-    ],
-    "controls": "Drag to move the hole. Consume objects smaller than you to grow bigger.",
-    "rating": 4.9
-  },
-  {
-    "id": 31,
-    "title": "Goal Keeper",
-    "slug": "goalkeeper",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/goalkeeper.svg",
-    "game_url": "public/games/goalkeeper.html",
-    "description": "Block flying soccer balls with quick reflexes! Drag to dive, tap to jump. How many shots can you save?",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "action",
-      "sports",
-      "soccer"
-    ],
-    "controls": "Drag to move keeper. Tap to jump. Block the ball!",
-    "rating": 4.8
-  },
-  {
-    "id": 1,
-    "title": "Fruit Slice Master",
-    "slug": "fruitninjanew",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/fruitninjanew.svg",
-    "game_url": "public/games/fruitninjanew.html",
-    "description": "Slice flying fruits with lightning-fast swipes! Juicy physics, combo multipliers, and explosive bombs.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "arcade",
-      "slicing",
-      "casual"
-    ],
-    "controls": "Swipe or click and drag to slice fruits. Avoid bombs!",
-    "rating": 4.9
-  },
-  {
-    "id": 2,
-    "title": "Snake.Go",
-    "slug": "snakego",
-    "category": "casual",
-    "thumbnail": "assets/thumbnails/snakego.svg",
-    "game_url": "public/games/snakego.html",
-    "description": "A neon retro snake reimagined! Glide across a pixel grid, eat glowing apples, and grow longer.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "snake",
-      "retro",
-      "arcade"
-    ],
-    "controls": "Arrow keys or swipe to change direction",
-    "rating": 4.8
-  },
-  {
-    "id": 3,
-    "title": "Pixel Flap",
-    "slug": "pixelflap",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/pixelflap.svg",
-    "game_url": "public/games/pixelflap.html",
-    "description": "Tap to flap your wings and weave through endless pipes! Classic side-scroller with pixel-art charm.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "arcade",
-      "casual",
-      "endless"
-    ],
-    "controls": "Tap / Click / Space to flap",
-    "rating": 4.7
-  },
-  {
     "id": 4,
     "title": "Coin Catcher",
     "slug": "coincatcher",
@@ -196,132 +340,6 @@
     ],
     "controls": "Drag or Arrow keys to move the basket",
     "rating": 4.6
-  },
-  {
-    "id": 5,
-    "title": "Brick Smash",
-    "slug": "bricksmash",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/bricksmash.svg",
-    "game_url": "public/games/bricksmash.html",
-    "description": "Smash through colorful neon bricks with a bouncing ball. Progress through levels.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "arcade",
-      "breakout",
-      "classic"
-    ],
-    "controls": "Drag or Arrow keys to move paddle. Tap / Space to launch.",
-    "rating": 4.8
-  },
-  {
-    "id": 6,
-    "title": "Bubble Shooter",
-    "slug": "bubbleshoot",
-    "category": "casual",
-    "thumbnail": "assets/thumbnails/bubbleshoot.svg",
-    "game_url": "public/games/bubbleshoot.html",
-    "description": "Aim and shoot colored bubbles to match 3 or more! Classic bubble shooter with chain reactions.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "puzzle",
-      "shooter",
-      "casual"
-    ],
-    "controls": "Aim with mouse/touch, tap or click to shoot.",
-    "rating": 4.9
-  },
-  {
-    "id": 7,
-    "title": "Color Sort",
-    "slug": "colorsort",
-    "category": "casual",
-    "thumbnail": "assets/thumbnails/colorsort.svg",
-    "game_url": "public/games/colorsort.html",
-    "description": "Sort colored liquids into matching tubes! A relaxing yet challenging puzzle.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "puzzle",
-      "sorting",
-      "casual"
-    ],
-    "controls": "Tap a tube to pick up liquid, tap another to pour.",
-    "rating": 4.7
-  },
-  {
-    "id": 8,
-    "title": "Stack Tower",
-    "slug": "stacktower",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/stacktower.svg",
-    "game_url": "public/games/stacktower.html",
-    "description": "Tap to stack blocks and build the tallest tower! Time your drops for PERFECT combos.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "arcade",
-      "timing",
-      "casual"
-    ],
-    "controls": "Tap or click to drop the block.",
-    "rating": 4.8
-  },
-  {
-    "id": 9,
-    "title": "Block Drop",
-    "slug": "blockdrop",
-    "category": "arcade",
-    "thumbnail": "assets/thumbnails/blockdrop.svg",
-    "game_url": "public/games/blockdrop.html",
-    "description": "Classic block-stacking puzzle! Arrange falling tetrominoes to clear lines. Speed increases as you level up.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "puzzle",
-      "classic",
-      "arcade"
-    ],
-    "controls": "Arrow keys or swipe to move. Tap or Up arrow to rotate.",
-    "rating": 4.9
-  },
-  {
-    "id": 10,
-    "title": "2048 Merge",
-    "slug": "2048merge",
-    "category": "casual",
-    "thumbnail": "assets/thumbnails/2048merge.svg",
-    "game_url": "public/games/2048merge.html",
-    "description": "Slide and merge numbered tiles to reach 2048! The iconic addictive puzzle.",
-    "featured": true,
-    "trending": true,
-    "tags": [
-      "puzzle",
-      "numbers",
-      "casual"
-    ],
-    "controls": "Arrow keys or swipe to slide tiles",
-    "rating": 4.9
-  },
-  {
-    "id": 11,
-    "title": "Memory Flip",
-    "slug": "memoryflip",
-    "category": "casual",
-    "thumbnail": "assets/thumbnails/memoryflip.svg",
-    "game_url": "public/games/memoryflip.html",
-    "description": "Flip cards and match pairs to clear the board. Choose 4x4 or 6x6 difficulty.",
-    "featured": false,
-    "trending": true,
-    "tags": [
-      "puzzle",
-      "memory",
-      "cards"
-    ],
-    "controls": "Tap or click cards to flip and match pairs",
-    "rating": 4.5
   },
   {
     "id": 12,
@@ -361,24 +379,6 @@
     "rating": 4.9
   },
   {
-    "id": 14,
-    "title": "Sudoku Pro",
-    "slug": "sudoku",
-    "category": "brain",
-    "thumbnail": "assets/thumbnails/sudoku.svg",
-    "game_url": "public/games/sudoku.html",
-    "description": "Classic 9x9 Sudoku with 4 difficulty levels. Hints, pencil marks, mistake counter, auto-save.",
-    "featured": true,
-    "trending": false,
-    "tags": [
-      "brain",
-      "puzzle",
-      "logic"
-    ],
-    "controls": "Tap a cell, then tap a number 1-9.",
-    "rating": 4.9
-  },
-  {
     "id": 15,
     "title": "GK Blitz",
     "slug": "gkblitz",
@@ -395,6 +395,23 @@
     ],
     "controls": "Tap the correct option. Blitz mode: 60s.",
     "rating": 4.9
+  },
+  {
+    "id": 18,
+    "title": "Memory Master",
+    "slug": "memorymaster",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/memorymaster.svg",
+    "game_url": "public/games/memorymaster.html",
+    "description": "Train working memory: Digit Span, Pattern Grid, Sequence modes.",
+    "featured": false,
+    "trending": false,
+    "tags": [
+      "brain",
+      "memory"
+    ],
+    "controls": "Memorize then reproduce sequence.",
+    "rating": 4.8
   },
   {
     "id": 16,
@@ -415,40 +432,6 @@
     "rating": 4.8
   },
   {
-    "id": 17,
-    "title": "Code Cracker",
-    "slug": "codecracker",
-    "category": "brain",
-    "thumbnail": "assets/thumbnails/codecracker.svg",
-    "game_url": "public/games/codecracker.html",
-    "description": "Decode letter-number patterns and ciphers. SSC and Banking reasoning section practice.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "brain",
-      "reasoning"
-    ],
-    "controls": "Analyze pattern, tap correct answer.",
-    "rating": 4.8
-  },
-  {
-    "id": 18,
-    "title": "Memory Master",
-    "slug": "memorymaster",
-    "category": "brain",
-    "thumbnail": "assets/thumbnails/memorymaster.svg",
-    "game_url": "public/games/memorymaster.html",
-    "description": "Train working memory: Digit Span, Pattern Grid, Sequence modes.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "brain",
-      "memory"
-    ],
-    "controls": "Memorize then reproduce sequence.",
-    "rating": 4.8
-  },
-  {
     "id": 19,
     "title": "Word Groups",
     "slug": "wordgroups",
@@ -466,6 +449,57 @@
     "rating": 4.9
   },
   {
+    "id": 24,
+    "title": "Odd One Out",
+    "slug": "oddoneout",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/oddoneout.svg",
+    "game_url": "public/games/oddoneout.html",
+    "description": "Find the item that doesn't belong! 400+ classification puzzles.",
+    "featured": false,
+    "trending": false,
+    "tags": [
+      "brain",
+      "reasoning"
+    ],
+    "controls": "Tap the odd item.",
+    "rating": 4.8
+  },
+  {
+    "id": 23,
+    "title": "True or False",
+    "slug": "truefalse",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/truefalse.svg",
+    "game_url": "public/games/truefalse.html",
+    "description": "Rapid-fire 60-second GK challenge. 210+ verified statements.",
+    "featured": false,
+    "trending": false,
+    "tags": [
+      "brain",
+      "quiz"
+    ],
+    "controls": "Tap TRUE or FALSE.",
+    "rating": 4.8
+  },
+  {
+    "id": 17,
+    "title": "Code Cracker",
+    "slug": "codecracker",
+    "category": "brain",
+    "thumbnail": "assets/thumbnails/codecracker.svg",
+    "game_url": "public/games/codecracker.html",
+    "description": "Decode letter-number patterns and ciphers. SSC and Banking reasoning section practice.",
+    "featured": false,
+    "trending": false,
+    "tags": [
+      "brain",
+      "reasoning"
+    ],
+    "controls": "Analyze pattern, tap correct answer.",
+    "rating": 4.8
+  },
+  {
     "id": 20,
     "title": "Word Wise",
     "slug": "wordwise",
@@ -480,23 +514,6 @@
       "vocabulary"
     ],
     "controls": "Tap the matching word.",
-    "rating": 4.8
-  },
-  {
-    "id": 21,
-    "title": "India Map Master",
-    "slug": "indiamap",
-    "category": "brain",
-    "thumbnail": "assets/thumbnails/indiamap.svg",
-    "game_url": "public/games/indiamap.html",
-    "description": "Master Indian Geography: States, Capitals, Rivers, Neighbors.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "brain",
-      "geography"
-    ],
-    "controls": "Read the clue, tap the correct state.",
     "rating": 4.8
   },
   {
@@ -517,37 +534,20 @@
     "rating": 4.9
   },
   {
-    "id": 23,
-    "title": "True or False",
-    "slug": "truefalse",
+    "id": 21,
+    "title": "India Map Master",
+    "slug": "indiamap",
     "category": "brain",
-    "thumbnail": "assets/thumbnails/truefalse.svg",
-    "game_url": "public/games/truefalse.html",
-    "description": "Rapid-fire 60-second GK challenge. 210+ verified statements.",
+    "thumbnail": "assets/thumbnails/indiamap.svg",
+    "game_url": "public/games/indiamap.html",
+    "description": "Master Indian Geography: States, Capitals, Rivers, Neighbors.",
     "featured": false,
     "trending": false,
     "tags": [
       "brain",
-      "quiz"
+      "geography"
     ],
-    "controls": "Tap TRUE or FALSE.",
-    "rating": 4.8
-  },
-  {
-    "id": 24,
-    "title": "Odd One Out",
-    "slug": "oddoneout",
-    "category": "brain",
-    "thumbnail": "assets/thumbnails/oddoneout.svg",
-    "game_url": "public/games/oddoneout.html",
-    "description": "Find the item that doesn't belong! 400+ classification puzzles.",
-    "featured": false,
-    "trending": false,
-    "tags": [
-      "brain",
-      "reasoning"
-    ],
-    "controls": "Tap the odd item.",
+    "controls": "Read the clue, tap the correct state.",
     "rating": 4.8
   },
   {
