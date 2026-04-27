@@ -53,7 +53,7 @@ body{display:flex;flex-direction:column;align-items:center;height:100dvh;positio
 .event-card{position:relative;background:linear-gradient(180deg,#f5e6d3 0%,#e6d3b8 100%);color:#3d2817;border:2px solid #a06d2e;border-radius:6px;padding:9px 12px 9px 36px;font-size:13px;font-weight:600;font-family:'Georgia',serif;line-height:1.25;cursor:grab;touch-action:none;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 6px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.4);min-height:42px;display:flex;align-items:center}
 .event-card:before{content:"✦";position:absolute;left:10px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:#a06d2e;font-size:14px;text-align:center;line-height:20px}
 .event-card.dragging{opacity:.5;cursor:grabbing}
-.event-card.flying{position:fixed;z-index:100;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5);transform:scale(1.04);cursor:grabbing}
+.event-card.flying{position:absolute;z-index:100;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5);transform:scale(1.04);cursor:grabbing}
 .event-card.placed{opacity:0;pointer-events:none;height:0;padding:0;margin:0;border:0;min-height:0;overflow:hidden}
 
 .timeline{display:flex;flex-direction:column;gap:7px;padding:6px 4px 4px;position:relative}

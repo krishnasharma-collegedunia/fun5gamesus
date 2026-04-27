@@ -25,7 +25,7 @@ html, body {
 }
 
 body {
-  position: fixed;
+  position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@ canvas {
 
 /* HUD */
 #ui {
-  position: fixed; top: 0; left: 0; right: 0;
+  position: absolute; top: 0; left: 0; right: 0;
   display: flex; justify-content: space-between; align-items: flex-start;
   padding: 10px 14px;
   pointer-events: none; z-index: 10;
@@ -59,11 +59,11 @@ canvas {
 
 /* OVERLAYS */
 .ovbg {
-  position: fixed; inset: 0;
+  position: absolute; inset: 0;
   background: rgba(8,3,0,0.9); z-index: 19;
 }
 .ov {
-  position: fixed; inset: 0;
+  position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 18px; z-index: 20; padding: 28px;
@@ -93,7 +93,7 @@ canvas {
 
 /* Streak banner */
 #streak {
-  position: fixed; top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   color: #ffcc00; font-size: clamp(36px, 10vw, 56px);
   font-weight: bold; font-family: 'Georgia', serif;

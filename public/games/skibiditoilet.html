@@ -215,7 +215,7 @@ function flashCombo(text){
 
 function flashScreen(color){
   var f=document.createElement('div');
-  f.style.cssText='position:fixed;inset:0;background:'+color+';opacity:.4;pointer-events:none;z-index:50;animation:flashOut .25s forwards';
+  f.style.cssText='position:absolute;inset:0;background:'+color+';opacity:.4;pointer-events:none;z-index:50;animation:flashOut .25s forwards';
   if(!document.getElementById('flashStyle')){
     var s=document.createElement('style');s.id='flashStyle';
     s.textContent='@keyframes flashOut{from{opacity:.4}to{opacity:0}}';
