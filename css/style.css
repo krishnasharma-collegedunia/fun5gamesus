@@ -557,17 +557,26 @@ body::before { display: none; }
   text-transform: uppercase;
 }
 
-/* Big thumbnail preview frame */
+/* Game preview container — matches thumbnail aspect (4:3) when showing poster */
 .play202-frame-container {
   position: relative;
-  background: #000;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   max-width: 380px;
   margin: 0 auto;
-  aspect-ratio: 1/1;
+  aspect-ratio: 4/3;
+  transition: aspect-ratio 0.3s;
+}
+
+/* When iframe is active (game playing), container becomes vertical 9:16 */
+.play202-frame-container.playing {
+  aspect-ratio: 9/16;
+  max-height: calc(100svh - 220px);
+  min-height: 520px;
+  background: #000;
 }
 
 .play202-thumb-preview {
@@ -575,6 +584,10 @@ body::before { display: none; }
   inset: 0;
   cursor: pointer;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
 }
 
 .play202-thumb-preview:hover { transform: scale(1.02); }
@@ -587,6 +600,29 @@ body::before { display: none; }
 }
 
 .play202-thumb-preview.hidden { display: none; }
+
+/* Optional play overlay icon on hover */
+.play202-thumb-preview::after {
+  content: '▶';
+  position: absolute;
+  width: 80px; height: 80px;
+  background: rgba(37,99,235,0.95);
+  border: 4px solid white;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  padding-left: 5px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  transform: scale(0.7);
+  pointer-events: none;
+}
+
+.play202-thumb-preview:hover::after { opacity: 1; transform: scale(1); }
 
 /* iframe wrapper inside container */
 .play202-frame-wrapper {
@@ -604,11 +640,9 @@ body::before { display: none; }
 }
 
 @media (min-width: 768px) {
-  .play202-frame-container {
+  .play202-frame-container { max-width: 480px; }
+  .play202-frame-container.playing {
     max-width: 480px;
-    aspect-ratio: 9/16;
-    max-height: calc(100svh - 200px);
-    min-height: 540px;
   }
 }
 

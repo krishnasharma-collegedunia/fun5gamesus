@@ -117,11 +117,14 @@
       if (iframeLoaded) return;
       iframeLoaded = true;
 
+      var container = document.getElementById('gameFrameContainer');
       var preview = document.getElementById('thumbPreview');
       var wrapper = document.getElementById('gameFrameWrapper');
       var loading = document.getElementById('gameLoading');
       var ctaWrap = document.getElementById('playCtaWrap');
 
+      // Switch to vertical (9:16) game mode
+      if (container) container.classList.add('playing');
       // Hide preview + CTA, show iframe wrapper
       if (preview) preview.classList.add('hidden');
       if (ctaWrap) ctaWrap.classList.add('hidden');
