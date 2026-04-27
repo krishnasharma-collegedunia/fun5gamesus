@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="hmbg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#fce7f3"/>
+<stop offset="100%" stop-color="#e9d5ff"/>
+</linearGradient>
+</defs>
+<rect width="400" height="300" fill="url(#hmbg)"/>
+<g font-size="22" text-anchor="middle">
+<!-- 6 column grid -->
+<!-- row 1 -->
+<text x="60" y="80" fill="#dc2626">❤</text>
+<text x="115" y="80" fill="#ec4899">💗</text>
+<text x="170" y="80" fill="#f43f5e">🌹</text>
+<text x="225" y="80" fill="#eab308">💍</text>
+<text x="280" y="80" fill="#a855f7">🎁</text>
+<text x="335" y="80" fill="#3b82f6">🦋</text>
+<!-- row 2 - matching hearts highlighted -->
+<rect x="40" y="105" width="40" height="40" rx="6" fill="#fff" stroke="#fbbf24" stroke-width="3"/>
+<text x="60" y="135" fill="#dc2626">❤</text>
+<rect x="95" y="105" width="40" height="40" rx="6" fill="#fff" stroke="#fbbf24" stroke-width="3"/>
+<text x="115" y="135" fill="#dc2626">❤</text>
+<rect x="150" y="105" width="40" height="40" rx="6" fill="#fff" stroke="#fbbf24" stroke-width="3"/>
+<text x="170" y="135" fill="#dc2626">❤</text>
+<text x="225" y="135" fill="#a855f7">🎁</text>
+<text x="280" y="135" fill="#3b82f6">🦋</text>
+<text x="335" y="135" fill="#eab308">💍</text>
+<!-- row 3 -->
+<text x="60" y="190" fill="#f43f5e">🌹</text>
+<text x="115" y="190" fill="#ec4899">💗</text>
+<text x="170" y="190" fill="#3b82f6">🦋</text>
+<text x="225" y="190" fill="#dc2626">❤</text>
+<text x="280" y="190" fill="#eab308">💍</text>
+<text x="335" y="190" fill="#a855f7">🎁</text>
+<!-- match 3 indicator -->
+<text x="115" y="160" font-family="Arial Black" font-size="14" font-weight="900" fill="#22c55e" text-anchor="middle">MATCH 3!</text>
+</g>
+<!-- HUD -->
+<rect x="20" y="20" width="80" height="32" rx="6" fill="#fff" stroke="#fbcfe8"/>
+<text x="60" y="42" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="#ec4899" text-anchor="middle">LV 12</text>
+<rect x="120" y="20" width="100" height="32" rx="6" fill="#fff" stroke="#fbcfe8"/>
+<text x="170" y="42" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="#a855f7" text-anchor="middle">SCORE 3,420</text>
+<rect x="240" y="20" width="140" height="32" rx="6" fill="#fff" stroke="#fbcfe8"/>
+<text x="310" y="42" font-family="Arial Black, sans-serif" font-size="12" font-weight="900" fill="#22c55e" text-anchor="middle">MOVES: 14</text>
+<!-- title -->
+<text x="200" y="270" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#ec4899" text-anchor="middle">HEART MATCH</text>
+</svg>
