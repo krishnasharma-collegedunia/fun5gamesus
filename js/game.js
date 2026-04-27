@@ -1,6 +1,7 @@
 /* ========================================
-   Fun5Games - Game Detail Page Script
-   Loads game in iframe | Ad slots ready
+   Fun5Games - Game Detail Page (play202-style)
+   PLAY button click -> iframe loads
+   Download Games section -> fun5games.com
    ======================================== */
 
 (function () {
@@ -8,6 +9,19 @@
 
   var allGames = [];
   var currentGame = null;
+  var iframeLoaded = false;
+
+  // Mobile game catalog (links to fun5games.com)
+  var DOWNLOAD_GAMES = [
+    { name: 'Subway Surfers', icon: '🏃‍♂️', cat: 'Endless Runner' },
+    { name: 'Candy Crush Saga', icon: '🍬', cat: 'Match-3' },
+    { name: 'Free Fire', icon: '🔫', cat: 'Battle Royale' },
+    { name: 'PUBG Mobile', icon: '🎯', cat: 'Shooter' },
+    { name: 'Clash of Clans', icon: '⚔️', cat: 'Strategy' },
+    { name: 'Among Us', icon: '👨‍🚀', cat: 'Party' },
+    { name: 'Minecraft', icon: '⛏️', cat: 'Sandbox' },
+    { name: 'Roblox', icon: '🎮', cat: 'Platform' }
+  ];
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -23,12 +37,14 @@
     updateMeta();
     updateHeader();
     updateInfo();
-    renderRelated();
+    setupPreview();
     setupControls();
-    loadGameIframe();
+    setupPlayButton();
+    renderRelated();
+    renderDownloadGames();
     setupPageLeave();
 
-    console.log('[Fun5Games] Playing: ' + currentGame.title);
+    console.log('[Fun5Games] Loaded: ' + currentGame.title);
   }
 
   function goHome() { window.location.href = 'index.html'; }
@@ -66,12 +82,12 @@
 
   function updateHeader() {
     document.getElementById('breadcrumb').textContent = cap(currentGame.category) + ' > ' + currentGame.title;
-    document.getElementById('gameTitle').textContent = currentGame.title;
+    document.getElementById('gameTitle').textContent = currentGame.title.toUpperCase();
 
     var full = Math.floor(currentGame.rating);
     var half = currentGame.rating % 1 >= 0.5;
-    var stars = '\u2605'.repeat(full);
-    if (half) stars += '\u00BD';
+    var stars = '★'.repeat(full);
+    if (half) stars += '½';
     stars += ' ' + currentGame.rating + '/5';
     document.getElementById('gameStars').textContent = stars;
     document.getElementById('gameBadge').textContent = cap(currentGame.category);
@@ -86,26 +102,61 @@
     }).join('');
   }
 
-  function loadGameIframe() {
-    var wrapper = document.getElementById('gameFrameWrapper');
-    var loading = document.getElementById('gameLoading');
+  function setupPreview() {
+    var img = document.getElementById('thumbPreviewImg');
+    img.src = currentGame.thumbnail;
+    img.alt = currentGame.title;
+  }
 
-    var iframe = document.createElement('iframe');
-    iframe.src = currentGame.game_url + '?v=' + Date.now();
-    iframe.id = 'gameIframe';
-    iframe.title = currentGame.title;
-    iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('scrolling', 'no');
+  function setupPlayButton() {
+    var playBtn = document.getElementById('playGameBtn');
+    if (!playBtn) return;
 
-    iframe.addEventListener('load', function () {
-      loading.classList.add('hidden');
-    });
+    var startGame = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (iframeLoaded) return;
+      iframeLoaded = true;
 
-    setTimeout(function () { loading.classList.add('hidden'); }, 8000);
+      var preview = document.getElementById('thumbPreview');
+      var wrapper = document.getElementById('gameFrameWrapper');
+      var loading = document.getElementById('gameLoading');
+      var ctaWrap = document.getElementById('playCtaWrap');
 
-    wrapper.appendChild(iframe);
+      // Hide preview + CTA, show iframe wrapper
+      if (preview) preview.classList.add('hidden');
+      if (ctaWrap) ctaWrap.classList.add('hidden');
+      wrapper.classList.remove('hidden');
+      if (loading) loading.classList.remove('hidden');
+
+      // Create iframe
+      var iframe = document.createElement('iframe');
+      iframe.src = currentGame.game_url + '?v=' + Date.now();
+      iframe.id = 'gameIframe';
+      iframe.title = currentGame.title;
+      iframe.setAttribute('allow', 'autoplay; fullscreen; gamepad');
+      iframe.setAttribute('allowfullscreen', 'true');
+      iframe.setAttribute('frameborder', '0');
+      iframe.setAttribute('scrolling', 'no');
+
+      iframe.addEventListener('load', function () {
+        if (loading) loading.classList.add('hidden');
+      });
+
+      setTimeout(function () { if (loading) loading.classList.add('hidden'); }, 8000);
+
+      wrapper.appendChild(iframe);
+
+      // Scroll to game
+      setTimeout(function () {
+        document.getElementById('gameFrameContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    };
+
+    playBtn.addEventListener('click', startGame);
+
+    // Also clicking thumbnail starts game
+    var preview = document.getElementById('thumbPreview');
+    if (preview) preview.addEventListener('click', startGame);
   }
 
   function setupControls() {
@@ -114,6 +165,10 @@
     var reloadBtn = document.getElementById('reloadBtn');
 
     fsBtn.addEventListener('click', function () {
+      if (!iframeLoaded) {
+        document.getElementById('playGameBtn').click();
+        return;
+      }
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else if (container.requestFullscreen) {
@@ -134,9 +189,9 @@
       var iframe = document.getElementById('gameIframe');
       if (iframe) {
         var loading = document.getElementById('gameLoading');
-        loading.classList.remove('hidden');
-        iframe.src = currentGame.game_url;
-        setTimeout(function () { loading.classList.add('hidden'); }, 8000);
+        if (loading) loading.classList.remove('hidden');
+        iframe.src = currentGame.game_url + '?v=' + Date.now();
+        setTimeout(function () { if (loading) loading.classList.add('hidden'); }, 8000);
       }
     });
 
@@ -151,10 +206,6 @@
   function setupPageLeave() {
     window.addEventListener('beforeunload', destroyIframe);
     window.addEventListener('pagehide', destroyIframe);
-    document.addEventListener('click', function (e) {
-      var link = e.target.closest('a[href]');
-      if (link && link.href.indexOf('javascript:') < 0) destroyIframe();
-    });
   }
 
   function destroyIframe() {
@@ -175,6 +226,11 @@
       .sort(function (a, b) { return b.rel - a.rel; })
       .slice(0, 6);
 
+    if (related.length < 6) {
+      // Fallback: show first 6 trending games
+      related = allGames.filter(function (g) { return g.id !== currentGame.id; }).slice(0, 6);
+    }
+
     var grid = document.getElementById('relatedGrid');
     if (!grid) return;
     grid.innerHTML = related.map(function (game) {
@@ -190,6 +246,21 @@
           '</a>' +
         '</div>' +
       '</div>';
+    }).join('');
+  }
+
+  function renderDownloadGames() {
+    var grid = document.getElementById('downloadGrid');
+    if (!grid) return;
+    grid.innerHTML = DOWNLOAD_GAMES.map(function (g) {
+      return '<a class="download-card" href="https://fun5games.com" target="_blank" rel="noopener">' +
+        '<div class="download-icon">' + g.icon + '</div>' +
+        '<div class="download-info">' +
+          '<div class="download-name">' + esc(g.name) + '</div>' +
+          '<div class="download-cat">' + esc(g.cat) + '</div>' +
+        '</div>' +
+        '<div class="download-arrow">↗</div>' +
+      '</a>';
     }).join('');
   }
 

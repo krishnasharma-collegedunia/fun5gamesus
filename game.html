@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-  <meta name="theme-color" content="#0a0e27">
+  <meta name="theme-color" content="#2563eb">
   <meta name="robots" content="index, follow">
   <meta name="description" content="" id="metaDesc">
   <meta property="og:title" content="" id="ogTitle">
@@ -15,7 +15,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Ad Placeholder Script -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 
   <script type="application/ld+json" id="jsonLd">
@@ -24,26 +23,18 @@
 </head>
 <body>
 
-  <!-- FLOATING ORBS -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-
   <!-- HEADER -->
   <header class="site-header">
     <div class="container">
       <div class="header-flex">
         <a class="brand" href="index.html">
           <div class="brand-icon">🎮</div>
-          <div>
-            <div class="brand-text">Fun5Games</div>
-            <div class="brand-sub">Free brain games &amp; arcade</div>
-          </div>
+          <div class="brand-text">Fun5Games</div>
         </a>
         <nav class="header-nav">
-          <a href="index.html">All Games</a>
-          <a href="index.html#brain">Brain &amp; Skills</a>
-          <a href="index.html#arcade">Arcade</a>
+          <a href="index.html#games">Games</a>
+          <a href="https://fun5games.com" target="_blank" rel="noopener">📲 Download</a>
+          <a href="index.html" class="primary">▶ Play</a>
         </nav>
       </div>
     </div>
@@ -54,80 +45,90 @@
 
       <!-- BACK NAV -->
       <div class="game-topbar">
-        <a href="index.html" class="back-btn">&#8592; All Games</a>
+        <a href="index.html" class="back-btn">&#8592; Games</a>
         <span class="game-breadcrumb" id="breadcrumb">Loading...</span>
       </div>
 
-      <!-- AD SLOT: Pre-game -->
-      <div class="ad-slot ad-pre">
+      <!-- GAME TITLE -->
+      <div class="play202-title-wrap">
+        <h1 class="play202-title" id="gameTitle">LOADING...</h1>
+      </div>
+
+      <!-- GAME PREVIEW / IFRAME -->
+      <div class="play202-frame-container" id="gameFrameContainer">
+        <!-- Thumbnail preview (shown before PLAY clicked) -->
+        <div class="play202-thumb-preview" id="thumbPreview">
+          <img id="thumbPreviewImg" alt="" loading="eager">
+        </div>
+        <!-- iframe wrapper (hidden until PLAY clicked) -->
+        <div class="play202-frame-wrapper hidden" id="gameFrameWrapper">
+          <div class="game-loading hidden" id="gameLoading">
+            <div class="spinner"></div>
+            <p>Loading game...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAY GAME BUTTON (yellow, like play202) -->
+      <div class="play202-cta-wrap" id="playCtaWrap">
+        <button class="play202-cta" id="playGameBtn" ontouchstart="">▶ PLAY GAME</button>
+      </div>
+
+      <!-- REWARDS CARD (links to fun5games.com - mobile games) -->
+      <div class="play202-rewards-card">
+        <p class="rewards-text">Looking for more games? Download top mobile games — free!</p>
+        <a class="rewards-btn" href="https://fun5games.com" target="_blank" rel="noopener">Let's Play 🔥 More Games</a>
+      </div>
+
+      <!-- AD SLOT (Taboola placeholder) -->
+      <div class="play202-ad-slot">
         <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
-      <!-- MAIN GAME LAYOUT -->
-      <div class="game-layout">
-        <div class="game-main">
-
-          <!-- GAME IFRAME -->
-          <div class="game-frame-container" id="gameFrameContainer">
-            <div class="game-frame-wrapper" id="gameFrameWrapper">
-              <div class="game-loading" id="gameLoading">
-                <div class="spinner"></div>
-                <p>Loading game...</p>
-              </div>
-            </div>
+      <!-- GAME META + CONTROLS -->
+      <div class="game-info-bar" style="margin-top:18px">
+        <div class="game-info-main">
+          <div class="game-meta">
+            <span class="stars" id="gameStars"></span>
+            <span class="cat-badge" id="gameBadge"></span>
           </div>
-
-          <!-- GAME INFO + CONTROLS -->
-          <div class="game-info-bar">
-            <div class="game-info-main">
-              <h1 id="gameTitle">Loading...</h1>
-              <div class="game-meta">
-                <span class="stars" id="gameStars"></span>
-                <span class="cat-badge" id="gameBadge"></span>
-              </div>
-            </div>
-            <div class="game-controls">
-              <button class="ctrl-btn ctrl-fs" id="fullscreenBtn">⛶ Fullscreen</button>
-              <button class="ctrl-btn ctrl-reload" id="reloadBtn">🔄 Reload</button>
-            </div>
-          </div>
-
-          <!-- HOW TO PLAY -->
-          <div class="how-to-play">
-            <h3>📖 How to Play</h3>
-            <p id="gameDescription">Loading...</p>
-            <div class="tag-row" id="gameTags"></div>
-          </div>
-
-          <!-- AD SLOT: Mid-page -->
-          <div class="ad-slot ad-mid">
-            <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
-          </div>
-
         </div>
-
-        <!-- SIDEBAR (shows on desktop) -->
-        <aside class="game-sidebar">
-          <div class="sidebar-card">
-            <h3>💡 Quick Tips</h3>
-            <p style="font-size:13px;color:var(--text-secondary);line-height:1.6" id="sidebarTips">Use keyboard shortcuts for faster play. Practice daily to build exam-level speed.</p>
-          </div>
-          <div class="ad-slot" style="padding:0">
-            <div class="ad-inner" style="min-height:250px"><span class="ad-text">Advertisement</span></div>
-          </div>
-        </aside>
+        <div class="game-controls">
+          <button class="ctrl-btn ctrl-fs" id="fullscreenBtn">⛶ Fullscreen</button>
+          <button class="ctrl-btn ctrl-reload" id="reloadBtn">🔄 Reload</button>
+        </div>
       </div>
 
-      <!-- MORE GAMES -->
-      <section class="more-games">
-        <h3>🎯 You May Also Like</h3>
-        <div class="game-grid" id="relatedGrid"></div>
+      <!-- HOW TO PLAY -->
+      <div class="how-to-play">
+        <h3>📖 How to Play</h3>
+        <p id="gameDescription">Loading...</p>
+        <div class="tag-row" id="gameTags"></div>
+      </div>
+
+      <!-- DOWNLOAD GAMES SECTION (fun5games.com mobile games) -->
+      <section class="download-section">
+        <div class="section-head">
+          <h2><span class="accent-bar"></span>📲 Download Top Mobile Games</h2>
+          <a class="more-link" href="https://fun5games.com" target="_blank" rel="noopener">View all →</a>
+        </div>
+        <p class="download-subtitle">Hand-picked Android &amp; iOS games — Action, Puzzle, Racing, Sports &amp; more</p>
+        <div class="download-grid" id="downloadGrid"></div>
+        <a class="download-cta" href="https://fun5games.com" target="_blank" rel="noopener">
+          🚀 Browse 200+ Mobile Games
+        </a>
       </section>
 
       <!-- BOTTOM AD -->
       <div class="ad-slot ad-bottom">
         <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
+
+      <!-- RELATED GAMES -->
+      <section class="more-games">
+        <h3>🎯 You May Also Like</h3>
+        <div class="game-grid" id="relatedGrid"></div>
+      </section>
 
     </div>
   </div>
