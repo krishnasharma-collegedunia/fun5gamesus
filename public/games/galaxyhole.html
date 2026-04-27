@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Galaxy Hole</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#02000a}
+body{display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif}
+canvas{display:block;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}
+.hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;pointer-events:none;z-index:10}
+.hb{background:rgba(10,0,30,.7);border:2px solid rgba(170,80,255,.55);border-radius:12px;padding:6px 12px;text-align:center;min-width:70px;backdrop-filter:blur(4px)}
+.hl{color:rgba(200,150,255,.9);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}
+.hv{color:#fff;font-size:24px;font-weight:bold;line-height:1.1;text-shadow:0 0 12px rgba(170,80,255,.8)}
+.meter{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:10;background:rgba(10,0,30,.7);border:2px solid rgba(170,80,255,.55);border-radius:12px;padding:6px 12px;min-width:130px;text-align:center;pointer-events:none}
+.mlbl{color:rgba(200,150,255,.9);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:bold}
+.mbar{height:8px;background:rgba(60,20,100,.6);border-radius:4px;margin-top:4px;overflow:hidden;position:relative}
+.mfill{height:100%;background:linear-gradient(90deg,#7b2cff,#ff4dd2);border-radius:4px;width:10%;transition:width .25s ease;box-shadow:0 0 8px rgba(255,77,210,.7)}
+.ob{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(40,0,80,.85),rgba(2,0,10,.97));z-index:19}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:20;padding:24px;text-align:center}
+.ov.hidden,.ob.hidden{display:none}
+.ov h1{font:900 clamp(44px,12vw,82px) Arial;color:#d8aaff;text-shadow:0 0 40px rgba(170,80,255,.85),4px 4px 0 #000;letter-spacing:3px;line-height:.95}
+.sub{color:rgba(200,150,255,.8);font:14px Arial;letter-spacing:3px}
+.fs{font:bold clamp(26px,7vw,42px) Arial;color:#ff4dd2;letter-spacing:2px;text-shadow:0 0 18px rgba(255,77,210,.7),2px 2px 0 #000}
+.bst{color:#fff;font:clamp(14px,3.5vw,18px) Arial;line-height:1.6}
+.bst b{color:#d8aaff}
+.btn{background:linear-gradient(180deg,#a85cff,#5a1fb0);color:#fff;border:2px solid rgba(255,255,255,.3);padding:15px 50px;font:900 clamp(17px,4.5vw,22px) Arial;border-radius:50px;letter-spacing:3px;box-shadow:0 6px 28px rgba(170,80,255,.55);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.hn{color:rgba(200,150,255,.5);font:12px Arial;letter-spacing:2px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+<div class="hb"><div class="hl">Score</div><div class="hv" id="sc">0</div></div>
+<div class="hb"><div class="hl">Time</div><div class="hv" id="tm">2:00</div></div>
+</div>
+<div class="meter"><div class="mlbl">Hole Size</div><div class="mbar"><div class="mfill" id="mf"></div></div></div>
+<div class="ob" id="ob1"></div>
+<div class="ov" id="ov1">
+  <h1>GALAXY<br>HOLE</h1>
+  <div class="sub">DRAG TO MOVE · CONSUME ALL</div>
+  <button class="btn" id="b1" ontouchstart="">PLAY</button>
+  <div class="hn">Devour the cosmos in 2:00</div>
+</div>
+<div class="ob hidden" id="ob2"></div>
+<div class="ov hidden" id="ov2">
+  <h1 style="color:#ff4dd2;text-shadow:0 0 40px rgba(255,77,210,.8),4px 4px 0 #000">TIME<br>UP</h1>
+  <div class="fs" id="fS">0</div>
+  <div class="bst" id="fB">Best: 0<br>Biggest devoured: -</div>
+  <button class="btn" id="b2" ontouchstart="">PLAY AGAIN</button>
+</div>
+<script>
+(function(){'use strict';
+var C=document.getElementById('c'),X=C.getContext('2d'),W,H;
+var scE=document.getElementById('sc'),tmE=document.getElementById('tm'),mfE=document.getElementById('mf');
+var fS=document.getElementById('fS'),fB=document.getElementById('fB');
+var ov1=document.getElementById('ov1'),ob1=document.getElementById('ob1');
+var ov2=document.getElementById('ov2'),ob2=document.getElementById('ob2');
+var b1=document.getElementById('b1'),b2=document.getElementById('b2');
+
+var hole,objects,particles,sparkles,stars,nebula;
+var score,timeLeft,run=false,last=0,best=0,biggest='-',biggestSize=0;
+var pointer={x:0,y:0,active:false};
+var spawnTimer=0,growPulse=0;
+var GAME_TIME=120;
+var TYPES=[
+  {name:'asteroid',shape:'circle',color:'#7d6a55',base:8,tier:'small'},
+  {name:'car',shape:'rect',color:'#ffcc44',base:10,tier:'small'},
+  {name:'satellite',shape:'tri',color:'#9adbff',base:14,tier:'small'},
+  {name:'tree',shape:'circle',color:'#3fcf6f',base:11,tier:'small'},
+  {name:'person',shape:'circle',color:'#ff8866',base:7,tier:'small'},
+  {name:'house',shape:'rect',color:'#c97a4f',base:18,tier:'medium'},
+  {name:'ship',shape:'tri',color:'#cccfff',base:20,tier:'medium'},
+  {name:'comet',shape:'circle',color:'#a3e9ff',base:16,tier:'medium'},
+  {name:'building',shape:'rect',color:'#7080a8',base:26,tier:'medium'},
+  {name:'skyscraper',shape:'rect',color:'#5566aa',base:38,tier:'large'},
+  {name:'planet',shape:'circle',color:'#e85d8a',base:44,tier:'large'},
+  {name:'station',shape:'tri',color:'#ffd24d',base:36,tier:'large'}
+];
+
+try{best=parseInt(localStorage.getItem('gh_best'))||0}catch(e){}
+
+function sz(){W=C.width=window.innerWidth;H=C.height=window.innerHeight}
+window.addEventListener('resize',function(){sz();if(stars)mkStars()});
+
+function rand(a,b){return a+Math.random()*(b-a)}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+
+function mkStars(){
+  stars=[];
+  for(var i=0;i<160;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.6+.3,p:Math.random()*Math.PI*2,v:rand(.4,1.6)});
+  nebula={t:0};
+}
+
+function mkObj(){
+  var t=pick(TYPES);
+  var size=t.base*rand(.85,1.25);
+  return {
+    x:rand(40,W-40),y:rand(40,H-40),
+    type:t.name,shape:t.shape,color:t.color,tier:t.tier,
+    size:size,r:size,
+    rot:Math.random()*Math.PI*2,vr:rand(-.02,.02),
+    vx:0,vy:0,
+    consumed:false,scale:1,fade:1,alive:true
+  };
+}
+
+function spawnObjects(n){
+  for(var i=0;i<n;i++){
+    var o=mkObj();
+    var tries=0;
+    while(tries<8&&Math.hypot(o.x-hole.x,o.y-hole.y)<hole.r+o.r+30){
+      o.x=rand(40,W-40);o.y=rand(40,H-40);tries++;
+    }
+    objects.push(o);
+  }
+}
+
+function rst(){
+  hole={x:W/2,y:H/2,tx:W/2,ty:H/2,r:18,glow:0,rot:0};
+  objects=[];particles=[];sparkles=[];
+  score=0;timeLeft=GAME_TIME;biggest='-';biggestSize=0;
+  spawnTimer=0;growPulse=0;
+  scE.textContent=0;tmE.textContent='2:00';mfE.style.width='10%';
+  mkStars();
+  spawnObjects(55);
+}
+
+function start(){sz();rst();hide(ov1);hide(ob1);hide(ov2);hide(ob2);run=true;last=performance.now();requestAnimationFrame(loop)}
+function hide(e){e.classList.add('hidden')}
+function show(e){e.classList.remove('hidden')}
+
+function gameOver(){
+  run=false;
+  if(score>best){best=score;try{localStorage.setItem('gh_best',best)}catch(e){}}
+  fS.textContent=score;
+  fB.innerHTML='Best: <b>'+best+'</b><br>Biggest devoured: <b>'+biggest+'</b>';
+  show(ov2);show(ob2);
+}
+
+function emitConsume(o){
+  for(var i=0;i<10;i++){
+    var a=Math.random()*Math.PI*2,sp=rand(1,4);
+    particles.push({x:o.x,y:o.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:30,max:30,col:o.color,r:rand(1.5,3.5)});
+  }
+}
+
+function emitSparkle(){
+  for(var i=0;i<8;i++){
+    var a=Math.random()*Math.PI*2,sp=rand(1,3);
+    sparkles.push({x:hole.x,y:hole.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:25,max:25});
+  }
+}
+
+function fmtTime(t){var m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+(s<10?'0':'')+s}
+
+function update(dt){
+  // hole movement: smooth easing toward pointer
+  if(pointer.active){
+    hole.tx=pointer.x;hole.ty=pointer.y;
+  }
+  hole.x+=(hole.tx-hole.x)*0.18;
+  hole.y+=(hole.ty-hole.y)*0.18;
+  // clamp to canvas
+  if(hole.x<hole.r)hole.x=hole.r;
+  if(hole.x>W-hole.r)hole.x=W-hole.r;
+  if(hole.y<hole.r)hole.y=hole.r;
+  if(hole.y>H-hole.r)hole.y=H-hole.r;
+  hole.rot+=0.04;
+  hole.glow=(hole.glow+0.06)%(Math.PI*2);
+  if(growPulse>0)growPulse-=dt*2;
+
+  timeLeft-=dt;
+  if(timeLeft<=0){timeLeft=0;tmE.textContent='0:00';gameOver();return}
+  tmE.textContent=fmtTime(timeLeft);
+
+  // periodic spawn
+  spawnTimer+=dt;
+  if(spawnTimer>3){spawnTimer=0;if(objects.filter(function(o){return o.alive}).length<70)spawnObjects(6)}
+
+  // stars twinkle
+  for(var i=0;i<stars.length;i++){stars[i].p+=dt*stars[i].v}
+  nebula.t+=dt*0.2;
+
+  // objects update + interaction
+  for(var i=objects.length-1;i>=0;i--){
+    var o=objects[i];
+    if(!o.alive){
+      o.scale-=0.07;o.fade-=0.07;o.rot+=0.25;
+      if(o.fade<=0)objects.splice(i,1);
+      continue;
+    }
+    o.rot+=o.vr;
+    var dx=hole.x-o.x,dy=hole.y-o.y,d=Math.hypot(dx,dy);
+    var pullR=hole.r*3.2;
+    if(d<pullR&&d>0.1){
+      var pullStrength=(1-d/pullR);
+      // only consume if hole is bigger
+      if(o.size<=hole.r*0.95){
+        // suck toward hole
+        var pull=pullStrength*pullStrength*4;
+        o.x+=dx/d*pull;
+        o.y+=dy/d*pull;
+        if(d<hole.r+o.r*0.4){
+          // CONSUMED
+          o.alive=false;
+          var pts=Math.round(o.size);
+          score+=pts;
+          scE.textContent=score;
+          var grow=o.size*0.05;
+          hole.r+=grow;
+          if(hole.r>140)hole.r=140;
+          growPulse=1;
+          if(o.size>biggestSize){biggestSize=o.size;biggest=o.type}
+          mfE.style.width=Math.min(100,(hole.r/140)*100)+'%';
+          emitConsume(o);
+          emitSparkle();
+        }
+      } else {
+        // too big — show red highlight via flag
+        o.tooBig=8;
+        if(d<hole.r+o.r){
+          // gentle bounce
+          var push=(hole.r+o.r-d)*0.4;
+          o.x-=dx/d*push;o.y-=dy/d*push;
+        }
+      }
+    }
+    if(o.tooBig)o.tooBig--;
+  }
+
+  // particles
+  for(var j=particles.length-1;j>=0;j--){
+    var p=particles[j];
+    p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;p.life--;
+    if(p.life<=0)particles.splice(j,1);
+  }
+  for(var k=sparkles.length-1;k>=0;k--){
+    var s=sparkles[k];
+    s.x+=s.vx;s.y+=s.vy;s.vx*=0.9;s.vy*=0.9;s.life--;
+    if(s.life<=0)sparkles.splice(k,1);
+  }
+}
+
+function drawBg(){
+  // nebula gradient (shifts subtly)
+  var t=nebula.t;
+  var c1='hsl('+((280+Math.sin(t)*30)%360)+',60%,8%)';
+  var c2='hsl('+((220+Math.cos(t*.7)*30)%360)+',55%,5%)';
+  var g=X.createRadialGradient(W*.3,H*.4,0,W/2,H/2,Math.max(W,H));
+  g.addColorStop(0,c1);g.addColorStop(1,c2);
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+  // second nebula glow
+  var g2=X.createRadialGradient(W*.7,H*.7,0,W*.7,H*.7,W*.6);
+  g2.addColorStop(0,'rgba(255,77,210,.07)');g2.addColorStop(1,'rgba(0,0,0,0)');
+  X.fillStyle=g2;X.fillRect(0,0,W,H);
+  // stars
+  for(var i=0;i<stars.length;i++){
+    var s=stars[i],tw=0.5+0.5*Math.sin(s.p);
+    X.globalAlpha=tw*0.9+0.1;
+    X.fillStyle='#fff';
+    X.beginPath();X.arc(s.x,s.y,s.s,0,Math.PI*2);X.fill();
+  }
+  X.globalAlpha=1;
+}
+
+function drawObject(o){
+  X.save();
+  X.translate(o.x,o.y);
+  X.rotate(o.rot);
+  X.scale(o.scale,o.scale);
+  X.globalAlpha=o.fade;
+  if(o.tooBig){
+    X.shadowBlur=18;X.shadowColor='#ff2d4d';
+    X.strokeStyle='#ff2d4d';X.lineWidth=3;
+  } else {
+    X.shadowBlur=8;X.shadowColor=o.color;
+    X.strokeStyle='rgba(255,255,255,.3)';X.lineWidth=1.2;
+  }
+  X.fillStyle=o.color;
+  if(o.shape==='circle'){
+    X.beginPath();X.arc(0,0,o.r,0,Math.PI*2);X.fill();X.stroke();
+    // detail
+    X.globalAlpha=o.fade*0.4;
+    X.fillStyle='#fff';
+    X.beginPath();X.arc(-o.r*.3,-o.r*.3,o.r*.3,0,Math.PI*2);X.fill();
+  } else if(o.shape==='rect'){
+    X.fillRect(-o.r,-o.r,o.r*2,o.r*2);X.strokeRect(-o.r,-o.r,o.r*2,o.r*2);
+    X.globalAlpha=o.fade*0.3;
+    X.fillStyle='#fff';
+    // window-like dots
+    for(var i=-1;i<=1;i++)for(var j=-1;j<=1;j++){
+      X.fillRect(i*o.r*.4-1.5,j*o.r*.4-1.5,3,3);
+    }
+  } else { // triangle
+    X.beginPath();
+    X.moveTo(0,-o.r);X.lineTo(o.r,o.r*.8);X.lineTo(-o.r,o.r*.8);X.closePath();
+    X.fill();X.stroke();
+  }
+  X.restore();
+  X.globalAlpha=1;X.shadowBlur=0;
+}
+
+function drawHole(){
+  var pulse=1+Math.sin(hole.glow)*0.06+(growPulse>0?growPulse*0.2:0);
+  var R=hole.r*pulse;
+  // outer distortion glow
+  var og=X.createRadialGradient(hole.x,hole.y,R*0.7,hole.x,hole.y,R*2.4);
+  og.addColorStop(0,'rgba(170,80,255,.45)');
+  og.addColorStop(0.5,'rgba(80,30,150,.18)');
+  og.addColorStop(1,'rgba(0,0,0,0)');
+  X.fillStyle=og;X.beginPath();X.arc(hole.x,hole.y,R*2.4,0,Math.PI*2);X.fill();
+  // accretion swirl
+  X.save();
+  X.translate(hole.x,hole.y);
+  for(var i=0;i<3;i++){
+    X.rotate(hole.rot*(i+1)*.7);
+    var sg=X.createRadialGradient(0,0,R*.3,0,0,R*1.05);
+    var hue=270+i*20;
+    sg.addColorStop(0,'rgba(0,0,0,1)');
+    sg.addColorStop(0.55,'hsla('+hue+',90%,55%,.6)');
+    sg.addColorStop(0.85,'hsla('+(hue+30)+',95%,65%,.35)');
+    sg.addColorStop(1,'rgba(0,0,0,0)');
+    X.fillStyle=sg;
+    X.beginPath();X.ellipse(0,0,R*1.05,R*.95,0,0,Math.PI*2);X.fill();
+  }
+  X.restore();
+  // event horizon (deep black)
+  X.fillStyle='#000';
+  X.beginPath();X.arc(hole.x,hole.y,R*0.85,0,Math.PI*2);X.fill();
+  // edge ring
+  X.strokeStyle='rgba(220,170,255,'+(0.5+0.4*Math.sin(hole.glow))+')';
+  X.lineWidth=2.4;
+  X.beginPath();X.arc(hole.x,hole.y,R*0.88,0,Math.PI*2);X.stroke();
+  // inner highlight crescent
+  X.save();
+  X.translate(hole.x,hole.y);X.rotate(hole.rot);
+  X.strokeStyle='rgba(255,255,255,.35)';X.lineWidth=1.4;
+  X.beginPath();X.arc(0,0,R*0.78,-0.5,1.2);X.stroke();
+  X.restore();
+}
+
+function drawParticles(){
+  for(var i=0;i<particles.length;i++){
+    var p=particles[i],a=p.life/p.max;
+    X.globalAlpha=a;
+    X.fillStyle=p.col;
+    X.beginPath();X.arc(p.x,p.y,p.r,0,Math.PI*2);X.fill();
+  }
+  for(var j=0;j<sparkles.length;j++){
+    var s=sparkles[j],a=s.life/s.max;
+    X.globalAlpha=a;
+    X.fillStyle='#fff';
+    X.shadowBlur=8;X.shadowColor='#d8aaff';
+    X.beginPath();X.arc(s.x,s.y,2,0,Math.PI*2);X.fill();
+  }
+  X.globalAlpha=1;X.shadowBlur=0;
+}
+
+function draw(){
+  drawBg();
+  // draw objects (alive first, then dying on top)
+  for(var i=0;i<objects.length;i++)if(objects[i].alive)drawObject(objects[i]);
+  for(var k=0;k<objects.length;k++)if(!objects[k].alive)drawObject(objects[k]);
+  drawHole();
+  drawParticles();
+}
+
+function loop(t){
+  if(!run)return;
+  var dt=Math.min(0.05,(t-last)/1000);last=t;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// pointer handling
+function getXY(e){
+  if(e.touches&&e.touches[0])return {x:e.touches[0].clientX,y:e.touches[0].clientY};
+  return {x:e.clientX,y:e.clientY};
+}
+function pDown(e){e.preventDefault();var p=getXY(e);pointer.x=p.x;pointer.y=p.y;pointer.active=true}
+function pMove(e){if(!pointer.active)return;e.preventDefault();var p=getXY(e);pointer.x=p.x;pointer.y=p.y}
+function pUp(e){pointer.active=false}
+C.addEventListener('mousedown',pDown);
+C.addEventListener('mousemove',pMove);
+window.addEventListener('mouseup',pUp);
+C.addEventListener('touchstart',pDown,{passive:false});
+C.addEventListener('touchmove',pMove,{passive:false});
+window.addEventListener('touchend',pUp);
+window.addEventListener('touchcancel',pUp);
+
+b1.addEventListener('click',start);
+b2.addEventListener('click',start);
+
+sz();mkStars();
+// idle backdrop on title
+(function idle(){
+  if(run)return;
+  X.fillStyle='#02000a';X.fillRect(0,0,W,H);
+  if(!nebula)nebula={t:0};
+  nebula.t+=0.01;
+  drawBg();
+  requestAnimationFrame(idle);
+})();
+})();
+</script>
+</body>
+</html>
