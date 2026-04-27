@@ -1,6 +1,5 @@
 /* ========================================
    Fun5Games - Homepage Script
-   Clean play202 design | Ad ready
    ======================================== */
 
 (function () {
@@ -10,12 +9,21 @@
   var filteredGames = [];
   var currentCat = 'all';
 
+  var CAT_LABELS = {
+    'all':    'All Games',
+    'action': 'Action Games',
+    'casual': 'Casual Games',
+    'arcade': 'Arcade Games',
+    'brain':  'Brain Games'
+  };
+
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
     await loadGames();
     renderGames();
     setupFilters();
+    updateSectionHeading('all');
     console.log('[Fun5Games] Loaded ' + allGames.length + ' games.');
   }
 
@@ -35,21 +43,23 @@
   function renderGames() {
     var grid = document.getElementById('gameGrid');
     if (!grid) return;
-    grid.innerHTML = filteredGames.map(function (game) {
-      return createCard(game);
+    grid.innerHTML = filteredGames.map(function (game, idx) {
+      return createCard(game, idx);
     }).join('');
   }
 
-  function createCard(game) {
+  function createCard(game, idx) {
+    // First 8 cards eager-load (visible on first scroll)
+    var loadingAttr = idx < 8 ? 'eager' : 'lazy';
     return '<div class="game-card" data-cat="' + game.category + '">' +
       '<div class="game-card-thumb">' +
-        '<img src="' + game.thumbnail + '" alt="' + esc(game.title) + '" loading="lazy" decoding="async" ' +
+        '<img src="' + game.thumbnail + '" alt="' + esc(game.title) + '" loading="' + loadingAttr + '" decoding="async" ' +
         'onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'thumb-placeholder\',innerHTML:\'🎮\'}))">' +
       '</div>' +
       '<div class="game-card-body">' +
         '<div class="game-card-title">' + esc(game.title) + '</div>' +
         '<a href="game.html?slug=' + game.slug + '">' +
-          '<button class="play-button">Play Game</button>' +
+          '<button class="play-button">▶ Play Game</button>' +
         '</a>' +
       '</div>' +
     '</div>';
@@ -64,8 +74,21 @@
           b.classList.toggle('active', b.dataset.cat === currentCat);
         });
         applyFilter();
+        updateSectionHeading(currentCat);
       });
     });
+  }
+
+  function updateSectionHeading(cat) {
+    var headEl = document.querySelector('.section-head h2');
+    var badge = document.querySelector('.section-head .badge-hot');
+    if (headEl) {
+      var label = CAT_LABELS[cat] || 'Games';
+      headEl.innerHTML = '<span class="accent-bar"></span>' + label;
+    }
+    if (badge) {
+      badge.style.display = cat === 'all' ? '' : 'none';
+    }
   }
 
   function applyFilter() {

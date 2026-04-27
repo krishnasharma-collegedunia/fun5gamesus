@@ -175,11 +175,14 @@ body::before { display: none; }
 }
 
 .ad-text {
-  color: var(--text-4);
-  font-size: 11px;
+  color: var(--primary);
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
+  opacity: 0.4;
+  position: relative;
+  z-index: 1;
 }
 
 .ad-mid .ad-inner { min-height: 130px; }
@@ -711,10 +714,10 @@ body::before { display: none; }
 }
 
 .play202-ad-slot .ad-inner {
-  background: #fafafa;
-  border: 1px dashed var(--border-2);
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  min-height: 100px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -777,8 +780,11 @@ body::before { display: none; }
 }
 
 .download-icon {
-  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
 .download-info {

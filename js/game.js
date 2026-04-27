@@ -11,16 +11,20 @@
   var currentGame = null;
   var iframeLoaded = false;
 
-  // Mobile game catalog (links to fun5games.com)
+  // Mobile game catalog (top 12 famous, links to fun5games.com)
   var DOWNLOAD_GAMES = [
-    { name: 'Subway Surfers', icon: '🏃‍♂️', cat: 'Endless Runner' },
-    { name: 'Candy Crush Saga', icon: '🍬', cat: 'Match-3' },
-    { name: 'Free Fire', icon: '🔫', cat: 'Battle Royale' },
-    { name: 'PUBG Mobile', icon: '🎯', cat: 'Shooter' },
-    { name: 'Clash of Clans', icon: '⚔️', cat: 'Strategy' },
-    { name: 'Among Us', icon: '👨‍🚀', cat: 'Party' },
-    { name: 'Minecraft', icon: '⛏️', cat: 'Sandbox' },
-    { name: 'Roblox', icon: '🎮', cat: 'Platform' }
+    { name: 'Subway Surfers',  cat: 'Endless Runner', icon: 'assets/mobile-icons/subwaysurfers.svg' },
+    { name: 'Candy Crush Saga',cat: 'Match-3',        icon: 'assets/mobile-icons/candycrush.svg' },
+    { name: 'Free Fire',       cat: 'Battle Royale',  icon: 'assets/mobile-icons/freefire.svg' },
+    { name: 'PUBG Mobile',     cat: 'Shooter',        icon: 'assets/mobile-icons/pubgmobile.svg' },
+    { name: 'Clash of Clans',  cat: 'Strategy',       icon: 'assets/mobile-icons/clashofclans.svg' },
+    { name: 'Among Us',        cat: 'Party',          icon: 'assets/mobile-icons/amongus.svg' },
+    { name: 'Minecraft',       cat: 'Sandbox',        icon: 'assets/mobile-icons/minecraft.svg' },
+    { name: 'Roblox',          cat: 'Platform',       icon: 'assets/mobile-icons/roblox.svg' },
+    { name: 'Temple Run',      cat: 'Endless Runner', icon: 'assets/mobile-icons/templerun.svg' },
+    { name: 'Angry Birds',     cat: 'Puzzle',         icon: 'assets/mobile-icons/angrybirds.svg' },
+    { name: 'Pokémon GO',      cat: 'Adventure',      icon: 'assets/mobile-icons/pokemongo.svg' },
+    { name: 'Brawl Stars',     cat: 'Action',         icon: 'assets/mobile-icons/brawlstars.svg' }
   ];
 
   document.addEventListener('DOMContentLoaded', init);
@@ -257,7 +261,7 @@
     if (!grid) return;
     grid.innerHTML = DOWNLOAD_GAMES.map(function (g) {
       return '<a class="download-card" href="https://fun5games.com" target="_blank" rel="noopener">' +
-        '<div class="download-icon">' + g.icon + '</div>' +
+        '<img class="download-icon" src="' + g.icon + '" alt="' + esc(g.name) + '" loading="lazy">' +
         '<div class="download-info">' +
           '<div class="download-name">' + esc(g.name) + '</div>' +
           '<div class="download-cat">' + esc(g.cat) + '</div>' +
