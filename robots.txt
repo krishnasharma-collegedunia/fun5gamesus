@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /data/
+Disallow: /assets/mobile-icons/
+
+Sitemap: https://fun5games.us/sitemap.xml
