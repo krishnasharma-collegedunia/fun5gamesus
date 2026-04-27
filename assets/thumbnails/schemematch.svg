@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#fef7e0"/>
+<g font-family="Arial, sans-serif" text-anchor="middle">
+<text x="200" y="35" font-size="13" font-weight="700" fill="#7c2d12" letter-spacing="2">🇮🇳 MATCH SCHEMES TO DESCRIPTIONS</text>
+<rect x="30" y="55" width="80" height="60" rx="6" fill="#f97316"/>
+<text x="70" y="80" font-size="13" font-weight="900" fill="#fff">PMJDY</text>
+<text x="70" y="98" font-size="9" fill="#fff">2014</text>
+<text x="70" y="108" font-size="8" fill="#fff" opacity="0.9">BANKING</text>
+<rect x="115" y="55" width="80" height="60" rx="6" fill="#22c55e"/>
+<text x="155" y="80" font-size="13" font-weight="900" fill="#fff">MGNREGA</text>
+<text x="155" y="98" font-size="9" fill="#fff">2005</text>
+<text x="155" y="108" font-size="8" fill="#fff" opacity="0.9">RURAL</text>
+<rect x="200" y="55" width="80" height="60" rx="6" fill="#3b82f6"/>
+<text x="240" y="80" font-size="13" font-weight="900" fill="#fff">PMAY-U</text>
+<text x="240" y="98" font-size="9" fill="#fff">2015</text>
+<text x="240" y="108" font-size="8" fill="#fff" opacity="0.9">URBAN</text>
+<rect x="285" y="55" width="80" height="60" rx="6" fill="#dc2626"/>
+<text x="325" y="80" font-size="11" font-weight="900" fill="#fff">AYUSHMAN</text>
+<text x="325" y="98" font-size="9" fill="#fff">2018</text>
+<text x="325" y="108" font-size="8" fill="#fff" opacity="0.9">HEALTH</text>
+<rect x="30" y="125" width="80" height="60" rx="6" fill="rgba(102,102,102,0.3)" stroke="#999" stroke-width="1"/>
+<circle cx="70" cy="155" r="20" fill="none" stroke="#999" stroke-width="2"/>
+<text x="70" y="161" font-size="20" font-weight="900" fill="#999">?</text>
+<rect x="115" y="125" width="80" height="60" rx="6" fill="rgba(102,102,102,0.3)" stroke="#999" stroke-width="1"/>
+<text x="155" y="148" font-size="9" font-weight="700" fill="#444">100 days</text>
+<text x="155" y="162" font-size="9" fill="#444">guaranteed wage</text>
+<text x="155" y="174" font-size="9" fill="#444">employment</text>
+<rect x="200" y="125" width="80" height="60" rx="6" fill="rgba(102,102,102,0.3)" stroke="#999" stroke-width="1"/>
+<circle cx="240" cy="155" r="20" fill="none" stroke="#999" stroke-width="2"/>
+<text x="240" y="161" font-size="20" font-weight="900" fill="#999">?</text>
+<rect x="285" y="125" width="80" height="60" rx="6" fill="rgba(102,102,102,0.3)" stroke="#999" stroke-width="1"/>
+<text x="325" y="148" font-size="9" font-weight="700" fill="#444">Health insurance</text>
+<text x="325" y="162" font-size="9" fill="#444">Rs 5 lakh per</text>
+<text x="325" y="174" font-size="9" fill="#444">family</text>
+<line x1="155" y1="115" x2="155" y2="125" stroke="#22c55e" stroke-width="2" stroke-dasharray="3,2"/>
+<line x1="325" y1="115" x2="325" y2="125" stroke="#22c55e" stroke-width="2" stroke-dasharray="3,2"/>
+<text x="200" y="215" font-size="11" font-weight="700" fill="#7c2d12">⏱ Time: 0:42  ✦ Mistakes: 1</text>
+<text x="200" y="240" font-size="10" fill="#92400e">Tap pairs to flip and match</text>
+<text x="200" y="290" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#7c2d12">SCHEME MATCH</text>
+</g>
+</svg>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#fdf6e3">
+<title>Constitution Quest</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#fdf6e3;color:#2d1a0a;position:relative;height:100vh;height:100dvh}
+#app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;max-width:560px;margin:0 auto}
+.hidden{display:none !important}
+
+/* Indian flag bar */
+.flagbar{height:5px;display:flex;flex-shrink:0}
+.flagbar .saff{flex:1;background:#ff9933}
+.flagbar .wht{flex:1;background:#fff;position:relative}
+.flagbar .wht::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:3px;border-radius:50%;background:#000080}
+.flagbar .grn{flex:1;background:#138808}
+
+/* Parchment texture overlay */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at top,rgba(255,180,80,.06),transparent 60%),radial-gradient(ellipse at bottom,rgba(19,136,8,.05),transparent 60%);z-index:0}
+
+/* ====== START SCREEN ====== */
+#start{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 16px 18px;overflow-y:auto;background:linear-gradient(180deg,#fdf6e3 0%,#f5e9c8 100%);z-index:1}
+#start::-webkit-scrollbar{width:0}
+.brand-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px}
+.ashoka{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#fff 0%,#fff 60%,#000080 60%,#000080 100%);position:relative;box-shadow:0 2px 8px rgba(0,0,80,.25);flex-shrink:0}
+.ashoka::before,.ashoka::after{content:"";position:absolute;left:50%;top:50%;width:2px;height:80%;background:#000080;transform:translate(-50%,-50%)}
+.ashoka::after{transform:translate(-50%,-50%) rotate(90deg)}
+.title-h1{font-family:Georgia,"Times New Roman",serif;font-size:30px;text-align:center;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff9933 0%,#1a1a1a 50%,#138808 100%);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.tag{text-align:center;color:#5a3e15;font-size:12px;margin-top:8px;font-weight:600;letter-spacing:.5px;font-style:italic}
+.ad-slot{border:1px dashed #b8995a;background:rgba(255,255,255,.4);color:#8a6a30;font-size:10px;letter-spacing:2px;padding:10px;text-align:center;margin:14px 0 6px;border-radius:6px;text-transform:uppercase}
+.sec-title{font-size:11px;letter-spacing:2.5px;color:#7a5a2a;font-weight:800;margin:14px 0 8px;text-align:center;text-transform:uppercase}
+
+.diff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.diff-card{background:#fff;border:3px solid #e8d4a0;border-radius:12px;padding:12px 6px 10px;text-align:center;cursor:pointer;transition:transform .12s,border-color .15s,background .15s,box-shadow .15s;display:flex;flex-direction:column;gap:4px;min-height:96px;justify-content:center}
+.diff-card.selected{border-color:#ff9933;background:#fff5e1;transform:scale(1.03);box-shadow:0 6px 18px rgba(255,153,51,.3)}
+.diff-card:active{transform:scale(.97)}
+.diff-icon{font-size:22px;line-height:1}
+.diff-name{font-weight:900;font-size:13px;color:#2d1a0a;letter-spacing:1px}
+.diff-meta{font-size:10px;color:#7a5a2a;font-weight:700}
+
+.play-btn{width:100%;background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);color:#fff;border:none;padding:16px;font-size:20px;font-weight:900;letter-spacing:3px;border-radius:12px;cursor:pointer;margin-top:16px;box-shadow:0 4px 0 #c06a10,0 6px 14px rgba(255,120,20,.3);transition:transform .08s,box-shadow .08s;font-family:inherit}
+.play-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #c06a10}
+
+.best-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.best-cell{background:#fff;border:2px solid #e8d4a0;border-radius:8px;padding:8px 4px;text-align:center}
+.best-lbl{font-size:9px;color:#7a5a2a;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.best-val{font-size:18px;color:#ff7711;font-weight:900;margin-top:2px;line-height:1;font-family:Georgia,serif}
+
+.howto{background:#fff;border:2px solid #e8d4a0;border-radius:10px;margin-top:12px;overflow:hidden}
+.howto-head{padding:11px 14px;font-weight:800;font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#fff8e5;color:#5a3e15;letter-spacing:1.5px;text-transform:uppercase}
+.howto-body{padding:10px 16px 14px;font-size:12px;line-height:1.7;color:#4a2f10;border-top:1px solid #e8d4a0;display:none}
+.howto.open .howto-body{display:block}
+.howto-body ul{padding-left:14px;list-style:none}
+.howto-body li{margin-bottom:5px;position:relative;padding-left:14px}
+.howto-body li::before{content:"•";color:#ff9933;font-weight:900;position:absolute;left:0}
+.howto .arr{transition:transform .2s;color:#ff9933}
+.howto.open .arr{transform:rotate(180deg)}
+
+.foot-line{text-align:center;font-size:10px;color:#8a6a30;margin-top:14px;letter-spacing:1px;font-style:italic}
+
+/* ====== GAME SCREEN ====== */
+#game{position:absolute;inset:0;display:flex;flex-direction:column;background:#fdf6e3;z-index:1}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fff;border-bottom:2px solid #e8d4a0;flex-shrink:0;gap:6px}
+.hud-cell{display:flex;flex-direction:column;align-items:center;min-width:50px}
+.hud-lbl{font-size:8px;color:#7a5a2a;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.hud-val{font-size:17px;font-weight:900;color:#2d1a0a;line-height:1;font-family:Georgia,serif}
+.hud-val.streak{color:#ff7711}
+.back-btn{background:#fff;border:1.5px solid #c9ad74;color:#5a3e15;font-size:11px;font-weight:700;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+.back-btn:active{background:#e8d4a0}
+
+.progress-bar{height:5px;background:#e8d4a0;position:relative;overflow:hidden;flex-shrink:0}
+.progress-fill{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#ff9933 0%,#138808 100%);width:0;transition:width .35s ease}
+
+.banner{padding:9px 14px;text-align:center;font-size:13px;font-weight:700;min-height:42px;flex-shrink:0;display:flex;justify-content:center;align-items:center;line-height:1.3;transition:background .25s,color .25s;border-bottom:1px solid #e8d4a0;background:rgba(255,255,255,.6);color:#5a3e15}
+.banner.ok{background:#c8e6c9;color:#1b5e20}
+.banner.bad{background:#ffcdd2;color:#b71c1c}
+
+/* PLAY AREA */
+.stage{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;padding:10px 12px 8px}
+
+/* Article card area */
+.card-area{flex:0 0 auto;position:relative;height:170px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.article-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:88%;max-width:340px;background:linear-gradient(180deg,#fffaf0 0%,#fff5dc 100%);border:2px solid #b8995a;border-radius:12px;padding:14px 16px 16px;box-shadow:0 6px 22px rgba(120,80,20,.22),0 0 0 1px rgba(255,255,255,.6) inset;cursor:grab;touch-action:none;transition:box-shadow .15s;will-change:transform;z-index:5}
+.article-card.dragging{cursor:grabbing;box-shadow:0 14px 38px rgba(120,60,10,.4),0 0 0 1px rgba(255,255,255,.6) inset;transition:none;z-index:20}
+.article-card.snap-back{transition:transform .35s cubic-bezier(.4,1.6,.6,1)}
+.article-card.flash-ok{animation:flashOk .55s ease}
+.article-card.flash-bad{animation:shakeBad .45s ease}
+.card-num{font-family:Georgia,"Times New Roman",serif;font-size:13px;color:#a06014;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.card-num::before{content:"";width:8px;height:8px;background:#ff9933;border-radius:50%;display:inline-block}
+.card-title{font-family:Georgia,"Times New Roman",serif;font-size:18px;color:#2d1a0a;font-weight:900;line-height:1.2;margin-top:5px}
+.card-desc{font-size:12px;color:#5a3e15;line-height:1.45;margin-top:7px;font-style:italic}
+.card-handle{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:9px;color:#a07a3a;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;opacity:.7}
+
+@keyframes flashOk{0%{background:linear-gradient(180deg,#a5e8a8 0%,#7fd483 100%);border-color:#2e7d32}100%{background:linear-gradient(180deg,#fffaf0 0%,#fff5dc 100%);border-color:#b8995a}}
+@keyframes shakeBad{0%,100%{transform:translate(-50%,-50%) rotate(0)}15%{transform:translate(-58%,-50%) rotate(-3deg)}30%{transform:translate(-42%,-50%) rotate(3deg)}45%{transform:translate(-58%,-50%) rotate(-2deg)}60%{transform:translate(-44%,-50%) rotate(2deg)}80%{transform:translate(-50%,-50%) rotate(0)}}
+
+/* The check mark / cross overlay */
+.mark-overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);font-size:80px;font-weight:900;pointer-events:none;z-index:25;text-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .3s cubic-bezier(.4,1.8,.6,1),opacity .25s}
+.mark-overlay.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+.mark-overlay.fade{opacity:0;transform:translate(-50%,-50%) scale(1.6)}
+.mark-overlay.ok{color:#22c55e}
+.mark-overlay.bad{color:#ef4444}
+
+/* Drop zones header */
+.zones-head{font-size:10px;letter-spacing:2.5px;color:#7a5a2a;font-weight:800;text-align:center;margin:6px 0 6px;text-transform:uppercase}
+
+.zones{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;padding-bottom:8px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.zones::-webkit-scrollbar{width:4px}
+.zones::-webkit-scrollbar-thumb{background:#c9ad74;border-radius:2px}
+.zone{background:#fff;border:2px solid #c9ad74;border-radius:10px;padding:10px 8px 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:62px;position:relative;transition:transform .12s,box-shadow .15s,border-color .15s;cursor:pointer}
+.zone .znum{font-family:Georgia,serif;font-size:11px;font-weight:900;letter-spacing:1.5px;line-height:1}
+.zone .zname{font-size:11px;font-weight:700;line-height:1.2;margin-top:3px}
+.zone::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:8px 0 0 8px;background:var(--zc,#ccc)}
+
+.zone[data-part="Part III"]{--zc:#3b82f6}
+.zone[data-part="Part IV"]{--zc:#f97316}
+.zone[data-part="Part V"]{--zc:#16a34a}
+.zone[data-part="Part VI"]{--zc:#a855f7}
+.zone[data-part="Part IX"]{--zc:#0d9488}
+.zone[data-part="Part XI"]{--zc:#dc2626}
+.zone[data-part="Part XV"]{--zc:#0284c7}
+.zone[data-part="Part XVII"]{--zc:#ca8a04}
+.zone[data-part="Part XVIII"]{--zc:#7c3aed}
+
+.zone[data-part="Part III"] .znum{color:#3b82f6}
+.zone[data-part="Part IV"] .znum{color:#f97316}
+.zone[data-part="Part V"] .znum{color:#16a34a}
+.zone[data-part="Part VI"] .znum{color:#a855f7}
+.zone[data-part="Part IX"] .znum{color:#0d9488}
+.zone[data-part="Part XI"] .znum{color:#dc2626}
+.zone[data-part="Part XV"] .znum{color:#0284c7}
+.zone[data-part="Part XVII"] .znum{color:#ca8a04}
+.zone[data-part="Part XVIII"] .znum{color:#7c3aed}
+
+.zone.hover{transform:scale(1.05);border-color:var(--zc);box-shadow:0 6px 18px rgba(0,0,0,.18),0 0 0 3px var(--zc) inset}
+.zone.flash-correct{animation:zoneOk .8s ease}
+.zone.flash-show{animation:zoneShow 1s ease}
+@keyframes zoneOk{0%{background:#fff;transform:scale(1)}30%{background:#a5e8a8;transform:scale(1.08)}100%{background:#fff;transform:scale(1)}}
+@keyframes zoneShow{0%,100%{box-shadow:0 0 0 0 var(--zc) inset}40%,70%{box-shadow:0 0 0 3px var(--zc) inset,0 0 18px var(--zc)}}
+
+/* Streak fly-up */
+.streak-pop{position:absolute;left:50%;top:14%;transform:translate(-50%,0) scale(.6);opacity:0;pointer-events:none;z-index:30;font-weight:900;font-size:18px;color:#ff7711;text-shadow:0 2px 8px rgba(255,120,20,.4);transition:transform .5s cubic-bezier(.3,1.5,.6,1),opacity .5s}
+.streak-pop.show{transform:translate(-50%,-30px) scale(1);opacity:1}
+
+/* Score change */
+.score-pop{position:absolute;right:16px;top:46px;font-weight:900;font-size:16px;pointer-events:none;z-index:30;opacity:0;transform:translateY(0);transition:transform .55s ease,opacity .55s}
+.score-pop.ok{color:#16a34a}
+.score-pop.bad{color:#dc2626}
+.score-pop.show{opacity:1;transform:translateY(-30px)}
+
+/* ====== END SCREEN ====== */
+#end{position:absolute;inset:0;display:flex;flex-direction:column;padding:18px 16px;overflow-y:auto;background:linear-gradient(180deg,#fdf6e3 0%,#f5e9c8 100%);z-index:1}
+.end-title{font-family:Georgia,serif;font-size:30px;text-align:center;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff9933 0%,#138808 100%);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1;margin-top:8px}
+.end-tag{text-align:center;font-size:12px;color:#7a5a2a;letter-spacing:1px;margin-top:6px;font-style:italic}
+.end-score-box{margin:18px auto 4px;text-align:center}
+.end-score-val{font-family:Georgia,serif;font-size:62px;font-weight:900;color:#ff7711;line-height:1;text-shadow:0 4px 14px rgba(255,120,20,.25)}
+.end-score-lbl{font-size:11px;letter-spacing:3px;color:#7a5a2a;font-weight:800;margin-top:4px;text-transform:uppercase}
+.end-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.end-stat{background:#fff;border:2px solid #e8d4a0;border-radius:10px;padding:10px 6px;text-align:center}
+.es-v{font-family:Georgia,serif;font-size:22px;font-weight:900;color:#2d1a0a;line-height:1}
+.es-l{font-size:9px;letter-spacing:1.5px;color:#7a5a2a;font-weight:800;margin-top:4px;text-transform:uppercase}
+
+.recap-title{font-size:11px;letter-spacing:2.5px;color:#7a5a2a;font-weight:800;margin:18px 0 8px;text-transform:uppercase;text-align:center}
+.recap-list{background:#fff;border:2px solid #e8d4a0;border-radius:10px;padding:6px;max-height:34vh;overflow-y:auto}
+.recap-list::-webkit-scrollbar{width:4px}
+.recap-list::-webkit-scrollbar-thumb{background:#c9ad74;border-radius:2px}
+.recap-row{display:flex;align-items:center;padding:7px 8px;border-bottom:1px solid #f3e6c0;gap:8px}
+.recap-row:last-child{border-bottom:none}
+.recap-mark{flex-shrink:0;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff}
+.recap-mark.ok{background:#22c55e}
+.recap-mark.bad{background:#ef4444}
+.recap-art{flex-shrink:0;font-family:Georgia,serif;font-size:12px;font-weight:900;color:#a06014;min-width:54px}
+.recap-part{flex:1;font-size:11px;color:#4a2f10;font-weight:600;line-height:1.25}
+
+.end-best{text-align:center;font-size:12px;color:#7a5a2a;margin-top:14px;letter-spacing:1px;font-weight:600}
+.end-best .nb{color:#ff7711;font-weight:900}
+
+.end-btns{display:flex;gap:8px;margin-top:14px}
+.end-btn{flex:1;padding:13px 8px;font-family:inherit;font-size:13px;font-weight:900;letter-spacing:2px;border-radius:24px;cursor:pointer;border:2px solid;text-transform:uppercase;transition:transform .08s}
+.end-btn.primary{background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);color:#fff;border-color:rgba(255,255,255,.4);box-shadow:0 4px 0 #c06a10}
+.end-btn.primary:active{transform:translateY(2px);box-shadow:0 2px 0 #c06a10}
+.end-btn.alt{background:#fff;color:#5a3e15;border-color:#c9ad74}
+.end-btn.alt:active{background:#f5e9c8;transform:translateY(1px)}
+.end-btn.share{background:rgba(19,136,8,.1);color:#138808;border-color:#138808}
+.end-btn.share.copied{background:#138808;color:#fff}
+
+/* shake utility */
+@keyframes nudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.nudge{animation:nudge .3s ease}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="flagbar"><div class="saff"></div><div class="wht"></div><div class="grn"></div></div>
+
+  <!-- ============== START SCREEN ============== -->
+  <div id="start">
+    <div class="brand-row">
+      <div class="ashoka"></div>
+      <div class="title-h1">CONSTITUTION QUEST</div>
+      <div class="ashoka"></div>
+    </div>
+    <div class="tag">Drag articles to their correct Part of the Constitution</div>
+
+    <div class="ad-slot">Advertisement</div>
+
+    <div class="sec-title">Choose Difficulty</div>
+    <div class="diff-grid" id="diffGrid">
+      <div class="diff-card" data-diff="easy"><div class="diff-icon">📜</div><div class="diff-name">EASY</div><div class="diff-meta">5 articles</div></div>
+      <div class="diff-card selected" data-diff="medium"><div class="diff-icon">⚖️</div><div class="diff-name">MEDIUM</div><div class="diff-meta">10 articles</div></div>
+      <div class="diff-card" data-diff="hard"><div class="diff-icon">🏛️</div><div class="diff-name">HARD</div><div class="diff-meta">15 articles</div></div>
+    </div>
+
+    <button class="play-btn" id="btnPlay">▶ PLAY</button>
+
+    <div class="sec-title">Best Scores</div>
+    <div class="best-row">
+      <div class="best-cell"><div class="best-lbl">Easy</div><div class="best-val" id="bestEasy">0</div></div>
+      <div class="best-cell"><div class="best-lbl">Medium</div><div class="best-val" id="bestMed">0</div></div>
+      <div class="best-cell"><div class="best-lbl">Hard</div><div class="best-val" id="bestHard">0</div></div>
+    </div>
+
+    <div class="howto" id="howto">
+      <div class="howto-head">How to Play <span class="arr">▾</span></div>
+      <div class="howto-body">
+        <ul>
+          <li>An article card appears at the top.</li>
+          <li>Read the article number and title carefully.</li>
+          <li>Press &amp; drag the card down to the correct Part.</li>
+          <li>Drop it on the right Part: card snaps in, you score +10.</li>
+          <li>Wrong drop: card shakes, the correct Part flashes briefly. -5 points.</li>
+          <li>Build a streak for bonus points (+2 per consecutive correct).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-line">सत्यमेव जयते — Truth alone triumphs</div>
+  </div>
+
+  <!-- ============== GAME SCREEN ============== -->
+  <div id="game" class="hidden">
+    <div class="hud">
+      <button class="back-btn" id="btnBack">← Quit</button>
+      <div class="hud-cell"><div class="hud-lbl">Article</div><div class="hud-val" id="hQ">0/0</div></div>
+      <div class="hud-cell"><div class="hud-lbl">Score</div><div class="hud-val" id="hScore">0</div></div>
+      <div class="hud-cell"><div class="hud-lbl">Streak</div><div class="hud-val streak" id="hStreak">0</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    <div class="banner" id="banner">Drag the article card to the correct Part</div>
+
+    <div class="stage" id="stage">
+      <div class="card-area" id="cardArea">
+        <div class="article-card" id="card">
+          <div class="card-num" id="cNum">Article 0</div>
+          <div class="card-title" id="cTitle">Title</div>
+          <div class="card-desc" id="cDesc">Description goes here.</div>
+          <div class="card-handle">↓ DRAG TO PART ↓</div>
+        </div>
+        <div class="mark-overlay" id="mark"></div>
+        <div class="streak-pop" id="streakPop"></div>
+        <div class="score-pop" id="scorePop"></div>
+      </div>
+
+      <div class="zones-head">Drop on the correct Part</div>
+      <div class="zones" id="zones"></div>
+    </div>
+  </div>
+
+  <!-- ============== END SCREEN ============== -->
+  <div id="end" class="hidden">
+    <div class="end-title">QUEST COMPLETE</div>
+    <div class="end-tag">— By the People, For the People —</div>
+    <div class="end-score-box">
+      <div class="end-score-val" id="eScore">0</div>
+      <div class="end-score-lbl">Final Score</div>
+    </div>
+    <div class="end-stats">
+      <div class="end-stat"><div class="es-v" id="eAcc">0%</div><div class="es-l">Accuracy</div></div>
+      <div class="end-stat"><div class="es-v" id="eRight">0</div><div class="es-l">Correct</div></div>
+      <div class="end-stat"><div class="es-v" id="eStreak">0</div><div class="es-l">Best Streak</div></div>
+    </div>
+
+    <div class="recap-title">Articles Learned</div>
+    <div class="recap-list" id="recapList"></div>
+
+    <div class="end-best" id="endBest"></div>
+
+    <div class="end-btns">
+      <button class="end-btn alt" id="btnHome">Home</button>
+      <button class="end-btn primary" id="btnAgain">Play Again</button>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:10px">
+      <button class="end-btn share" id="btnShare" style="flex:0 1 auto;padding:10px 22px;font-size:11px">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){'use strict';
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+
+/* ===================== DATA: 30+ ARTICLES, VERIFIED MAPPINGS ===================== */
+/* Sources cross-checked: Constitution of India (full text), NCERT Indian Polity (Class XI),
+   Laxmikanth M. "Indian Polity" 6e, Wikipedia "List of Articles of the Constitution of India".
+   - Part III (Fundamental Rights) covers Arts 12-35
+   - Part IV (DPSP) covers Arts 36-51
+   - Part V (Union) covers Arts 52-151
+   - Part VI (States) covers Arts 152-237
+   - Part IX (Panchayats, 73rd Amend.) covers Arts 243-243O
+   - Part XI (Centre-State Relations) covers Arts 245-263
+   - Part XV (Elections) covers Arts 324-329
+   - Part XVII (Official Language) covers Arts 343-351
+   - Part XVIII (Emergency) covers Arts 352-360
+*/
+var ARTICLES=[
+  // Part III - Fundamental Rights (Arts 12-35)
+  {num:"14",title:"Right to Equality before Law",part:"Part III",desc:"Equality before law and equal protection of laws."},
+  {num:"15",title:"Prohibition of Discrimination",part:"Part III",desc:"No discrimination on grounds of religion, race, caste, sex or place of birth."},
+  {num:"16",title:"Equality of Opportunity",part:"Part III",desc:"Equality in matters of public employment."},
+  {num:"19",title:"Six Freedoms",part:"Part III",desc:"Freedom of speech, assembly, association, movement, residence and profession."},
+  {num:"21",title:"Right to Life",part:"Part III",desc:"Protection of life and personal liberty — no person shall be deprived of life or liberty except by procedure established by law."},
+  {num:"21A",title:"Right to Education",part:"Part III",desc:"Free and compulsory education to children aged 6 to 14 years (86th Amendment)."},
+  {num:"22",title:"Protection from Arrest",part:"Part III",desc:"Protection against arbitrary arrest and detention."},
+  {num:"23",title:"Against Trafficking",part:"Part III",desc:"Prohibition of traffic in human beings and forced labour."},
+  {num:"25",title:"Religious Freedom",part:"Part III",desc:"Freedom of conscience and free profession, practice and propagation of religion."},
+  {num:"32",title:"Constitutional Remedies",part:"Part III",desc:"Right to move the Supreme Court for enforcement of Fundamental Rights — called the 'heart and soul' of the Constitution by Dr. Ambedkar."},
+
+  // Part IV - DPSP (Arts 36-51)
+  {num:"39",title:"Equal Justice Principles",part:"Part IV",desc:"State to ensure adequate means of livelihood, equal pay for equal work."},
+  {num:"40",title:"Village Panchayats",part:"Part IV",desc:"State to organize village panchayats as units of self-government."},
+  {num:"41",title:"Right to Work",part:"Part IV",desc:"Right to work, education and public assistance in cases of unemployment."},
+  {num:"44",title:"Uniform Civil Code",part:"Part IV",desc:"State to secure a uniform civil code for citizens throughout India."},
+  {num:"45",title:"Early Childhood Care",part:"Part IV",desc:"Provision for early childhood care and education for children below 6 years."},
+  {num:"48",title:"Animal Husbandry",part:"Part IV",desc:"Organize agriculture and animal husbandry on modern, scientific lines."},
+  {num:"48A",title:"Environment Protection",part:"Part IV",desc:"State to protect and improve environment, safeguard forests and wildlife (42nd Amendment)."},
+  {num:"51",title:"International Peace",part:"Part IV",desc:"Promote international peace, security and respect for international law."},
+
+  // Part V - Union (Arts 52-151)
+  {num:"52",title:"President of India",part:"Part V",desc:"There shall be a President of India."},
+  {num:"61",title:"Impeachment of President",part:"Part V",desc:"Procedure for impeachment of the President for violation of the Constitution."},
+  {num:"74",title:"Council of Ministers",part:"Part V",desc:"PM-led Council of Ministers to aid and advise the President."},
+  {num:"79",title:"Constitution of Parliament",part:"Part V",desc:"Parliament consists of the President, Lok Sabha and Rajya Sabha."},
+  {num:"110",title:"Money Bills",part:"Part V",desc:"Definition of a Money Bill."},
+  {num:"124",title:"Supreme Court",part:"Part V",desc:"Establishment and constitution of the Supreme Court of India."},
+  {num:"148",title:"Comptroller & Auditor-General",part:"Part V",desc:"Office of the Comptroller and Auditor-General of India (CAG)."},
+
+  // Part VI - States (Arts 152-237)
+  {num:"153",title:"Governor of State",part:"Part VI",desc:"There shall be a Governor for each State."},
+  {num:"163",title:"State Council of Ministers",part:"Part VI",desc:"Council of Ministers in States to aid and advise the Governor."},
+  {num:"168",title:"State Legislatures",part:"Part VI",desc:"Constitution of Legislatures in States."},
+  {num:"214",title:"High Courts",part:"Part VI",desc:"There shall be a High Court for each State."},
+
+  // Part IX - Panchayats (Arts 243-243O)
+  {num:"243",title:"Definitions of Panchayat",part:"Part IX",desc:"Defines village, intermediate and district level panchayats (73rd Amendment)."},
+
+  // Part XI - Centre-State Relations (Arts 245-263)
+  {num:"245",title:"Legislative Powers",part:"Part XI",desc:"Distribution of legislative powers between the Centre and the States."},
+  {num:"249",title:"Rajya Sabha & State List",part:"Part XI",desc:"Power of Parliament to legislate on State List subjects in national interest."},
+
+  // Part XV - Elections (Arts 324-329)
+  {num:"324",title:"Election Commission",part:"Part XV",desc:"Superintendence, direction and control of elections vested in the ECI."},
+  {num:"325",title:"No Caste/Religion Bar",part:"Part XV",desc:"No person ineligible for inclusion in electoral roll on grounds of religion, race, caste or sex."},
+  {num:"326",title:"Adult Suffrage",part:"Part XV",desc:"Elections to Lok Sabha and State Assemblies on the basis of adult suffrage."},
+
+  // Part XVII - Official Language (Arts 343-351)
+  {num:"343",title:"Official Language of Union",part:"Part XVII",desc:"Hindi in Devanagari script as the official language of the Union."},
+  {num:"345",title:"State Languages",part:"Part XVII",desc:"State Legislature may adopt language(s) for official purposes of the State."},
+
+  // Part XVIII - Emergency (Arts 352-360)
+  {num:"352",title:"National Emergency",part:"Part XVIII",desc:"Proclamation of Emergency on grounds of war, external aggression or armed rebellion."},
+  {num:"356",title:"President's Rule",part:"Part XVIII",desc:"Provisions in case of failure of constitutional machinery in States."},
+  {num:"360",title:"Financial Emergency",part:"Part XVIII",desc:"Provisions for declaring a Financial Emergency."}
+];
+
+var PARTS_INFO={
+  "Part III":{name:"Fundamental Rights",short:"III",ctx:"protects citizens' rights"},
+  "Part IV":{name:"DPSP",short:"IV",ctx:"guides State policy"},
+  "Part V":{name:"Union (Centre)",short:"V",ctx:"the Union government"},
+  "Part VI":{name:"States",short:"VI",ctx:"the State governments"},
+  "Part IX":{name:"Panchayats",short:"IX",ctx:"local self-government"},
+  "Part XI":{name:"Centre-State",short:"XI",ctx:"Centre-State relations"},
+  "Part XV":{name:"Elections",short:"XV",ctx:"elections"},
+  "Part XVII":{name:"Official Language",short:"XVII",ctx:"official languages"},
+  "Part XVIII":{name:"Emergency",short:"XVIII",ctx:"emergency provisions"}
+};
+var PART_ORDER=["Part III","Part IV","Part V","Part VI","Part IX","Part XI","Part XV","Part XVII","Part XVIII"];
+
+/* ===================== STATE ===================== */
+var DIFF={easy:5,medium:10,hard:15};
+var diff="medium";
+var roundArticles=[];
+var roundParts=[];
+var idx=0;
+var score=0;
+var streak=0;
+var bestStreak=0;
+var correctCount=0;
+var recap=[];
+
+/* ===================== STORAGE ===================== */
+var BEST_KEY="constitution_quest_best_v1";
+function loadBest(){
+  try{var raw=localStorage.getItem(BEST_KEY);if(!raw)return{easy:0,medium:0,hard:0};var p=JSON.parse(raw);return{easy:p.easy|0,medium:p.medium|0,hard:p.hard|0};}catch(e){return{easy:0,medium:0,hard:0};}
+}
+function saveBest(b){try{localStorage.setItem(BEST_KEY,JSON.stringify(b));}catch(e){}}
+var best=loadBest();
+
+/* ===================== UTIL ===================== */
+function $(id){return document.getElementById(id);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function uniq(arr){var s={},r=[];for(var i=0;i<arr.length;i++){if(!s[arr[i]]){s[arr[i]]=1;r.push(arr[i]);}}return r;}
+
+/* ===================== AUDIO (WebAudio) ===================== */
+var audioCtx=null;
+function ensureAudio(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}}
+function tone(freq,dur,type,vol){
+  if(!audioCtx)return;
+  try{
+    var t=audioCtx.currentTime;
+    var o=audioCtx.createOscillator();
+    var g=audioCtx.createGain();
+    o.type=type||"sine";
+    o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol||.18,t+.015);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start(t);o.stop(t+dur+.05);
+  }catch(e){}
+}
+function chimeOk(){ensureAudio();tone(660,.12,"sine",.18);setTimeout(function(){tone(880,.18,"sine",.16);},90);setTimeout(function(){tone(1320,.22,"triangle",.14);},190);}
+function chimeBad(){ensureAudio();tone(220,.18,"sawtooth",.18);setTimeout(function(){tone(180,.22,"sawtooth",.14);},120);}
+function chimeStreak(){ensureAudio();tone(880,.09,"triangle",.14);setTimeout(function(){tone(1175,.09,"triangle",.14);},80);setTimeout(function(){tone(1568,.16,"triangle",.16);},170);}
+function chimeFinish(){ensureAudio();tone(523,.16,"triangle",.18);setTimeout(function(){tone(659,.16,"triangle",.18);},150);setTimeout(function(){tone(784,.16,"triangle",.18);},300);setTimeout(function(){tone(1047,.30,"triangle",.20);},450);}
+
+/* haptic */
+function buzz(ms){if(navigator.vibrate){try{navigator.vibrate(ms);}catch(e){}}}
+
+/* ===================== SCREENS ===================== */
+function show(id){
+  ["start","game","end"].forEach(function(s){var el=$(s);if(s===id){el.classList.remove("hidden");}else{el.classList.add("hidden");}});
+}
+
+/* ===================== START SCREEN WIRING ===================== */
+function renderBest(){
+  $("bestEasy").textContent=best.easy;
+  $("bestMed").textContent=best.medium;
+  $("bestHard").textContent=best.hard;
+}
+renderBest();
+
+var diffCards=document.querySelectorAll(".diff-card");
+for(var i=0;i<diffCards.length;i++){
+  (function(card){
+    card.addEventListener("click",function(){
+      ensureAudio();
+      var sel=document.querySelector(".diff-card.selected");
+      if(sel)sel.classList.remove("selected");
+      card.classList.add("selected");
+      diff=card.getAttribute("data-diff");
+      tone(540,.06,"triangle",.12);
+    });
+  })(diffCards[i]);
+}
+
+$("howto").addEventListener("click",function(){
+  $("howto").classList.toggle("open");
+});
+
+$("btnPlay").addEventListener("click",function(){
+  ensureAudio();
+  startRound();
+});
+
+$("btnBack").addEventListener("click",function(){
+  if(confirm("Quit this round?")){
+    show("start");
+  }
+});
+
+$("btnAgain").addEventListener("click",function(){
+  ensureAudio();
+  startRound();
+});
+$("btnHome").addEventListener("click",function(){
+  show("start");
+  renderBest();
+});
+$("btnShare").addEventListener("click",function(){
+  ensureAudio();
+  var txt="I scored "+score+" in Constitution Quest ("+diff.toUpperCase()+") — drag Indian Constitution Articles to their correct Part! Try it.";
+  if(navigator.share){
+    navigator.share({title:"Constitution Quest",text:txt}).catch(function(){copyShare(txt);});
+  }else{
+    copyShare(txt);
+  }
+});
+function copyShare(txt){
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){flashShare();}).catch(function(){fallbackCopy(txt);});
+    }else{
+      fallbackCopy(txt);
+    }
+  }catch(e){fallbackCopy(txt);}
+}
+function fallbackCopy(txt){
+  try{
+    var ta=document.createElement("textarea");
+    ta.value=txt;
+    ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");
+    document.body.removeChild(ta);
+    flashShare();
+  }catch(e){}
+}
+function flashShare(){
+  var b=$("btnShare");
+  var orig=b.textContent;
+  b.classList.add("copied");
+  b.textContent="Copied!";
+  setTimeout(function(){b.classList.remove("copied");b.textContent=orig;},1400);
+}
+
+/* ===================== ROUND SETUP ===================== */
+function buildRound(){
+  var n=DIFF[diff]||10;
+  var pool=ARTICLES.slice();
+  shuffle(pool);
+  roundArticles=pool.slice(0,n);
+
+  // Determine which Parts appear
+  var partSet={};
+  roundArticles.forEach(function(a){partSet[a.part]=1;});
+  var presentParts=Object.keys(partSet);
+
+  // Always show 4-6 parts so wrong answers exist. Add distractor parts if too few.
+  var minZones=Math.min(6,Math.max(4,presentParts.length));
+  var distractors=PART_ORDER.filter(function(p){return !partSet[p];});
+  shuffle(distractors);
+  while(presentParts.length<minZones&&distractors.length){
+    presentParts.push(distractors.shift());
+  }
+  // Cap at 6 zones to keep mobile layout clean
+  if(presentParts.length>6){
+    // Prioritize parts that are actually used, then trim distractors
+    var used=presentParts.filter(function(p){return partSet[p];});
+    var unused=presentParts.filter(function(p){return !partSet[p];});
+    presentParts=used.concat(unused).slice(0,6);
+  }
+  // Order them by canonical PART_ORDER
+  roundParts=PART_ORDER.filter(function(p){return presentParts.indexOf(p)>=0;});
+}
+
+function startRound(){
+  buildRound();
+  idx=0;score=0;streak=0;bestStreak=0;correctCount=0;recap=[];
+  $("hScore").textContent="0";
+  $("hStreak").textContent="0";
+  show("game");
+  renderZones();
+  loadArticle();
+}
+
+function renderZones(){
+  var z=$("zones");
+  z.innerHTML="";
+  for(var i=0;i<roundParts.length;i++){
+    var p=roundParts[i];
+    var info=PARTS_INFO[p];
+    var div=document.createElement("div");
+    div.className="zone";
+    div.setAttribute("data-part",p);
+    div.innerHTML='<div class="znum">PART '+info.short+'</div><div class="zname">'+info.name+'</div>';
+    z.appendChild(div);
+  }
+}
+
+function loadArticle(){
+  if(idx>=roundArticles.length){endRound();return;}
+  var a=roundArticles[idx];
+  $("hQ").textContent=(idx+1)+"/"+roundArticles.length;
+  var pct=(idx/roundArticles.length)*100;
+  $("progFill").style.width=pct+"%";
+  $("cNum").textContent="Article "+a.num;
+  $("cTitle").textContent=a.title;
+  $("cDesc").textContent=a.desc;
+  $("banner").className="banner";
+  $("banner").textContent="Drag the article card to the correct Part";
+  resetCardPosition();
+}
+
+/* ===================== DRAG-AND-DROP ===================== */
+var card=$("card");
+var stage=null; // resolved at first drag
+var origCardRect=null;
+var dragging=false;
+var dragOffsetX=0,dragOffsetY=0;
+var dragStartX=0,dragStartY=0;
+var currentTx=0,currentTy=0;
+var lastZone=null;
+var lockInput=false;
+var pointerId=null;
+
+function resetCardPosition(){
+  card.classList.remove("dragging","flash-ok","flash-bad","snap-back");
+  card.style.transform="translate(-50%,-50%)";
+  currentTx=0;currentTy=0;
+}
+
+function getCardCenter(){
+  var r=card.getBoundingClientRect();
+  return{x:r.left+r.width/2,y:r.top+r.height/2};
+}
+
+function pointerDown(e){
+  if(lockInput)return;
+  ensureAudio();
+  e.preventDefault();
+  var pt=e.touches?e.touches[0]:e;
+  pointerId=e.pointerId||0;
+  var c=getCardCenter();
+  dragOffsetX=pt.clientX-c.x;
+  dragOffsetY=pt.clientY-c.y;
+  dragStartX=pt.clientX;
+  dragStartY=pt.clientY;
+  dragging=true;
+  card.classList.add("dragging");
+  card.classList.remove("snap-back");
+  if(card.setPointerCapture&&e.pointerId!=null){
+    try{card.setPointerCapture(e.pointerId);}catch(err){}
+  }
+}
+function pointerMove(e){
+  if(!dragging)return;
+  e.preventDefault();
+  var pt=e.touches?e.touches[0]:e;
+  // movement vector since drag start, applied as translate atop the centering translate(-50%,-50%)
+  var dx=pt.clientX-dragStartX;
+  var dy=pt.clientY-dragStartY;
+  currentTx=dx;currentTy=dy;
+  // tilt based on horizontal movement
+  var tilt=Math.max(-12,Math.min(12,dx*.07));
+  card.style.transform="translate(calc(-50% + "+dx+"px),calc(-50% + "+dy+"px)) rotate("+tilt+"deg)";
+  // detect zone hover
+  var zone=zoneAt(pt.clientX,pt.clientY);
+  if(zone!==lastZone){
+    if(lastZone)lastZone.classList.remove("hover");
+    if(zone)zone.classList.add("hover");
+    lastZone=zone;
+    if(zone){buzz(8);}
+  }
+}
+function pointerUp(e){
+  if(!dragging)return;
+  e.preventDefault();
+  dragging=false;
+  card.classList.remove("dragging");
+  var pt=e.changedTouches?e.changedTouches[0]:e;
+  var zone=zoneAt(pt.clientX,pt.clientY);
+  if(lastZone){lastZone.classList.remove("hover");}
+  lastZone=null;
+  if(zone){
+    handleDrop(zone);
+  }else{
+    snapBack();
+  }
+}
+function zoneAt(x,y){
+  var els=document.elementsFromPoint?document.elementsFromPoint(x,y):[document.elementFromPoint(x,y)];
+  for(var i=0;i<els.length;i++){
+    var el=els[i];
+    while(el){
+      if(el.classList&&el.classList.contains("zone"))return el;
+      el=el.parentElement;
+    }
+  }
+  return null;
+}
+
+function snapBack(){
+  card.classList.add("snap-back");
+  card.style.transform="translate(-50%,-50%)";
+  setTimeout(function(){card.classList.remove("snap-back");},360);
+}
+
+card.addEventListener("pointerdown",pointerDown);
+card.addEventListener("pointermove",pointerMove);
+card.addEventListener("pointerup",pointerUp);
+card.addEventListener("pointercancel",pointerUp);
+
+/* ===================== HANDLE DROP ===================== */
+function handleDrop(zone){
+  if(lockInput)return;
+  var droppedPart=zone.getAttribute("data-part");
+  var a=roundArticles[idx];
+  var correct=droppedPart===a.part;
+  lockInput=true;
+  if(correct){
+    onCorrect(a,zone);
+  }else{
+    onWrong(a,zone,droppedPart);
+  }
+}
+
+function onCorrect(a,zone){
+  // visual: snap into zone center then flash
+  var zr=zone.getBoundingClientRect();
+  var cr=card.getBoundingClientRect();
+  var deltaX=(zr.left+zr.width/2)-(cr.left+cr.width/2);
+  var deltaY=(zr.top+zr.height/2)-(cr.top+cr.height/2);
+  // Apply a snap-toward-zone translate then return + flash
+  card.classList.add("snap-back");
+  card.style.transform="translate(calc(-50% + "+(currentTx+deltaX*0.4)+"px),calc(-50% + "+(currentTy+deltaY*0.4)+"px)) scale(0.85)";
+  zone.classList.add("flash-correct");
+  showMark("ok");
+  chimeOk();
+  buzz(20);
+  // score
+  score+=10;
+  streak+=1;
+  if(streak>1){
+    var bonus=2*streak;
+    score+=bonus;
+    showStreakPop("STREAK x"+streak+" +"+bonus);
+    chimeStreak();
+  }
+  if(streak>bestStreak)bestStreak=streak;
+  correctCount+=1;
+  recap.push({article:a,droppedPart:a.part,correct:true});
+  showScorePop("+"+(streak>1?(10+2*streak):10),"ok");
+  $("hScore").textContent=score;
+  $("hStreak").textContent=streak;
+  setBanner("ok","Yes! Article "+a.num+" is in "+a.part+" — "+PARTS_INFO[a.part].name+". "+contextFor(a));
+
+  setTimeout(function(){
+    zone.classList.remove("flash-correct");
+    nextArticle();
+  },1100);
+}
+
+function onWrong(a,zone,droppedPart){
+  card.classList.add("flash-bad");
+  showMark("bad");
+  chimeBad();
+  buzz([30,40,30]);
+  // highlight correct zone
+  var correctZone=document.querySelector('.zone[data-part="'+a.part+'"]');
+  if(correctZone)correctZone.classList.add("flash-show");
+  score=Math.max(0,score-5);
+  if(streak>bestStreak)bestStreak=streak;
+  streak=0;
+  recap.push({article:a,droppedPart:droppedPart,correct:false});
+  showScorePop("-5","bad");
+  $("hScore").textContent=score;
+  $("hStreak").textContent=streak;
+  var correctName=PARTS_INFO[a.part].name;
+  setBanner("bad","Not quite. Article "+a.num+" belongs to "+a.part+" — "+correctName+".");
+  setTimeout(function(){
+    card.classList.remove("flash-bad");
+    if(correctZone)correctZone.classList.remove("flash-show");
+    snapBack();
+    setTimeout(function(){
+      nextArticle();
+    },300);
+  },1400);
+}
+
+function nextArticle(){
+  idx+=1;
+  lockInput=false;
+  if(idx>=roundArticles.length){
+    var prog=100;$("progFill").style.width=prog+"%";
+    setTimeout(endRound,200);
+  }else{
+    loadArticle();
+  }
+}
+
+function showMark(kind){
+  var m=$("mark");
+  m.className="mark-overlay "+kind;
+  m.textContent=kind==="ok"?"✓":"✗";
+  // trigger reflow
+  void m.offsetWidth;
+  m.classList.add("show");
+  setTimeout(function(){m.classList.add("fade");},500);
+  setTimeout(function(){m.classList.remove("show","fade",kind);m.textContent="";},1000);
+}
+
+function showStreakPop(txt){
+  var p=$("streakPop");
+  p.textContent=txt;
+  p.classList.remove("show");
+  void p.offsetWidth;
+  p.classList.add("show");
+  setTimeout(function(){p.classList.remove("show");},900);
+}
+
+function showScorePop(txt,kind){
+  var p=$("scorePop");
+  p.textContent=txt;
+  p.className="score-pop "+kind;
+  void p.offsetWidth;
+  p.classList.add("show");
+  setTimeout(function(){p.classList.remove("show");},650);
+}
+
+function setBanner(kind,txt){
+  var b=$("banner");
+  b.className="banner "+kind;
+  b.textContent=txt;
+}
+
+function contextFor(a){
+  // Short pithy line for correct feedback
+  var p=PARTS_INFO[a.part];
+  var lines={
+    "Part III":"A Fundamental Right that protects citizens directly.",
+    "Part IV":"A Directive Principle — non-justiciable but fundamental in governance.",
+    "Part V":"Concerns the Union government — Centre's structure and powers.",
+    "Part VI":"Concerns the State governments and their organs.",
+    "Part IX":"Inserted by the 73rd Amendment for local self-government.",
+    "Part XI":"Defines the Centre-State legislative & administrative balance.",
+    "Part XV":"Vests electoral oversight in the Election Commission.",
+    "Part XVII":"Deals with official languages of the Union and States.",
+    "Part XVIII":"Empowers the Centre during emergencies."
+  };
+  return lines[a.part]||p.ctx;
+}
+
+/* ===================== END SCREEN ===================== */
+function endRound(){
+  show("end");
+  chimeFinish();
+  $("eScore").textContent=score;
+  var total=roundArticles.length;
+  var acc=total?Math.round((correctCount/total)*100):0;
+  $("eAcc").textContent=acc+"%";
+  $("eRight").textContent=correctCount+"/"+total;
+  $("eStreak").textContent=bestStreak;
+
+  // Recap list
+  var list=$("recapList");
+  list.innerHTML="";
+  for(var i=0;i<recap.length;i++){
+    var r=recap[i];
+    var row=document.createElement("div");
+    row.className="recap-row";
+    var mk='<div class="recap-mark '+(r.correct?"ok":"bad")+'">'+(r.correct?"✓":"✗")+'</div>';
+    var art='<div class="recap-art">Art '+r.article.num+'</div>';
+    var partLine;
+    if(r.correct){
+      partLine=r.article.part+" — "+PARTS_INFO[r.article.part].name;
+    }else{
+      partLine="You: "+r.droppedPart+" • Correct: "+r.article.part+" ("+PARTS_INFO[r.article.part].name+")";
+    }
+    var det='<div class="recap-part"><b>'+r.article.title+'</b><br><span style="font-size:10px;color:#7a5a2a">'+partLine+'</span></div>';
+    row.innerHTML=mk+art+det;
+    list.appendChild(row);
+  }
+
+  // Best
+  var prevBest=best[diff]||0;
+  var newBest=false;
+  if(score>prevBest){best[diff]=score;saveBest(best);newBest=true;}
+  $("endBest").innerHTML=newBest?'<span class="nb">★ NEW BEST!</span> Personal record on '+diff.toUpperCase():'Best ('+diff.toUpperCase()+'): <span class="nb">'+best[diff]+'</span>';
+}
+
+/* ===================== INITIAL ===================== */
+show("start");
+
+// Prevent context menu on long press of card
+card.addEventListener("contextmenu",function(e){e.preventDefault();});
+
+// Make sure only one instance of the diff is selected and matches current diff
+(function(){var def=document.querySelector('.diff-card[data-diff="'+diff+'"]');if(def){var sel=document.querySelector(".diff-card.selected");if(sel)sel.classList.remove("selected");def.classList.add("selected");}})();
+
+})();
+</script>
+</body>
+</html>

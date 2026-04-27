@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+<rect width="400" height="300" fill="#fdf6e3"/>
+<rect x="0" y="0" width="400" height="6" fill="#ff9933"/>
+<rect x="0" y="6" width="400" height="3" fill="#fff"/>
+<rect x="0" y="9" width="400" height="6" fill="#138808"/>
+<g font-family="Georgia, serif" text-anchor="middle">
+<text x="200" y="38" font-size="13" font-weight="700" fill="#000080" letter-spacing="1.5">⚖️ CONSTITUTION OF INDIA ⚖️</text>
+<rect x="100" y="55" width="200" height="60" rx="4" fill="#fff" stroke="#000080" stroke-width="1.5"/>
+<text x="200" y="78" font-size="13" font-weight="700" fill="#000080" font-family="Arial">ARTICLE 21</text>
+<text x="200" y="100" font-size="11" fill="#444" font-family="Arial" font-style="italic">Right to Life and Personal Liberty</text>
+<text x="200" y="135" font-size="20" fill="#444" font-family="Arial">⬇</text>
+<rect x="30" y="150" width="105" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+<text x="82" y="167" font-size="10" font-weight="700" fill="#1e40af" font-family="Arial">PART III</text>
+<text x="82" y="183" font-size="10" fill="#1e40af" font-family="Arial">Fund. Rights ✓</text>
+<rect x="145" y="150" width="105" height="40" rx="6" fill="#fed7aa" stroke="#f97316" stroke-width="1.5" opacity="0.6"/>
+<text x="197" y="167" font-size="10" font-weight="700" fill="#9a3412" font-family="Arial">PART IV</text>
+<text x="197" y="183" font-size="10" fill="#9a3412" font-family="Arial">DPSP</text>
+<rect x="260" y="150" width="105" height="40" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5" opacity="0.6"/>
+<text x="312" y="167" font-size="10" font-weight="700" fill="#166534" font-family="Arial">PART V</text>
+<text x="312" y="183" font-size="10" fill="#166534" font-family="Arial">Union</text>
+<rect x="30" y="200" width="105" height="40" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5" opacity="0.6"/>
+<text x="82" y="217" font-size="10" font-weight="700" fill="#9f1239" font-family="Arial">PART VI</text>
+<text x="82" y="233" font-size="10" fill="#9f1239" font-family="Arial">States</text>
+<rect x="145" y="200" width="105" height="40" rx="6" fill="#e9d5ff" stroke="#a855f7" stroke-width="1.5" opacity="0.6"/>
+<text x="197" y="217" font-size="10" font-weight="700" fill="#581c87" font-family="Arial">PART XV</text>
+<text x="197" y="233" font-size="10" fill="#581c87" font-family="Arial">Elections</text>
+<rect x="260" y="200" width="105" height="40" rx="6" fill="#fef3c7" stroke="#eab308" stroke-width="1.5" opacity="0.6"/>
+<text x="312" y="217" font-size="10" font-weight="700" fill="#713f12" font-family="Arial">PART XVIII</text>
+<text x="312" y="233" font-size="10" fill="#713f12" font-family="Arial">Emergency</text>
+<text x="200" y="290" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#000080">CONSTITUTION QUEST</text>
+</g>
+</svg>

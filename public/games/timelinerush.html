@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3d2817">
+<title>Timeline Rush</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:none;width:100%;height:100%;background:#3d2817;background:linear-gradient(160deg,#3d2817 0%,#5a3a1f 50%,#6b4423 100%);font-family:'Georgia','Times New Roman',serif;color:#f5e6d3}
+body{display:flex;flex-direction:column;align-items:center;height:100dvh;position:relative}
+.wrap{width:100%;max-width:560px;height:100%;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px 14px 18px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.scr.hidden{display:none}
+.title{font-size:clamp(38px,10vw,62px);font-weight:900;letter-spacing:5px;text-align:center;background:linear-gradient(180deg,#ffd9a3 0%,#d4a056 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(212,160,86,.3);line-height:1;margin-top:14px;font-family:'Georgia',serif}
+.tag{font-size:clamp(11px,3vw,14px);text-align:center;color:rgba(245,230,211,.75);margin-top:8px;letter-spacing:1.5px;font-style:italic}
+.ad-slot{border:2px dashed rgba(245,230,211,.25);color:rgba(245,230,211,.5);text-align:center;padding:12px;font-size:11px;letter-spacing:2px;border-radius:8px;margin:14px 4px;text-transform:uppercase;background:rgba(0,0,0,.15);font-family:sans-serif}
+.sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,217,163,.85);margin:14px 4px 8px;font-weight:bold;font-family:sans-serif}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 4px}
+.opt-btn{background:rgba(245,230,211,.08);border:2px solid rgba(245,230,211,.2);color:#f5e6d3;padding:12px 8px;font-size:13px;font-weight:bold;font-family:'Georgia',serif;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-transform:uppercase;transition:all .15s}
+.opt-btn.active{background:linear-gradient(180deg,#d4a056,#a06d2e);color:#3d2817;border-color:#ffd9a3;box-shadow:0 4px 18px rgba(212,160,86,.5)}
+.mode-row{display:flex;gap:8px;padding:0 4px;margin-top:6px}
+.mode-btn{flex:1;background:rgba(245,230,211,.08);border:2px solid rgba(245,230,211,.2);color:#f5e6d3;padding:12px;font-size:13px;font-weight:bold;font-family:'Georgia',serif;border-radius:10px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;letter-spacing:1px;text-align:center}
+.mode-btn.active{background:linear-gradient(180deg,#7a9e3f,#5a7a30);color:#fff;border-color:#fff;box-shadow:0 4px 18px rgba(122,158,63,.5)}
+.mode-desc{font-size:11px;color:rgba(245,230,211,.55);padding:0 4px;margin-top:4px;text-align:center;font-style:italic}
+.play-btn{display:block;margin:18px auto 8px;background:linear-gradient(180deg,#c45a2b,#8b3815);color:#fff;border:3px solid rgba(255,217,163,.4);padding:16px 54px;font:900 clamp(18px,5vw,24px) 'Georgia',serif;border-radius:50px;letter-spacing:4px;box-shadow:0 8px 28px rgba(196,90,43,.5);touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.play-btn:active{transform:scale(.96)}
+.best-line{text-align:center;font-size:12px;color:rgba(255,217,163,.9);margin-top:6px;letter-spacing:1px;font-family:sans-serif}
+.howto-box{margin:12px 4px 8px;border:1px solid rgba(245,230,211,.18);border-radius:10px;background:rgba(0,0,0,.25);overflow:hidden}
+.howto-head{padding:10px 14px;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:rgba(255,217,163,.9);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:sans-serif}
+.howto-body{padding:0 14px 12px;font-size:13px;line-height:1.7;color:rgba(245,230,211,.8);display:none}
+.howto-body.open{display:block}
+.howto-body ul{list-style:none;padding:0}
+.howto-body li{padding:2px 0}
+.howto-body li:before{content:"✦ ";color:#d4a056;margin-right:4px}
+
+/* Game screen */
+.g-head{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 8px;gap:8px}
+.g-info{display:flex;flex-direction:column;gap:2px}
+.g-counter{font-size:14px;font-weight:bold;color:#ffd9a3;letter-spacing:1px}
+.g-era{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,230,211,.7);font-family:sans-serif}
+.g-score-box{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.g-score{font-size:13px;font-weight:900;background:linear-gradient(180deg,#ffd9a3,#d4a056);color:#3d2817;padding:4px 12px;border-radius:10px;letter-spacing:1px;font-family:sans-serif}
+.g-timer{font-size:11px;color:rgba(255,217,163,.85);letter-spacing:1px;font-family:sans-serif}
+.g-prompt{font-size:12px;text-align:center;color:rgba(245,230,211,.85);padding:6px 4px;font-style:italic;letter-spacing:.5px}
+
+.section-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,217,163,.7);margin:6px 4px 4px;font-weight:bold;font-family:sans-serif;text-align:center}
+
+.event-pool{display:flex;flex-direction:column;gap:7px;padding:0 4px;margin-bottom:8px;min-height:60px}
+.event-card{position:relative;background:linear-gradient(180deg,#f5e6d3 0%,#e6d3b8 100%);color:#3d2817;border:2px solid #a06d2e;border-radius:6px;padding:9px 12px 9px 36px;font-size:13px;font-weight:600;font-family:'Georgia',serif;line-height:1.25;cursor:grab;touch-action:none;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 6px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.4);min-height:42px;display:flex;align-items:center}
+.event-card:before{content:"✦";position:absolute;left:10px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:#a06d2e;font-size:14px;text-align:center;line-height:20px}
+.event-card.dragging{opacity:.5;cursor:grabbing}
+.event-card.flying{position:fixed;z-index:100;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5);transform:scale(1.04);cursor:grabbing}
+.event-card.placed{opacity:0;pointer-events:none;height:0;padding:0;margin:0;border:0;min-height:0;overflow:hidden}
+
+.timeline{display:flex;flex-direction:column;gap:7px;padding:6px 4px 4px;position:relative}
+.timeline:before{content:"";position:absolute;left:24px;top:8px;bottom:8px;width:3px;background:linear-gradient(180deg,#d4a056,#8b3815);border-radius:2px;opacity:.6}
+.slot{position:relative;display:flex;align-items:center;gap:10px;padding-left:38px;min-height:48px}
+.slot:after{content:"";position:absolute;left:18px;top:50%;width:14px;height:14px;border-radius:50%;background:#3d2817;border:3px solid #d4a056;transform:translateY(-50%);z-index:2;box-shadow:0 0 0 2px #3d2817}
+.slot-pos{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:#d4a056;color:#3d2817;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:3;font-family:sans-serif;letter-spacing:0;text-shadow:0 0 0 transparent}
+.slot-drop{flex:1;min-height:44px;border:2px dashed rgba(245,230,211,.35);border-radius:6px;background:rgba(0,0,0,.18);display:flex;align-items:center;padding:6px 10px;font-size:12px;color:rgba(245,230,211,.4);font-style:italic;transition:all .15s;font-family:sans-serif;letter-spacing:.5px}
+.slot-drop.hover{border-color:#ffd9a3;background:rgba(212,160,86,.2);color:#ffd9a3;transform:scale(1.02)}
+.slot-drop.has-card{border:2px solid #a06d2e;background:linear-gradient(180deg,#f5e6d3 0%,#e6d3b8 100%);padding:0;cursor:grab;touch-action:none;align-items:stretch}
+.slot-drop.has-card .placed-card{flex:1;display:flex;align-items:center;padding:9px 12px;font-size:13px;font-weight:600;color:#3d2817;line-height:1.25;font-family:'Georgia',serif;font-style:normal}
+.slot-drop.correct{background:linear-gradient(180deg,#9bd75a 0%,#7ab842 100%) !important;border:2px solid #4d7a1f !important;animation:flashOk .6s ease}
+.slot-drop.correct .placed-card{color:#1a3a0a}
+.slot-drop.wrong{background:linear-gradient(180deg,#e88b8b 0%,#d96666 100%) !important;border:2px solid #8b2020 !important;animation:flashNo .6s ease}
+.slot-drop.wrong .placed-card{color:#3a0a0a}
+.year-badge{display:none;background:rgba(0,0,0,.4);color:#fff;padding:3px 8px;font-size:11px;font-weight:900;border-radius:4px;letter-spacing:.5px;font-family:sans-serif;margin-right:8px;align-self:center;flex-shrink:0;border:1px solid rgba(255,255,255,.3)}
+.slot-drop.reveal .year-badge{display:block}
+.slot-drop.reveal-correct{background:linear-gradient(180deg,#9bd75a 0%,#7ab842 100%) !important;border:2px solid #4d7a1f !important}
+.slot-drop.reveal-correct .placed-card{color:#1a3a0a}
+.slot-drop.reveal-wrong{background:linear-gradient(180deg,#e88b8b 0%,#d96666 100%) !important;border:2px solid #8b2020 !important}
+.slot-drop.reveal-wrong .placed-card{color:#3a0a0a}
+.check-mark,.x-mark{display:none;font-size:18px;font-weight:900;margin-right:8px;align-self:center;flex-shrink:0}
+.slot-drop.reveal-correct .check-mark{display:block;color:#1a3a0a}
+.slot-drop.reveal-wrong .x-mark{display:block;color:#3a0a0a}
+
+@keyframes flashOk{0%{transform:scale(1)}40%{transform:scale(1.04);box-shadow:0 0 24px rgba(155,215,90,.8)}100%{transform:scale(1)}}
+@keyframes flashNo{0%,40%,80%{transform:translateX(0)}10%,50%{transform:translateX(-6px)}30%,70%{transform:translateX(6px)}100%{transform:translateX(0)}}
+
+.submit-btn{display:block;margin:14px auto 6px;background:linear-gradient(180deg,#d4a056,#8b3815);color:#fff;border:2px solid rgba(255,217,163,.4);padding:13px 50px;font:900 16px 'Georgia',serif;border-radius:30px;letter-spacing:4px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;opacity:.4;pointer-events:none;transition:opacity .25s;text-transform:uppercase}
+.submit-btn.active{opacity:1;pointer-events:auto;box-shadow:0 6px 20px rgba(196,90,43,.5)}
+.submit-btn:active{transform:scale(.96)}
+
+.round-result{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(180deg,#3d2817 0%,#5a3a1f 100%);border:3px solid #d4a056;border-radius:14px;padding:20px 28px;text-align:center;z-index:50;box-shadow:0 0 40px rgba(212,160,86,.6);transition:transform .35s cubic-bezier(.5,1.6,.6,1);min-width:240px}
+.round-result.show{transform:translate(-50%,-50%) scale(1)}
+.rr-title{font-size:24px;font-weight:900;color:#ffd9a3;letter-spacing:2px;font-family:'Georgia',serif;margin-bottom:6px}
+.rr-stats{font-size:13px;color:rgba(245,230,211,.85);line-height:1.7;font-family:sans-serif}
+.rr-points{font-size:32px;font-weight:900;background:linear-gradient(180deg,#ffd9a3,#d4a056);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:6px;font-family:'Georgia',serif}
+
+.bonus-banner{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%) scale(0);font-size:34px;font-weight:900;letter-spacing:2px;background:linear-gradient(180deg,#ffd9a3,#d4a056);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;pointer-events:none;z-index:30;transition:transform .3s cubic-bezier(.5,1.6,.6,1);text-shadow:0 0 24px rgba(0,0,0,.5);font-family:'Georgia',serif}
+.bonus-banner.show{transform:translate(-50%,-50%) scale(1)}
+
+/* End screen */
+.end-title{font-size:clamp(34px,9vw,52px);font-weight:900;letter-spacing:3px;text-align:center;background:linear-gradient(180deg,#ffd9a3 0%,#d4a056 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:6px;line-height:1;font-family:'Georgia',serif}
+.end-score{font-size:clamp(56px,15vw,90px);font-weight:900;color:#fff;text-align:center;line-height:1;margin:14px 0 4px;text-shadow:0 0 30px rgba(212,160,86,.5)}
+.end-lbl{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,217,163,.9);text-align:center;font-weight:bold;font-family:sans-serif}
+.end-stats{display:flex;gap:8px;padding:0 4px;margin-top:14px;flex-wrap:wrap}
+.end-stat{flex:1;min-width:90px;background:rgba(0,0,0,.3);border:1px solid rgba(245,230,211,.18);border-radius:10px;padding:10px 6px;text-align:center}
+.es-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,217,163,.8);font-weight:bold;font-family:sans-serif}
+.es-val{font-size:clamp(16px,4.5vw,22px);font-weight:900;color:#fff;margin-top:4px;font-family:'Georgia',serif}
+.eras-mastered{padding:0 4px;margin-top:14px}
+.em-head{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,217,163,.9);margin-bottom:6px;font-weight:bold;font-family:sans-serif;text-align:center}
+.em-row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(0,0,0,.25);border-radius:6px;margin-bottom:4px;font-size:13px;border-left:3px solid #d4a056}
+.em-name{color:rgba(245,230,211,.9);font-weight:bold}
+.em-pts{color:#ffd9a3;font-weight:900;font-family:sans-serif}
+.end-best{text-align:center;font-size:13px;color:rgba(255,217,163,.9);margin-top:10px;letter-spacing:1px;font-family:sans-serif}
+.end-btns{display:flex;gap:8px;padding:0 4px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.e-btn{flex:1;min-width:130px;background:linear-gradient(180deg,#c45a2b,#8b3815);color:#fff;border:2px solid rgba(255,217,163,.4);padding:13px 14px;font:900 13px 'Georgia',serif;border-radius:24px;letter-spacing:2px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;text-transform:uppercase}
+.e-btn.alt{background:rgba(245,230,211,.1);border-color:rgba(245,230,211,.3)}
+.e-btn:active{transform:scale(.96)}
+.share-btn{display:block;margin:10px auto 0;background:rgba(212,160,86,.15);border:1px solid rgba(212,160,86,.4);color:#ffd9a3;padding:10px 26px;font:bold 12px 'Georgia',serif;border-radius:22px;letter-spacing:2px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;text-transform:uppercase}
+.share-btn.copied{background:rgba(122,158,63,.3);border-color:#7a9e3f;color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START SCREEN -->
+<div class="scr" id="s_start">
+<div class="title">TIMELINE RUSH</div>
+<div class="tag">Order Indian history events chronologically</div>
+<div class="ad-slot">Advertisement</div>
+
+<div class="sec-label">Choose Era</div>
+<div class="opts-grid" id="era_grid"></div>
+
+<div class="sec-label">Difficulty (Events per Round)</div>
+<div class="mode-row">
+<button class="mode-btn" data-diff="5" ontouchstart="">5 EASY</button>
+<button class="mode-btn active" data-diff="7" ontouchstart="">7 MEDIUM</button>
+<button class="mode-btn" data-diff="10" ontouchstart="">10 HARD</button>
+</div>
+<div class="mode-desc" id="mode_desc">5 rounds · drag events into chronological order</div>
+
+<button class="play-btn" id="btn_play" ontouchstart="">▶ PLAY</button>
+<div class="best-line" id="best_line">Best: 0</div>
+
+<div class="howto-box">
+<div class="howto-head" id="howto_head"><span>How to Play</span><span id="howto_arrow">▼</span></div>
+<div class="howto-body" id="howto_body">
+<ul>
+<li>You'll see historical events in random order</li>
+<li>Drag each event card into a slot (1 = oldest, top)</li>
+<li>Position 1 is oldest, last position is newest</li>
+<li>Tap a placed card to remove it; drag-swap to reorder</li>
+<li>Submit reveals correct dates & marks each slot</li>
+<li>+20 per correct, -5 per wrong, all-correct bonus</li>
+<li>Time bonus rewards quick thinking</li>
+<li>5 rounds total — maximise your score!</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="scr hidden" id="s_game">
+<div class="g-head">
+<div class="g-info">
+<div class="g-counter" id="g_counter">Round 1 of 5</div>
+<div class="g-era" id="g_era">All Eras</div>
+</div>
+<div class="g-score-box">
+<div class="g-score">Score: <span id="g_score">0</span></div>
+<div class="g-timer" id="g_timer">⏱ 0s</div>
+</div>
+</div>
+<div class="g-prompt">Drag events into chronological order — oldest at top</div>
+
+<div class="section-label">Events to Order</div>
+<div class="event-pool" id="event_pool"></div>
+
+<div class="section-label">Timeline (Oldest → Newest)</div>
+<div class="timeline" id="timeline"></div>
+
+<button class="submit-btn" id="btn_submit" ontouchstart="">SUBMIT ORDER</button>
+
+<div class="round-result" id="round_result">
+<div class="rr-title" id="rr_title">Round Complete!</div>
+<div class="rr-stats" id="rr_stats"></div>
+<div class="rr-points" id="rr_points">+0</div>
+</div>
+<div class="bonus-banner" id="bonus_banner"></div>
+</div>
+
+<!-- END SCREEN -->
+<div class="scr hidden" id="s_end">
+<div class="end-title" id="end_title">TIMELINE MASTERED</div>
+<div class="end-score" id="end_score">0</div>
+<div class="end-lbl">Final Score</div>
+<div class="end-stats">
+<div class="end-stat"><div class="es-lbl">Accuracy</div><div class="es-val" id="es_acc">0%</div></div>
+<div class="end-stat"><div class="es-lbl">Perfect Rounds</div><div class="es-val" id="es_perfect">0</div></div>
+<div class="end-stat"><div class="es-lbl">Fastest</div><div class="es-val" id="es_fast">--</div></div>
+</div>
+<div class="eras-mastered">
+<div class="em-head">Round Breakdown</div>
+<div id="em_list"></div>
+</div>
+<div class="end-best" id="end_best">Best: 0</div>
+<div class="ad-slot">Advertisement</div>
+<div class="end-btns">
+<button class="e-btn" id="btn_again" ontouchstart="">PLAY AGAIN</button>
+<button class="e-btn alt" id="btn_change" ontouchstart="">CHANGE ERA</button>
+</div>
+<button class="share-btn" id="btn_share" ontouchstart="">📋 SHARE SCORE</button>
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// TIMELINE RUSH — Indian History Chronology Game
+// All years verified against Wikipedia / NCERT / standard
+// UPSC reference texts (Bipan Chandra, Spectrum, Romila Thapar).
+// ============================================================
+var EVENTS = {
+  ancient: [
+    {title:"Indus Valley Civilization peak (Mature Harappan)", year:-2500},
+    {title:"Composition of Rigveda begins", year:-1500},
+    {title:"Aryan migration into Sapta-Sindhu region", year:-1500},
+    {title:"Composition of Later Vedic texts (Brahmanas)", year:-1000},
+    {title:"Mahajanapada period begins (16 kingdoms)", year:-600},
+    {title:"Mahavira founds Jainism doctrine", year:-540},
+    {title:"Buddha attains enlightenment at Bodh Gaya", year:-528},
+    {title:"First Buddhist Council at Rajgriha", year:-483},
+    {title:"Persian invasion under Darius I", year:-518},
+    {title:"Alexander the Great invades India", year:-326},
+    {title:"Mauryan Empire founded by Chandragupta", year:-322},
+    {title:"Megasthenes visits Pataliputra", year:-302},
+    {title:"Bindusara becomes Mauryan emperor", year:-297},
+    {title:"Ashoka's Kalinga War", year:-261},
+    {title:"Third Buddhist Council at Pataliputra", year:-250},
+    {title:"Mauryan Empire collapses (Brihadratha killed)", year:-185},
+    {title:"Shunga dynasty founded by Pushyamitra", year:-185},
+    {title:"Satavahana dynasty established", year:-230},
+    {title:"Indo-Greek invasions of Menander I", year:-155},
+    {title:"Saka era begins under Kanishka", year:78},
+    {title:"Reign of Kanishka begins", year:78},
+    {title:"Fourth Buddhist Council in Kashmir", year:100},
+    {title:"Gupta Empire founded by Chandragupta I", year:320},
+    {title:"Samudragupta's Allahabad inscription", year:350},
+    {title:"Chandragupta II's reign begins (Vikramaditya)", year:380},
+    {title:"Fa-Hien visits India", year:399},
+    {title:"Aryabhata writes Aryabhatiya", year:499},
+    {title:"Hun invasions weaken the Guptas", year:510},
+    {title:"Pulakesin II becomes Chalukya ruler", year:610},
+    {title:"Harshavardhana's coronation at Kannauj", year:606},
+    {title:"Hiuen Tsang visits Harsha's court", year:630},
+    {title:"Pallava king Narasimhavarman defeats Pulakesin II", year:642},
+    {title:"Death of Harshavardhana", year:647},
+    {title:"Arab conquest of Sindh by Muhammad bin Qasim", year:712},
+    {title:"Tripartite struggle for Kannauj begins", year:783},
+    {title:"Chola revival under Vijayalaya", year:850},
+    {title:"Rajaraja Chola I's reign begins", year:985},
+    {title:"Mahmud of Ghazni's first raid on India", year:1000},
+    {title:"Rajendra Chola I's Ganges expedition", year:1019}
+  ],
+  medieval: [
+    {title:"Mahmud of Ghazni sacks Somnath temple", year:1025},
+    {title:"Al-Biruni writes Kitab-ul-Hind", year:1030},
+    {title:"First Battle of Tarain (Prithviraj wins)", year:1191},
+    {title:"Second Battle of Tarain (Ghori wins)", year:1192},
+    {title:"Bakhtiyar Khilji destroys Nalanda", year:1193},
+    {title:"Delhi Sultanate established by Aibak", year:1206},
+    {title:"Iltutmish becomes Sultan of Delhi", year:1211},
+    {title:"Razia Sultana ascends throne", year:1236},
+    {title:"Balban becomes Sultan of Delhi", year:1266},
+    {title:"Khilji dynasty founded by Jalaluddin", year:1290},
+    {title:"Alauddin Khilji's reign begins", year:1296},
+    {title:"Malik Kafur's southern campaigns", year:1310},
+    {title:"Tughlaq dynasty begins (Ghiyasuddin)", year:1320},
+    {title:"Muhammad-bin-Tughlaq shifts capital to Daulatabad", year:1327},
+    {title:"Vijayanagara Empire founded by Harihara & Bukka", year:1336},
+    {title:"Bahmani Sultanate founded by Hasan Gangu", year:1347},
+    {title:"Firoz Shah Tughlaq's reign begins", year:1351},
+    {title:"Timur invades Delhi", year:1398},
+    {title:"Sayyid dynasty founded by Khizr Khan", year:1414},
+    {title:"Lodi dynasty founded by Bahlul Lodi", year:1451},
+    {title:"Vasco da Gama lands at Calicut", year:1498},
+    {title:"Sikandar Lodi shifts capital to Agra", year:1504},
+    {title:"Krishnadevaraya ascends Vijayanagara throne", year:1509},
+    {title:"Portuguese capture Goa under Albuquerque", year:1510},
+    {title:"Battle of Khanwa (Babur vs Rana Sanga)", year:1527},
+    {title:"First Battle of Panipat (Babur founds Mughal Empire)", year:1526},
+    {title:"Humayun ascends Mughal throne", year:1530},
+    {title:"Sher Shah Suri defeats Humayun at Chausa", year:1539},
+    {title:"Sher Shah Suri defeats Humayun at Kannauj", year:1540},
+    {title:"Battle of Talikota (Vijayanagara falls)", year:1565},
+    {title:"Akbar's coronation at Kalanaur", year:1556},
+    {title:"Second Battle of Panipat (Akbar vs Hemu)", year:1556},
+    {title:"Akbar abolishes Jizya", year:1564},
+    {title:"Battle of Haldighati (Akbar vs Rana Pratap)", year:1576},
+    {title:"Akbar founds Din-i-Ilahi", year:1582},
+    {title:"Akbar's death; Jahangir's accession", year:1605},
+    {title:"Jahangir grants trading rights to East India Co.", year:1613},
+    {title:"Sir Thomas Roe arrives at Mughal court", year:1615},
+    {title:"Shah Jahan's reign begins", year:1628},
+    {title:"Construction of Taj Mahal begins", year:1632},
+    {title:"Aurangzeb's accession (defeats Dara Shikoh)", year:1658},
+    {title:"Shivaji's coronation as Chhatrapati", year:1674},
+    {title:"Aurangzeb reimposes Jizya", year:1679},
+    {title:"Aurangzeb's death at Ahmednagar", year:1707},
+    {title:"Battle of Karnal (Nadir Shah defeats Mughals)", year:1739},
+    {title:"Third Battle of Panipat (Marathas vs Abdali)", year:1761}
+  ],
+  modern: [
+    {title:"East India Company chartered by Elizabeth I", year:1600},
+    {title:"British Surat factory established", year:1612},
+    {title:"British acquire Bombay from Portuguese (dowry)", year:1661},
+    {title:"Calcutta founded by Job Charnock", year:1690},
+    {title:"Battle of Plassey (Clive defeats Siraj-ud-Daulah)", year:1757},
+    {title:"Battle of Buxar (vs Mir Qasim, Awadh, Mughal)", year:1764},
+    {title:"Treaty of Allahabad / Diwani of Bengal", year:1765},
+    {title:"Bengal Famine kills millions", year:1770},
+    {title:"Regulating Act passed", year:1773},
+    {title:"First Anglo-Maratha War begins", year:1775},
+    {title:"Pitt's India Act enacted", year:1784},
+    {title:"Cornwallis Code introduced", year:1793},
+    {title:"Permanent Settlement of Bengal", year:1793},
+    {title:"Subsidiary Alliance introduced by Wellesley", year:1798},
+    {title:"Fourth Anglo-Mysore War (Tipu killed)", year:1799},
+    {title:"Treaty of Bassein with Peshwa", year:1802},
+    {title:"Second Anglo-Maratha War begins", year:1803},
+    {title:"Treaty of Amritsar with Ranjit Singh", year:1809},
+    {title:"Charter Act of 1813 (allows missionaries)", year:1813},
+    {title:"Anglo-Nepalese War begins", year:1814},
+    {title:"Third Anglo-Maratha War (Marathas defeated)", year:1818},
+    {title:"Ryotwari System introduced in Madras", year:1820},
+    {title:"Brahmo Samaj founded by Ram Mohan Roy", year:1828},
+    {title:"Sati Abolition Act (Bentinck)", year:1829},
+    {title:"English made medium of instruction (Macaulay)", year:1835},
+    {title:"First Anglo-Afghan War begins", year:1839},
+    {title:"First Anglo-Sikh War begins", year:1845},
+    {title:"Second Anglo-Sikh War; Punjab annexed", year:1849},
+    {title:"Doctrine of Lapse introduced by Dalhousie", year:1848},
+    {title:"First railway line opens (Bombay-Thane)", year:1853},
+    {title:"Hindu Widow Remarriage Act passed", year:1856},
+    {title:"Awadh annexed by Dalhousie", year:1856},
+    {title:"Calcutta, Bombay, Madras Universities founded", year:1857},
+    {title:"Government of India Act / Crown rule", year:1858},
+    {title:"Indigo Revolt in Bengal", year:1859},
+    {title:"Indian Councils Act passed", year:1861},
+    {title:"Arya Samaj founded by Dayananda Saraswati", year:1875},
+    {title:"Vernacular Press Act (Lytton)", year:1878},
+    {title:"Theosophical Society moves to Adyar", year:1882},
+    {title:"Ilbert Bill controversy", year:1883}
+  ],
+  freedom: [
+    {title:"Revolt of 1857 begins at Meerut", year:1857},
+    {title:"Indian National Congress founded by A.O. Hume", year:1885},
+    {title:"Age of Consent Act passed", year:1891},
+    {title:"Vivekananda's Chicago address at Parliament of Religions", year:1893},
+    {title:"Tilak launches Ganapati festival", year:1894},
+    {title:"Curzon becomes Viceroy", year:1899},
+    {title:"Partition of Bengal by Curzon", year:1905},
+    {title:"Swadeshi Movement launched", year:1905},
+    {title:"Muslim League founded at Dhaka", year:1906},
+    {title:"Surat Split of Congress (Moderates vs Extremists)", year:1907},
+    {title:"Morley-Minto Reforms (separate electorates)", year:1909},
+    {title:"Delhi Durbar; capital shifts to Delhi", year:1911},
+    {title:"Annulment of Bengal Partition", year:1911},
+    {title:"Komagata Maru incident", year:1914},
+    {title:"Gandhi returns to India from South Africa", year:1915},
+    {title:"Lucknow Pact (Congress-Muslim League)", year:1916},
+    {title:"Home Rule Movement (Tilak & Annie Besant)", year:1916},
+    {title:"Champaran Satyagraha", year:1917},
+    {title:"Montagu Declaration on responsible government", year:1917},
+    {title:"Kheda & Ahmedabad Satyagraha", year:1918},
+    {title:"Rowlatt Act passed", year:1919},
+    {title:"Jallianwala Bagh Massacre", year:1919},
+    {title:"Government of India Act 1919 (Diarchy)", year:1919},
+    {title:"Khilafat Movement launched", year:1919},
+    {title:"Non-Cooperation Movement launched", year:1920},
+    {title:"Chauri Chaura incident; movement withdrawn", year:1922},
+    {title:"Swaraj Party founded", year:1923},
+    {title:"Kakori Train Conspiracy", year:1925},
+    {title:"RSS founded by Hedgewar at Nagpur", year:1925},
+    {title:"Communist Party of India founded", year:1925},
+    {title:"Simon Commission arrives in India", year:1928},
+    {title:"Bardoli Satyagraha (Patel)", year:1928},
+    {title:"Nehru Report submitted", year:1928},
+    {title:"Saunders shot by Bhagat Singh & Rajguru", year:1928},
+    {title:"Lahore Session - Purna Swaraj declared", year:1929},
+    {title:"Bhagat Singh throws bomb in Assembly", year:1929},
+    {title:"Salt March / Dandi March", year:1930},
+    {title:"First Round Table Conference", year:1930},
+    {title:"Gandhi-Irwin Pact signed", year:1931},
+    {title:"Bhagat Singh, Sukhdev, Rajguru hanged", year:1931},
+    {title:"Second Round Table Conference", year:1931},
+    {title:"Communal Award by MacDonald", year:1932},
+    {title:"Poona Pact (Gandhi-Ambedkar)", year:1932},
+    {title:"Government of India Act 1935 passed", year:1935},
+    {title:"Provincial elections held under 1935 Act", year:1937},
+    {title:"Tripuri Crisis (Bose vs Gandhi)", year:1939},
+    {title:"World War II begins; Congress ministries resign", year:1939},
+    {title:"Lahore Resolution (Pakistan demand)", year:1940},
+    {title:"August Offer rejected", year:1940},
+    {title:"Cripps Mission fails", year:1942},
+    {title:"Quit India Movement launched", year:1942},
+    {title:"INA formed under Subhas Chandra Bose", year:1943},
+    {title:"Bengal Famine kills 2-3 million", year:1943},
+    {title:"INA Trial at Red Fort", year:1945},
+    {title:"Wavell Plan / Shimla Conference", year:1945},
+    {title:"Cabinet Mission Plan", year:1946},
+    {title:"Direct Action Day / Calcutta Killings", year:1946},
+    {title:"Constituent Assembly first meeting", year:1946},
+    {title:"Mountbatten Plan announced", year:1947},
+    {title:"India's Independence; Partition", year:1947},
+    {title:"Gandhi assassinated by Godse", year:1948}
+  ],
+  post: [
+    {title:"India's Independence achieved", year:1947},
+    {title:"Integration of princely states begins (Patel)", year:1947},
+    {title:"First Indo-Pak War over Kashmir", year:1948},
+    {title:"Hyderabad annexed via Operation Polo", year:1948},
+    {title:"Constitution of India adopted", year:1949},
+    {title:"Constitution comes into force; India a Republic", year:1950},
+    {title:"Planning Commission established", year:1950},
+    {title:"First Five-Year Plan launched", year:1951},
+    {title:"First general elections held", year:1951},
+    {title:"Community Development Programme begins", year:1952},
+    {title:"States Reorganization Act (linguistic states)", year:1956},
+    {title:"Hindu Code Bills enacted", year:1956},
+    {title:"Goa liberated from Portuguese", year:1961},
+    {title:"India-China War (Sino-Indian)", year:1962},
+    {title:"Nehru's death", year:1964},
+    {title:"India-Pakistan War (Tashkent Agreement)", year:1965},
+    {title:"Indira Gandhi becomes Prime Minister", year:1966},
+    {title:"Green Revolution begins (HYV seeds)", year:1966},
+    {title:"Naxalbari uprising begins", year:1967},
+    {title:"Bank nationalisation (14 banks)", year:1969},
+    {title:"Bangladesh Liberation War; Indo-Pak War", year:1971},
+    {title:"Simla Agreement signed", year:1972},
+    {title:"Pokhran-I (Smiling Buddha) nuclear test", year:1974},
+    {title:"JP Movement / Total Revolution", year:1974},
+    {title:"Emergency declared (Indira Gandhi)", year:1975},
+    {title:"Janata Party comes to power", year:1977},
+    {title:"42nd Constitutional Amendment", year:1976},
+    {title:"Operation Blue Star at Golden Temple", year:1984},
+    {title:"Indira Gandhi assassinated", year:1984},
+    {title:"Bhopal Gas Tragedy", year:1984},
+    {title:"Anti-Sikh riots in Delhi", year:1984},
+    {title:"Rajiv Gandhi-Longowal Accord", year:1985},
+    {title:"Sri Lanka IPKF deployment", year:1987},
+    {title:"Bofors scandal breaks", year:1987},
+    {title:"V.P. Singh implements Mandal Commission", year:1990},
+    {title:"Rajiv Gandhi assassinated by LTTE", year:1991},
+    {title:"Economic liberalisation (Manmohan Singh)", year:1991},
+    {title:"Babri Masjid demolition", year:1992},
+    {title:"73rd & 74th Constitutional Amendments (Panchayati Raj)", year:1992},
+    {title:"Pokhran-II nuclear tests (Operation Shakti)", year:1998},
+    {title:"Kargil War with Pakistan", year:1999},
+    {title:"Right to Information Act passed", year:2005},
+    {title:"NREGA / MGNREGA enacted", year:2005},
+    {title:"Indo-US Civil Nuclear Deal signed", year:2008},
+    {title:"26/11 Mumbai terror attacks", year:2008},
+    {title:"Right to Education Act passed", year:2009},
+    {title:"Lokpal and Lokayuktas Act passed", year:2013},
+    {title:"Mangalyaan reaches Mars orbit", year:2014},
+    {title:"NITI Aayog replaces Planning Commission", year:2015},
+    {title:"Demonetisation of Rs 500 & 1000 notes", year:2016},
+    {title:"GST implemented nationwide", year:2017},
+    {title:"Article 370 abrogated; J&K reorganised", year:2019},
+    {title:"COVID-19 nationwide lockdown begins", year:2020},
+    {title:"Chandrayaan-3 lands on lunar south pole", year:2023}
+  ]
+};
+
+// Build "all eras" pool
+EVENTS.all = [].concat(EVENTS.ancient, EVENTS.medieval, EVENTS.modern, EVENTS.freedom, EVENTS.post);
+
+// Tag each event with era for reference
+function tagEras(){
+  ['ancient','medieval','modern','freedom','post'].forEach(function(k){
+    EVENTS[k].forEach(function(e){e.era=k});
+  });
+}
+tagEras();
+
+var ERA_INFO = [
+  {key:'ancient',name:'Ancient',sub:'Pre-1206'},
+  {key:'medieval',name:'Medieval',sub:'1206-1757'},
+  {key:'modern',name:'Modern',sub:'1600-1857'},
+  {key:'freedom',name:'Freedom Struggle',sub:'1857-1947'},
+  {key:'post',name:'Post-Independence',sub:'1947-Now'},
+  {key:'all',name:'All Eras',sub:'Mixed timeline'}
+];
+
+// Game state
+var STATE = {
+  era:'all',
+  difficulty:7,
+  totalRounds:5,
+  round:0,
+  score:0,
+  correctCount:0,
+  totalEvents:0,
+  perfectRounds:0,
+  fastestRound:null,
+  roundStart:0,
+  roundEvents:[],
+  slotAssignments:[], // length = difficulty; each is event index in roundEvents or null
+  submitted:false,
+  roundLog:[]
+};
+
+function $(id){return document.getElementById(id)}
+
+// =================== START SCREEN ===================
+function buildEraGrid(){
+  var grid=$('era_grid');
+  grid.innerHTML='';
+  ERA_INFO.forEach(function(e){
+    var btn=document.createElement('button');
+    btn.className='opt-btn'+(e.key===STATE.era?' active':'');
+    btn.dataset.era=e.key;
+    btn.innerHTML=e.name+'<br><span style="font-size:10px;font-weight:normal;opacity:.7">'+e.sub+'</span>';
+    btn.setAttribute('ontouchstart','');
+    btn.addEventListener('click',function(){
+      STATE.era=e.key;
+      buildEraGrid();
+      updateBest();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+document.querySelectorAll('.mode-btn[data-diff]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.mode-btn[data-diff]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    STATE.difficulty=parseInt(b.dataset.diff);
+    $('mode_desc').textContent='5 rounds · '+STATE.difficulty+' events per round · '+(STATE.difficulty*5)+' total events';
+  });
+});
+
+$('howto_head').addEventListener('click',function(){
+  var body=$('howto_body');
+  body.classList.toggle('open');
+  $('howto_arrow').textContent=body.classList.contains('open')?'▲':'▼';
+});
+
+function getBestKey(){return 'tlrush_best_'+STATE.era+'_'+STATE.difficulty}
+function updateBest(){
+  var b=parseInt(localStorage.getItem(getBestKey())||'0');
+  $('best_line').textContent='Best ('+ERA_INFO.find(function(e){return e.key===STATE.era}).name+', '+STATE.difficulty+'): '+b;
+}
+
+$('btn_play').addEventListener('click',startGame);
+
+// =================== GAME LOGIC ===================
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=a[i];a[i]=a[j];a[j]=t;
+  }
+  return a;
+}
+
+function startGame(){
+  STATE.round=0;
+  STATE.score=0;
+  STATE.correctCount=0;
+  STATE.totalEvents=STATE.difficulty*STATE.totalRounds;
+  STATE.perfectRounds=0;
+  STATE.fastestRound=null;
+  STATE.roundLog=[];
+  $('s_start').classList.add('hidden');
+  $('s_game').classList.remove('hidden');
+  $('s_end').classList.add('hidden');
+  nextRound();
+}
+
+function nextRound(){
+  STATE.round++;
+  if(STATE.round>STATE.totalRounds){return endGame()}
+
+  // Pick events: shuffle pool and take first N — ensure unique years for clean ordering
+  var pool=EVENTS[STATE.era].slice();
+  shuffle(pool);
+  var picked=[],seenYears={};
+  for(var i=0;i<pool.length && picked.length<STATE.difficulty;i++){
+    if(!seenYears[pool[i].year]){
+      picked.push(pool[i]);
+      seenYears[pool[i].year]=1;
+    }
+  }
+  // Fallback: if pool too thin, allow duplicates
+  if(picked.length<STATE.difficulty){
+    picked=pool.slice(0,STATE.difficulty);
+  }
+
+  STATE.roundEvents=picked.slice(); // these will be displayed shuffled
+  shuffle(STATE.roundEvents);
+
+  STATE.slotAssignments=new Array(STATE.difficulty).fill(null);
+  STATE.submitted=false;
+  STATE.roundStart=Date.now();
+
+  // Update UI
+  $('g_counter').textContent='Round '+STATE.round+' of '+STATE.totalRounds;
+  $('g_era').textContent=ERA_INFO.find(function(e){return e.key===STATE.era}).name;
+  $('g_score').textContent=STATE.score;
+
+  renderPool();
+  renderTimeline();
+  updateSubmitState();
+  startTimer();
+}
+
+var timerHandle=null;
+function startTimer(){
+  if(timerHandle)clearInterval(timerHandle);
+  $('g_timer').textContent='⏱ 0s';
+  timerHandle=setInterval(function(){
+    if(STATE.submitted)return;
+    var s=Math.floor((Date.now()-STATE.roundStart)/1000);
+    $('g_timer').textContent='⏱ '+s+'s';
+  },500);
+}
+function stopTimer(){if(timerHandle){clearInterval(timerHandle);timerHandle=null}}
+
+function renderPool(){
+  var pool=$('event_pool');
+  pool.innerHTML='';
+  STATE.roundEvents.forEach(function(ev,idx){
+    var card=document.createElement('div');
+    card.className='event-card';
+    card.dataset.idx=idx;
+    card.textContent=ev.title;
+    if(STATE.slotAssignments.indexOf(idx)>=0){
+      card.classList.add('placed');
+    }
+    attachDrag(card);
+    pool.appendChild(card);
+  });
+}
+
+function renderTimeline(){
+  var tl=$('timeline');
+  tl.innerHTML='';
+  for(var i=0;i<STATE.difficulty;i++){
+    var slot=document.createElement('div');
+    slot.className='slot';
+    var pos=document.createElement('div');
+    pos.className='slot-pos';
+    pos.textContent=i+1;
+    var drop=document.createElement('div');
+    drop.className='slot-drop';
+    drop.dataset.slot=i;
+    var assigned=STATE.slotAssignments[i];
+    if(assigned===null){
+      drop.textContent=(i===0?'Oldest':(i===STATE.difficulty-1?'Newest':'Drop event #'+(i+1)));
+    }else{
+      drop.classList.add('has-card');
+      drop.innerHTML='<span class="check-mark">✓</span><span class="x-mark">✕</span><span class="year-badge"></span><div class="placed-card">'+STATE.roundEvents[assigned].title+'</div>';
+      attachSlotDrag(drop);
+    }
+    slot.appendChild(pos);
+    slot.appendChild(drop);
+    tl.appendChild(slot);
+  }
+}
+
+function updateSubmitState(){
+  var ok=STATE.slotAssignments.every(function(v){return v!==null});
+  $('btn_submit').classList.toggle('active',ok && !STATE.submitted);
+}
+
+// =================== DRAG & DROP ===================
+var DRAG={el:null,ghost:null,sourceIdx:null,sourceSlot:null,startX:0,startY:0,offX:0,offY:0,active:false};
+
+function attachDrag(card){
+  card.addEventListener('pointerdown',function(e){
+    if(STATE.submitted)return;
+    e.preventDefault();
+    var idx=parseInt(card.dataset.idx);
+    if(STATE.slotAssignments.indexOf(idx)>=0)return; // already placed
+    beginDrag(card,e,{eventIdx:idx,fromSlot:null});
+  });
+}
+
+function attachSlotDrag(slotEl){
+  slotEl.addEventListener('pointerdown',function(e){
+    if(STATE.submitted)return;
+    e.preventDefault();
+    var slotNum=parseInt(slotEl.dataset.slot);
+    var idx=STATE.slotAssignments[slotNum];
+    if(idx===null||idx===undefined)return;
+    beginDrag(slotEl,e,{eventIdx:idx,fromSlot:slotNum});
+  });
+}
+
+function beginDrag(originEl,e,info){
+  DRAG.active=true;
+  DRAG.sourceIdx=info.eventIdx;
+  DRAG.sourceSlot=info.fromSlot;
+  DRAG.startX=e.clientX;
+  DRAG.startY=e.clientY;
+
+  // Build ghost card
+  var ghost=document.createElement('div');
+  ghost.className='event-card flying';
+  ghost.textContent=STATE.roundEvents[info.eventIdx].title;
+  document.body.appendChild(ghost);
+  // Position ghost matching origin element rect
+  var rect=originEl.getBoundingClientRect();
+  ghost.style.width=rect.width+'px';
+  ghost.style.left=rect.left+'px';
+  ghost.style.top=rect.top+'px';
+  DRAG.offX=e.clientX-rect.left;
+  DRAG.offY=e.clientY-rect.top;
+  DRAG.ghost=ghost;
+  DRAG.el=originEl;
+  originEl.classList.add('dragging');
+
+  document.addEventListener('pointermove',onDragMove);
+  document.addEventListener('pointerup',onDragEnd);
+  document.addEventListener('pointercancel',onDragEnd);
+}
+
+function onDragMove(e){
+  if(!DRAG.active)return;
+  e.preventDefault();
+  DRAG.ghost.style.left=(e.clientX-DRAG.offX)+'px';
+  DRAG.ghost.style.top=(e.clientY-DRAG.offY)+'px';
+  // Highlight slot under cursor
+  document.querySelectorAll('.slot-drop').forEach(function(s){s.classList.remove('hover')});
+  var target=findSlotUnder(e.clientX,e.clientY);
+  if(target)target.classList.add('hover');
+}
+
+function findSlotUnder(x,y){
+  var slots=document.querySelectorAll('.slot-drop');
+  for(var i=0;i<slots.length;i++){
+    var r=slots[i].getBoundingClientRect();
+    if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom)return slots[i];
+  }
+  return null;
+}
+
+function onDragEnd(e){
+  if(!DRAG.active)return;
+  document.removeEventListener('pointermove',onDragMove);
+  document.removeEventListener('pointerup',onDragEnd);
+  document.removeEventListener('pointercancel',onDragEnd);
+
+  var target=findSlotUnder(e.clientX,e.clientY);
+  document.querySelectorAll('.slot-drop').forEach(function(s){s.classList.remove('hover')});
+
+  if(target){
+    var slotNum=parseInt(target.dataset.slot);
+    var existing=STATE.slotAssignments[slotNum];
+    var srcEvent=DRAG.sourceIdx;
+    var srcSlot=DRAG.sourceSlot;
+    if(srcSlot===null){
+      // From pool → slot
+      if(existing!==null){
+        // Swap: existing card goes back to pool (effectively unplaced)
+        STATE.slotAssignments[slotNum]=srcEvent;
+      }else{
+        STATE.slotAssignments[slotNum]=srcEvent;
+      }
+    }else{
+      // Slot → slot (swap or move)
+      if(srcSlot!==slotNum){
+        STATE.slotAssignments[srcSlot]=existing;
+        STATE.slotAssignments[slotNum]=srcEvent;
+      }
+    }
+  }else if(DRAG.sourceSlot!==null){
+    // Dropped outside any slot → remove from slot
+    STATE.slotAssignments[DRAG.sourceSlot]=null;
+  }
+
+  if(DRAG.ghost){DRAG.ghost.remove()}
+  if(DRAG.el){DRAG.el.classList.remove('dragging')}
+  DRAG.ghost=null;DRAG.el=null;DRAG.active=false;DRAG.sourceIdx=null;DRAG.sourceSlot=null;
+
+  renderPool();
+  renderTimeline();
+  updateSubmitState();
+}
+
+// =================== SUBMIT & SCORE ===================
+$('btn_submit').addEventListener('click',function(){
+  if(STATE.submitted)return;
+  if(!STATE.slotAssignments.every(function(v){return v!==null}))return;
+  submitRound();
+});
+
+function submitRound(){
+  STATE.submitted=true;
+  stopTimer();
+  var roundTime=Math.floor((Date.now()-STATE.roundStart)/1000);
+
+  // Compute correct order: sort roundEvents by year ascending → reference indices
+  var sortedRefs=STATE.roundEvents.map(function(_,i){return i})
+    .sort(function(a,b){return STATE.roundEvents[a].year-STATE.roundEvents[b].year});
+
+  // Reveal & score per slot
+  var slots=document.querySelectorAll('.slot-drop');
+  var correctCount=0;
+  for(var i=0;i<STATE.difficulty;i++){
+    var assigned=STATE.slotAssignments[i];
+    var correctIdx=sortedRefs[i];
+    var ev=STATE.roundEvents[assigned];
+    var slotEl=slots[i];
+    var yearBadge=slotEl.querySelector('.year-badge');
+    if(yearBadge){
+      yearBadge.textContent=fmtYear(ev.year);
+    }
+    slotEl.classList.add('reveal');
+    if(assigned===correctIdx){
+      slotEl.classList.add('reveal-correct');
+      correctCount++;
+    }else{
+      slotEl.classList.add('reveal-wrong');
+    }
+  }
+
+  // Scoring
+  var perPosCorrect=20*correctCount;
+  var perPosWrong=-5*(STATE.difficulty-correctCount);
+  var perfectBonus=0;
+  if(correctCount===STATE.difficulty){
+    perfectBonus=50;
+    STATE.perfectRounds++;
+  }
+  // Time bonus: faster than (difficulty * 8s) → up to 30 pts
+  var threshold=STATE.difficulty*8;
+  var timeBonus=Math.max(0,Math.round((threshold-roundTime)*1.5));
+  if(timeBonus>40)timeBonus=40;
+  // Time bonus only if at least half correct
+  if(correctCount<Math.ceil(STATE.difficulty/2))timeBonus=0;
+
+  var roundScore=perPosCorrect+perPosWrong+perfectBonus+timeBonus;
+  STATE.score+=roundScore;
+  STATE.correctCount+=correctCount;
+  STATE.roundLog.push({round:STATE.round,correct:correctCount,total:STATE.difficulty,time:roundTime,points:roundScore});
+
+  if(STATE.fastestRound===null||roundTime<STATE.fastestRound){
+    STATE.fastestRound=roundTime;
+  }
+
+  $('g_score').textContent=STATE.score;
+
+  // Banner
+  if(perfectBonus>0){
+    showBanner('PERFECT! +'+perfectBonus);
+  }else if(correctCount===0){
+    showBanner('Try Again');
+  }
+
+  // Round result popup
+  var rr=$('round_result');
+  $('rr_title').textContent=correctCount===STATE.difficulty?'PERFECT!':(correctCount>=Math.ceil(STATE.difficulty/2)?'Good Round':'Round Done');
+  $('rr_stats').innerHTML='Correct: '+correctCount+'/'+STATE.difficulty+'<br>Time: '+roundTime+'s'+(timeBonus>0?'<br>Time Bonus: +'+timeBonus:'');
+  $('rr_points').textContent=(roundScore>=0?'+':'')+roundScore;
+  setTimeout(function(){rr.classList.add('show')},1200);
+  setTimeout(function(){rr.classList.remove('show')},3000);
+
+  // Auto-advance after 3s after popup hides (~3.5s after submit)
+  setTimeout(function(){
+    nextRound();
+  },3500);
+}
+
+function fmtYear(y){
+  if(y<0)return Math.abs(y)+' BCE';
+  return y+' CE';
+}
+
+function showBanner(txt){
+  var b=$('bonus_banner');
+  b.textContent=txt;
+  b.classList.add('show');
+  setTimeout(function(){b.classList.remove('show')},1100);
+}
+
+// =================== END SCREEN ===================
+function endGame(){
+  $('s_game').classList.add('hidden');
+  $('s_end').classList.remove('hidden');
+  stopTimer();
+
+  $('end_score').textContent=STATE.score;
+  var acc=Math.round(100*STATE.correctCount/STATE.totalEvents);
+  $('es_acc').textContent=acc+'%';
+  $('es_perfect').textContent=STATE.perfectRounds+'/'+STATE.totalRounds;
+  $('es_fast').textContent=STATE.fastestRound!==null?STATE.fastestRound+'s':'--';
+
+  // Round breakdown
+  var emList=$('em_list');
+  emList.innerHTML='';
+  STATE.roundLog.forEach(function(r){
+    var row=document.createElement('div');
+    row.className='em-row';
+    var name=document.createElement('span');
+    name.className='em-name';
+    name.textContent='Round '+r.round+' ('+r.correct+'/'+r.total+', '+r.time+'s)';
+    var pts=document.createElement('span');
+    pts.className='em-pts';
+    pts.textContent=(r.points>=0?'+':'')+r.points;
+    row.appendChild(name);row.appendChild(pts);
+    emList.appendChild(row);
+  });
+
+  // Best
+  var bestKey=getBestKey();
+  var prev=parseInt(localStorage.getItem(bestKey)||'0');
+  if(STATE.score>prev){
+    localStorage.setItem(bestKey,String(STATE.score));
+    $('end_best').textContent='🏆 NEW BEST: '+STATE.score+' (was '+prev+')';
+  }else{
+    $('end_best').textContent='Best: '+prev;
+  }
+
+  // Title fit
+  if(acc>=90)$('end_title').textContent='HISTORIAN!';
+  else if(acc>=70)$('end_title').textContent='WELL DONE';
+  else if(acc>=50)$('end_title').textContent='KEEP STUDYING';
+  else $('end_title').textContent='REVIEW NEEDED';
+}
+
+$('btn_again').addEventListener('click',startGame);
+$('btn_change').addEventListener('click',function(){
+  $('s_end').classList.add('hidden');
+  $('s_start').classList.remove('hidden');
+  updateBest();
+});
+
+$('btn_share').addEventListener('click',function(){
+  var era=ERA_INFO.find(function(e){return e.key===STATE.era}).name;
+  var acc=Math.round(100*STATE.correctCount/STATE.totalEvents);
+  var txt='⏳ Timeline Rush: '+STATE.score+' pts | '+acc+'% accuracy | '+era+' | '+STATE.perfectRounds+'/'+STATE.totalRounds+' perfect rounds. Can you beat me?';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){
+      var b=$('btn_share');
+      b.classList.add('copied');
+      b.textContent='✓ COPIED!';
+      setTimeout(function(){b.classList.remove('copied');b.textContent='📋 SHARE SCORE'},1800);
+    });
+  }
+});
+
+// =================== INIT ===================
+function init(){
+  buildEraGrid();
+  updateBest();
+  $('mode_desc').textContent='5 rounds · '+STATE.difficulty+' events per round · '+(STATE.difficulty*5)+' total events';
+}
+init();
+
+// Prevent default touch behaviors that break drag
+document.addEventListener('touchmove',function(e){if(DRAG.active)e.preventDefault()},{passive:false});
+</script>
+</body>
+</html>

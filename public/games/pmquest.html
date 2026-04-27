@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>PM Quest</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:manipulation;width:100%;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#fef7e0;color:#1a1a2e;position:relative;height:100vh}
+#app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
+.hidden{display:none !important}
+
+/* Indian flag bar */
+.flagbar{height:5px;display:flex;flex-shrink:0}
+.flagbar .saff{flex:1;background:#ff9933}
+.flagbar .wht{flex:1;background:#fff;position:relative}
+.flagbar .wht::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:3px;border-radius:50%;background:#000080}
+.flagbar .grn{flex:1;background:#138808}
+
+/* Parliament silhouette (CSS) */
+.parliament{position:absolute;left:0;right:0;bottom:0;height:90px;pointer-events:none;opacity:0.08;z-index:0}
+.parliament svg{width:100%;height:100%}
+
+/* ====== START SCREEN ====== */
+#start{position:absolute;inset:0;display:flex;flex-direction:column;padding:14px;overflow-y:auto;background:linear-gradient(180deg,#fff8e1 0%,#fff2c7 100%)}
+#start h1{font-size:38px;text-align:center;font-weight:900;letter-spacing:3px;margin-top:6px;background:linear-gradient(90deg,#ff9933 0%,#000080 50%,#138808 100%);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+#start .tag{text-align:center;color:#5a3e15;font-size:12px;margin-top:6px;font-weight:600;font-style:italic}
+.ad{border:1px dashed #999;background:rgba(255,255,255,0.4);color:#777;font-size:11px;padding:10px;text-align:center;margin:8px 0;border-radius:6px}
+.sec-title{font-size:11px;letter-spacing:2px;color:#5a3e15;font-weight:800;margin:12px 0 6px;text-align:center}
+
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.mode-card{background:#fff;border:3px solid #d4b878;border-radius:12px;padding:11px 8px;text-align:center;cursor:pointer;transition:transform .1s,border-color .15s,background .15s;font-weight:700;min-height:84px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px}
+.mode-card.selected{border-color:#ff9933;background:#fff5e1;transform:scale(1.02);box-shadow:0 4px 12px rgba(255,153,51,0.3)}
+.mode-card:active{transform:scale(0.97)}
+.mode-card .mi{font-size:24px;line-height:1}
+.mode-card .mn{font-size:12px;font-weight:900;color:#1a1a2e;letter-spacing:1px}
+.mode-card .md{font-size:9px;color:#7a5a2a;font-weight:600;line-height:1.25}
+
+.diff-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px}
+.diff-card{background:#fff;border:2px solid #d4b878;border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;font-weight:800;font-size:13px;letter-spacing:1px;color:#5a3e15;transition:all .12s}
+.diff-card.selected{background:#000080;color:#fff;border-color:#000080;transform:scale(1.04)}
+.diff-card:active{transform:scale(0.96)}
+.diff-card .dlbl{font-size:11px}
+.diff-card .dsub{font-size:9px;font-weight:600;margin-top:2px;opacity:0.85}
+
+.play-btn{width:100%;background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);color:#fff;border:none;padding:16px;font-size:20px;font-weight:900;letter-spacing:3px;border-radius:12px;cursor:pointer;margin-top:14px;box-shadow:0 4px 0 #c06a10;transition:transform .08s,box-shadow .08s}
+.play-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #c06a10}
+
+.howto{background:#fff;border:2px solid #d4b878;border-radius:10px;margin-top:12px;overflow:hidden}
+.howto-head{padding:10px 12px;font-weight:800;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#fff8e5;color:#5a3e15}
+.howto-body{padding:10px 14px 14px;font-size:12px;line-height:1.6;color:#3a2a10;border-top:1px solid #d4b878}
+.howto-body ul{padding-left:16px}
+.howto-body li{margin-bottom:3px}
+.howto .arr{transition:transform .2s}
+.howto.open .arr{transform:rotate(180deg)}
+
+.scores-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.score-cell{background:#fff;border:2px solid #d4b878;border-radius:8px;padding:8px 4px;text-align:center}
+.score-cell .sl{font-size:9px;color:#7a5a2a;font-weight:700;letter-spacing:1px}
+.score-cell .sv{font-size:16px;color:#ff7711;font-weight:900;margin-top:2px}
+
+/* ====== GAME SCREEN ====== */
+#game{position:absolute;inset:0;display:flex;flex-direction:column;background:linear-gradient(180deg,#fffaeb 0%,#fff2c7 100%)}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#fff;border-bottom:2px solid #d4b878;flex-shrink:0;gap:6px}
+.hud .cell{display:flex;flex-direction:column;align-items:center;min-width:46px}
+.hud .lbl{font-size:8px;color:#7a5a2a;font-weight:700;letter-spacing:1px}
+.hud .val{font-size:16px;font-weight:900;color:#1a1a2e;line-height:1.1}
+.hud .val.warn{color:#d32f2f}
+.hud .back{background:#fff;border:1.5px solid #c9ad74;color:#5a3e15;font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;cursor:pointer}
+.hud .back:active{background:#e8d4a0}
+
+.timer-bar{height:4px;background:#e8d4a0;position:relative;overflow:hidden;flex-shrink:0}
+.timer-fill{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#138808 0%,#ffd54f 50%,#d32f2f 100%);width:100%;transition:width .25s linear}
+
+.round-info{padding:6px 10px;background:#fff;border-bottom:1px solid #e8d4a0;text-align:center;font-size:11px;color:#5a3e15;font-weight:700;letter-spacing:1px;flex-shrink:0}
+.round-info .mode-tag{display:inline-block;padding:2px 8px;background:#000080;color:#fff;border-radius:8px;font-size:9px;margin-left:6px;letter-spacing:1.5px}
+
+.feedback{padding:6px 10px;text-align:center;font-size:12px;font-weight:800;min-height:30px;flex-shrink:0;display:flex;justify-content:center;align-items:center;line-height:1.3}
+.feedback.ok{background:#c8e6c9;color:#1b5e20}
+.feedback.bad{background:#ffcdd2;color:#b71c1c}
+.feedback.idle{background:transparent;color:#7a5a2a}
+
+/* Match arena: two columns + SVG overlay */
+.arena{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;padding:6px 0 0;min-height:0}
+.col-titles{display:grid;grid-template-columns:1fr 1fr;padding:0 8px;flex-shrink:0}
+.col-titles div{font-size:10px;font-weight:800;letter-spacing:1.5px;color:#5a3e15;text-align:center;padding:3px 0}
+.col-titles div span{display:inline-block;padding:3px 10px;background:#fff;border:1.5px solid #d4b878;border-radius:10px}
+
+.cols{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0 6px;padding:0 8px 8px;position:relative;overflow:hidden;min-height:0}
+.col{display:flex;flex-direction:column;gap:6px;justify-content:space-around;position:relative;z-index:2;overflow:hidden}
+.col-left{padding-right:2px}
+.col-right{padding-left:2px}
+
+.svg-overlay{position:absolute;inset:0;pointer-events:none;z-index:1}
+
+.pm-card,.item-card{background:#fff;border:2.5px solid #d4b878;border-radius:10px;padding:6px 7px;cursor:pointer;display:flex;align-items:center;gap:6px;flex:1;min-height:48px;max-height:62px;transition:transform .1s,border-color .15s,background .15s,box-shadow .2s;position:relative}
+.pm-card:active,.item-card:active{transform:scale(0.97)}
+.pm-card.selected{border-color:#ff9933;background:#fff5e1;box-shadow:0 0 0 3px rgba(255,153,51,0.3),0 4px 8px rgba(255,153,51,0.4);transform:scale(1.02)}
+.item-card.selected{border-color:#000080;background:#e8eaf6;box-shadow:0 0 0 3px rgba(0,0,128,0.3),0 4px 8px rgba(0,0,128,0.4);transform:scale(1.02)}
+.pm-card.connected{border-color:#5a3e15;background:#fff8e5}
+.item-card.connected{border-color:#5a3e15;background:#fff8e5}
+.pm-card.correct,.item-card.correct{border-color:#2e7d32 !important;background:#c8e6c9 !important;animation:pop .4s}
+.pm-card.wrong,.item-card.wrong{border-color:#c62828 !important;background:#ffcdd2 !important;animation:shake .35s}
+.pm-card.disabled,.item-card.disabled{pointer-events:none}
+
+/* PM photo placeholder (Ashoka Chakra style avatar) */
+.pm-photo{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#ff9933,#138808);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);position:relative;overflow:hidden}
+.pm-photo::before{content:"";position:absolute;inset:2px;border-radius:50%;border:1px dashed rgba(255,255,255,0.7)}
+.pm-photo span{position:relative;z-index:2;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
+
+.pm-info{flex:1;min-width:0}
+.pm-name{font-size:11px;font-weight:900;color:#1a1a2e;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-tenure{font-size:9px;color:#5a3e15;font-weight:600;margin-top:1px;line-height:1.1}
+
+.item-icon{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:#fff8e5;border:1.5px solid #d4b878;display:flex;align-items:center;justify-content:center;font-size:14px}
+.item-text{flex:1;font-size:10px;font-weight:700;color:#1a1a2e;line-height:1.2;min-width:0}
+.item-year{display:block;font-size:9px;font-weight:900;color:#ff7711;margin-bottom:1px;letter-spacing:0.5px}
+.item-desc{display:block;line-height:1.2;font-weight:600}
+
+/* Endpoint dot */
+.endpoint{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #d4b878;transform:translateY(-50%);transition:background .2s,border-color .2s}
+.pm-card .endpoint{right:-4px}
+.item-card .endpoint{left:-4px}
+.pm-card.selected .endpoint{background:#ff9933;border-color:#ff7711}
+.item-card.selected .endpoint{background:#000080;border-color:#000080}
+.pm-card.connected .endpoint,.item-card.connected .endpoint{background:#5a3e15;border-color:#3a2a10}
+.pm-card.correct .endpoint,.item-card.correct .endpoint{background:#2e7d32;border-color:#1b5e20}
+.pm-card.wrong .endpoint,.item-card.wrong .endpoint{background:#c62828;border-color:#8b1818}
+
+.bottom-bar{flex-shrink:0;padding:8px 10px;background:#fff;border-top:2px solid #d4b878;display:flex;gap:8px;align-items:center}
+.clear-btn{flex:0 0 auto;background:#fff;border:1.5px solid #c9ad74;color:#5a3e15;font-size:11px;font-weight:800;padding:10px 14px;border-radius:8px;cursor:pointer;letter-spacing:1px}
+.clear-btn:active{background:#e8d4a0}
+.clear-btn:disabled{opacity:0.45;cursor:not-allowed}
+.submit-btn{flex:1;background:linear-gradient(135deg,#138808 0%,#0a5a05 100%);color:#fff;border:none;padding:12px;font-size:14px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;box-shadow:0 3px 0 #0a5a05;transition:transform .08s,box-shadow .08s}
+.submit-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #0a5a05}
+.submit-btn:disabled{background:#bdbdbd;box-shadow:0 3px 0 #9e9e9e;cursor:not-allowed}
+.next-btn{flex:1;background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);color:#fff;border:none;padding:12px;font-size:14px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;box-shadow:0 3px 0 #c06a10}
+.next-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #c06a10}
+
+/* Reveal explanation panel */
+.reveal-panel{position:absolute;left:8px;right:8px;bottom:60px;background:#fff;border:2px solid #d4b878;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.18);max-height:48vh;overflow-y:auto;z-index:5}
+.reveal-panel.hidden{display:none}
+.rp-head{padding:8px 12px;background:linear-gradient(90deg,#fff5e1,#fff);border-bottom:1px solid #d4b878;font-weight:900;font-size:12px;color:#5a3e15;letter-spacing:1px;position:sticky;top:0}
+.rp-body{padding:6px 10px 10px}
+.rp-row{display:flex;gap:8px;padding:6px 4px;border-bottom:1px dashed #e8d4a0;align-items:flex-start;font-size:10.5px;line-height:1.35}
+.rp-row:last-child{border-bottom:none}
+.rp-row .rp-mark{flex:0 0 auto;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:11px;margin-top:1px}
+.rp-row .rp-mark.ok{background:#2e7d32}
+.rp-row .rp-mark.bad{background:#c62828}
+.rp-row .rp-text{flex:1}
+.rp-row .rp-text b{color:#1a1a2e}
+.rp-row .rp-text .rp-correct{color:#2e7d32;font-weight:800}
+.rp-row .rp-text .rp-correct.bad{color:#c62828}
+
+/* Animations */
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes drawline{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ====== END SCREEN ====== */
+#end{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px;overflow-y:auto;background:linear-gradient(180deg,#fff8e1 0%,#ffe0b2 100%);text-align:center}
+#end h2{font-size:30px;font-weight:900;margin-top:14px;background:linear-gradient(90deg,#ff9933 0%,#000080 50%,#138808 100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:2px}
+#end .final-score{font-size:60px;font-weight:900;color:#ff7711;margin:8px 0;line-height:1}
+#end .label{color:#5a3e15;letter-spacing:2px;font-size:13px;font-weight:700}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.stat-cell{background:#fff;border:2px solid #d4b878;border-radius:10px;padding:12px}
+.stat-cell .sl{font-size:10px;color:#7a5a2a;letter-spacing:1.5px;font-weight:700}
+.stat-cell .sv{font-size:22px;color:#1a1a2e;font-weight:900;margin-top:4px}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.btn-row .b{padding:13px;font-size:14px;font-weight:900;letter-spacing:2px;border-radius:10px;cursor:pointer;border:none;color:#fff}
+.btn-row .b1{background:linear-gradient(135deg,#138808 0%,#0a5a05 100%);box-shadow:0 3px 0 #0a5a05}
+.btn-row .b2{background:linear-gradient(135deg,#ff9933 0%,#ff7711 100%);box-shadow:0 3px 0 #c06a10}
+.btn-row .b:active{transform:translateY(2px)}
+.btn-row .b1:active{box-shadow:0 1px 0 #0a5a05}
+.btn-row .b2:active{box-shadow:0 1px 0 #c06a10}
+
+.celebrate{font-size:42px;margin:6px 0}
+
+/* Toast */
+.toast{position:absolute;left:50%;top:90px;transform:translateX(-50%) translateY(-12px);background:rgba(26,26,46,0.92);color:#fff;padding:8px 14px;border-radius:18px;font-size:12px;font-weight:700;letter-spacing:0.5px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:30;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Streak badge */
+.streak{position:absolute;right:8px;top:48px;background:linear-gradient(135deg,#ff9933,#ff7711);color:#fff;padding:4px 10px;border-radius:14px;font-size:10px;font-weight:900;letter-spacing:1px;box-shadow:0 3px 8px rgba(255,119,17,0.45);z-index:6;display:none;animation:fadein .3s}
+.streak.show{display:block}
+
+@media (max-height:640px){
+  .pm-card,.item-card{min-height:42px;max-height:54px;padding:5px 6px}
+  .pm-photo{width:30px;height:30px;font-size:11px}
+  .pm-name{font-size:10px}
+  .pm-tenure{font-size:8px}
+  .item-text{font-size:9.5px}
+  .item-year{font-size:8.5px}
+  .item-icon{width:26px;height:26px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- Flag bar -->
+<div class="flagbar"><div class="saff"></div><div class="wht"></div><div class="grn"></div></div>
+
+<!-- ====== START SCREEN ====== -->
+<div id="start">
+<h1>PM QUEST</h1>
+<div class="tag">Match Prime Ministers to their iconic moments</div>
+
+<div class="ad">Advertisement</div>
+
+<div class="sec-title">SELECT MODE</div>
+<div class="modes" id="modes">
+  <div class="mode-card selected" data-mode="acts"><div class="mi">A</div><div class="mn">ACTS</div><div class="md">Match policies & laws</div></div>
+  <div class="mode-card" data-mode="tenure"><div class="mi">T</div><div class="mn">TENURE</div><div class="md">Match years in office</div></div>
+  <div class="mode-card" data-mode="quotes"><div class="mi">Q</div><div class="mn">QUOTES</div><div class="md">Match famous slogans</div></div>
+  <div class="mode-card" data-mode="events"><div class="mi">E</div><div class="mn">EVENTS</div><div class="md">Wars & history</div></div>
+</div>
+
+<div class="sec-title">DIFFICULTY</div>
+<div class="diff-row" id="diff-row">
+  <div class="diff-card selected" data-diff="easy"><div class="dlbl">EASY</div><div class="dsub">5 PMs / 90s</div></div>
+  <div class="diff-card" data-diff="medium"><div class="dlbl">MEDIUM</div><div class="dsub">5 PMs / 60s</div></div>
+  <div class="diff-card" data-diff="hard"><div class="dlbl">HARD</div><div class="dsub">5 PMs / 40s</div></div>
+</div>
+
+<button class="play-btn" id="play-btn">PLAY</button>
+
+<div class="scores-row">
+  <div class="score-cell"><div class="sl">BEST</div><div class="sv" id="best-score">0</div></div>
+  <div class="score-cell"><div class="sl">PLAYS</div><div class="sv" id="play-count">0</div></div>
+  <div class="score-cell"><div class="sl">ACCURACY</div><div class="sv" id="best-acc">0%</div></div>
+</div>
+
+<div class="ad">Advertisement</div>
+
+<div class="howto" id="howto">
+  <div class="howto-head"><span>How to Play</span><span class="arr">v</span></div>
+  <div class="howto-body hidden">
+    <ul>
+      <li>5 Prime Ministers on the LEFT, 5 facts on the RIGHT.</li>
+      <li>Tap a PM card, then tap the matching fact to draw a connection line.</li>
+      <li>Tap a connected card again to break and re-draw.</li>
+      <li>Connect all 5 pairs, then SUBMIT to reveal answers.</li>
+      <li>Green line = correct, Red line = wrong. Read explanations.</li>
+      <li>Play 5 rounds = 25 connections total.</li>
+      <li>+20 per correct, +time bonus + streak bonus (3 in a row).</li>
+      <li>Be quick: timer drains every round.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ad">Advertisement</div>
+</div>
+
+<!-- ====== GAME SCREEN ====== -->
+<div id="game" class="hidden">
+  <div class="hud">
+    <button class="back" id="back-btn">BACK</button>
+    <div class="cell"><div class="lbl">ROUND</div><div class="val" id="round-val">1/5</div></div>
+    <div class="cell"><div class="lbl">SCORE</div><div class="val" id="score-val">0</div></div>
+    <div class="cell"><div class="lbl">CORRECT</div><div class="val" id="correct-val">0</div></div>
+    <div class="cell"><div class="lbl">TIME</div><div class="val" id="time-val">90</div></div>
+  </div>
+  <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+  <div class="round-info">Round <span id="round-num">1</span> of 5 <span class="mode-tag" id="mode-tag">ACTS</span></div>
+  <div class="feedback idle" id="feedback">Tap a PM, then tap the matching fact</div>
+
+  <div class="streak" id="streak-badge">STREAK x3</div>
+
+  <div class="arena" id="arena">
+    <div class="col-titles"><div><span>PRIME MINISTER</span></div><div><span id="right-title">ACT / POLICY</span></div></div>
+    <div class="cols" id="cols">
+      <svg class="svg-overlay" id="svg-overlay" preserveAspectRatio="none"></svg>
+      <div class="col col-left" id="col-left"></div>
+      <div class="col col-right" id="col-right"></div>
+    </div>
+    <div class="reveal-panel hidden" id="reveal-panel">
+      <div class="rp-head" id="rp-head">REVEAL</div>
+      <div class="rp-body" id="rp-body"></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="clear-btn" id="clear-btn">CLEAR</button>
+    <button class="submit-btn" id="submit-btn" disabled>SUBMIT (0/5)</button>
+    <button class="next-btn hidden" id="next-btn">NEXT ROUND</button>
+  </div>
+</div>
+
+<!-- ====== END SCREEN ====== -->
+<div id="end" class="hidden">
+  <div class="celebrate" id="end-emoji">*</div>
+  <h2 id="end-title">QUEST COMPLETE</h2>
+  <div class="label">FINAL SCORE</div>
+  <div class="final-score" id="final-score">0</div>
+  <div class="stat-grid">
+    <div class="stat-cell"><div class="sl">CORRECT</div><div class="sv" id="end-correct">0/25</div></div>
+    <div class="stat-cell"><div class="sl">ACCURACY</div><div class="sv" id="end-acc">0%</div></div>
+    <div class="stat-cell"><div class="sl">BEST STREAK</div><div class="sv" id="end-streak">0</div></div>
+    <div class="stat-cell"><div class="sl">BEST SCORE</div><div class="sv" id="end-best">0</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="b b1" id="play-again">PLAY AGAIN</button>
+    <button class="b b2" id="home-btn">HOME</button>
+  </div>
+  <div class="ad" style="margin-top:18px">Advertisement</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   PM QUEST DATA
+   Verified against Wikipedia / PIB / NCERT references.
+   Each PM entry contains acts/events/quotes/tenure pairs.
+   ============================================================ */
+var PMS = [
+  {
+    name:"Jawaharlal Nehru", short:"Nehru", initials:"JN",
+    tenure:"1947-1964", tenureLabel:"Aug 1947 - May 1964 (16y 9m)",
+    color1:"#1976d2", color2:"#0d47a1",
+    acts:[
+      {y:"1951", t:"First Five-Year Plan launched", e:"Modeled on Soviet planning, focused on agriculture and irrigation."},
+      {y:"1954", t:"Panchsheel Treaty signed with China", e:"Five Principles of Peaceful Co-existence with PRC."},
+      {y:"1956", t:"States Reorganisation Act on linguistic lines", e:"Created 14 states and 6 UTs based on language."},
+      {y:"1961", t:"Co-founded Non-Aligned Movement", e:"With Tito, Nasser and Sukarno at the Belgrade Summit."}
+    ],
+    events:[
+      {y:"1962", t:"Sino-Indian War with China", e:"India lost Aksai Chin; impacted Nehru's health."},
+      {y:"1955", t:"Bandung Conference participation", e:"Asian-African Conference promoting non-alignment."}
+    ],
+    quotes:[
+      {y:"1947", t:"\"At the stroke of midnight... freedom\"", e:"Tryst with Destiny speech, 14 August 1947."},
+      {y:"1947", t:"\"Aaram haram hai\" (Rest is forbidden)", e:"His famous call for hard work in nation building."}
+    ]
+  },
+  {
+    name:"Lal Bahadur Shastri", short:"Shastri", initials:"LBS",
+    tenure:"1964-1966", tenureLabel:"Jun 1964 - Jan 1966 (1y 7m)",
+    color1:"#7b1fa2", color2:"#4a148c",
+    acts:[
+      {y:"1965", t:"Launched Green Revolution policy", e:"Backed M.S. Swaminathan's HYV seed programme."},
+      {y:"1965", t:"Started White Revolution / Operation Flood", e:"Created National Dairy Development Board (NDDB)."},
+      {y:"1965", t:"Coined slogan 'Jai Jawan Jai Kisan'", e:"Saluting soldiers and farmers during 1965 war."}
+    ],
+    events:[
+      {y:"1965", t:"Indo-Pakistan War", e:"Forces reached outskirts of Lahore."},
+      {y:"1966", t:"Tashkent Declaration with Pakistan", e:"Signed with Ayub Khan; Shastri died next morning."}
+    ],
+    quotes:[
+      {y:"1965", t:"\"Jai Jawan Jai Kisan\"", e:"Iconic slogan rallying soldiers and farmers."}
+    ]
+  },
+  {
+    name:"Indira Gandhi", short:"Indira", initials:"IG",
+    tenure:"1966-1977, 1980-1984", tenureLabel:"Jan 1966 - Mar 1977; Jan 1980 - Oct 1984 (15y 11m)",
+    color1:"#388e3c", color2:"#1b5e20",
+    acts:[
+      {y:"1969", t:"Nationalisation of 14 major banks", e:"By ordinance; later 6 more in 1980."},
+      {y:"1971", t:"Abolition of Privy Purses (26th Amendment)", e:"Ended privileges of former princely states."},
+      {y:"1974", t:"Pokhran-I 'Smiling Buddha' nuclear test", e:"India's first nuclear test, 18 May 1974."},
+      {y:"1984", t:"Operation Blue Star at Golden Temple", e:"Action against militants in Amritsar."},
+      {y:"1975", t:"20-Point Economic Programme", e:"Anti-poverty plan launched during Emergency."}
+    ],
+    events:[
+      {y:"1971", t:"Bangladesh Liberation War", e:"Created Bangladesh; Pakistan surrendered in Dhaka."},
+      {y:"1975", t:"National Emergency declared", e:"21 months of suspended civil liberties."},
+      {y:"1984", t:"Assassinated by her bodyguards", e:"31 October 1984, after Operation Blue Star."}
+    ],
+    quotes:[
+      {y:"1984", t:"\"I am alive today, I may not be tomorrow\"", e:"Bhubaneswar speech, day before assassination."}
+    ]
+  },
+  {
+    name:"Morarji Desai", short:"Desai", initials:"MD",
+    tenure:"1977-1979", tenureLabel:"Mar 1977 - Jul 1979 (2y 4m)",
+    color1:"#f57c00", color2:"#e65100",
+    acts:[
+      {y:"1978", t:"44th Constitutional Amendment", e:"Reversed key parts of the 42nd Amendment."},
+      {y:"1977", t:"First non-Congress PM (Janata Party)", e:"Formed after Emergency-era backlash."},
+      {y:"1978", t:"Restored fundamental right to property as legal right", e:"Removed Article 19(1)(f); Article 300A added."}
+    ],
+    events:[
+      {y:"1979", t:"Janata Party coalition collapsed", e:"Internal rifts forced his resignation."},
+      {y:"1990", t:"Awarded Nishan-e-Pakistan", e:"Highest civilian honour of Pakistan."}
+    ],
+    quotes:[
+      {y:"1977", t:"\"Truth is one, paths are many\"", e:"Reflecting his Gandhian philosophy."}
+    ]
+  },
+  {
+    name:"Charan Singh", short:"Charan", initials:"CS",
+    tenure:"1979-1980", tenureLabel:"Jul 1979 - Jan 1980 (170 days)",
+    color1:"#5d4037", color2:"#3e2723",
+    acts:[
+      {y:"1979", t:"Champion of farmer-centric policies", e:"Prioritised rural and agrarian reforms."},
+      {y:"1979", t:"Never faced Parliament as PM", e:"Resigned before facing a confidence vote."}
+    ],
+    events:[
+      {y:"1979", t:"Shortest-serving PM (until then)", e:"Held office for only 170 days."}
+    ],
+    quotes:[
+      {y:"1979", t:"\"India lives in its villages\"", e:"His core political philosophy."}
+    ]
+  },
+  {
+    name:"Rajiv Gandhi", short:"Rajiv", initials:"RG",
+    tenure:"1984-1989", tenureLabel:"Oct 1984 - Dec 1989 (5y 1m)",
+    color1:"#0288d1", color2:"#01579b",
+    acts:[
+      {y:"1985", t:"Anti-Defection Law (52nd Amendment)", e:"Added Tenth Schedule to curb floor-crossing."},
+      {y:"1989", t:"Voting age reduced from 21 to 18 (61st)", e:"Empowered young voters across India."},
+      {y:"1986", t:"Telecom revolution via C-DOT", e:"Founded Centre for Development of Telematics."},
+      {y:"1992", t:"73rd-74th Amendments groundwork (passed posthumously)", e:"Drafts on Panchayati Raj and Municipalities began under him."}
+    ],
+    events:[
+      {y:"1984", t:"Bhopal gas tragedy aftermath", e:"Took office days after Bhopal disaster."},
+      {y:"1987", t:"Bofors howitzer scandal", e:"Allegations of arms-deal kickbacks."},
+      {y:"1987", t:"Indo-Sri Lanka Peace Accord", e:"Sent IPKF to Sri Lanka."},
+      {y:"1991", t:"Assassinated at Sriperumbudur", e:"Killed by LTTE suicide bomber on 21 May 1991."}
+    ],
+    quotes:[
+      {y:"1985", t:"\"Only 15 paise of every rupee reaches the poor\"", e:"His indictment of leaky welfare schemes."}
+    ]
+  },
+  {
+    name:"V.P. Singh", short:"VP Singh", initials:"VP",
+    tenure:"1989-1990", tenureLabel:"Dec 1989 - Nov 1990 (343 days)",
+    color1:"#c62828", color2:"#8e0000",
+    acts:[
+      {y:"1990", t:"Implementation of Mandal Commission", e:"27% reservation for OBCs in central jobs."},
+      {y:"1990", t:"Janata Dal leader & National Front PM", e:"Headed coalition supported by BJP & Left."}
+    ],
+    events:[
+      {y:"1990", t:"Anti-Mandal protests across India", e:"Self-immolation by student Rajiv Goswami."},
+      {y:"1990", t:"BJP withdrew support after Rath Yatra", e:"Brought down his minority government."}
+    ],
+    quotes:[
+      {y:"1990", t:"\"Raja nahin fakir hai, desh ki taqdir hai\"", e:"Slogan during 1989 Bofors-fuelled campaign."}
+    ]
+  },
+  {
+    name:"P.V. Narasimha Rao", short:"Rao", initials:"PVN",
+    tenure:"1991-1996", tenureLabel:"Jun 1991 - May 1996 (4y 11m)",
+    color1:"#00695c", color2:"#004d40",
+    acts:[
+      {y:"1991", t:"Launched Economic Liberalisation (LPG)", e:"Liberalisation, Privatisation, Globalisation; ended licence raj."},
+      {y:"1991", t:"Devaluation of rupee & New Industrial Policy", e:"Manmohan Singh as FM presented landmark Budget."},
+      {y:"1992", t:"73rd & 74th Constitutional Amendments", e:"Constitutional status to Panchayats and Municipalities."},
+      {y:"1991", t:"Look East Policy launched", e:"Strategic engagement with Southeast Asia."}
+    ],
+    events:[
+      {y:"1992", t:"Babri Masjid demolition in Ayodhya", e:"6 December 1992; led to nationwide riots."},
+      {y:"1992", t:"Harshad Mehta securities scam exposed", e:"Rs 4,000+ crore Bombay stock exchange scandal."}
+    ],
+    quotes:[
+      {y:"1991", t:"\"Not making a decision is also a decision\"", e:"Famous strategic ambiguity attributed to him."}
+    ]
+  },
+  {
+    name:"H.D. Deve Gowda", short:"Deve Gowda", initials:"HDG",
+    tenure:"1996-1997", tenureLabel:"Jun 1996 - Apr 1997 (10 months)",
+    color1:"#558b2f", color2:"#33691e",
+    acts:[
+      {y:"1996", t:"United Front coalition PM", e:"Backed by Congress from outside; 13-party alliance."},
+      {y:"1996", t:"Announced National Highways special focus", e:"Forerunner to later Quadrilateral plans."}
+    ],
+    events:[
+      {y:"1997", t:"Congress withdrew support", e:"Forced his exit; succeeded by I.K. Gujral."}
+    ],
+    quotes:[]
+  },
+  {
+    name:"I.K. Gujral", short:"Gujral", initials:"IKG",
+    tenure:"1997-1998", tenureLabel:"Apr 1997 - Mar 1998 (332 days)",
+    color1:"#6a1b9a", color2:"#4a148c",
+    acts:[
+      {y:"1997", t:"Gujral Doctrine on neighbourhood policy", e:"Five principles of non-reciprocal diplomacy."},
+      {y:"1997", t:"50th anniversary of Independence celebrations", e:"Held August 1997 Midnight Session of Parliament."}
+    ],
+    events:[
+      {y:"1998", t:"Government fell over DMK-Jain Commission row", e:"Congress withdrew support over LTTE references."}
+    ],
+    quotes:[]
+  },
+  {
+    name:"Atal Bihari Vajpayee", short:"Vajpayee", initials:"ABV",
+    tenure:"1996, 1998-2004", tenureLabel:"May 1996 (13 days); Mar 1998 - May 2004 (6y 2m)",
+    color1:"#ef6c00", color2:"#bf360c",
+    acts:[
+      {y:"1998", t:"Pokhran-II nuclear tests (Operation Shakti)", e:"Five tests; India declared a nuclear weapon state."},
+      {y:"2001", t:"Sarva Shiksha Abhiyan launched", e:"Universal elementary education programme."},
+      {y:"1998", t:"Golden Quadrilateral / NHDP started", e:"Connecting Delhi-Mumbai-Chennai-Kolkata by highway."},
+      {y:"1999", t:"Delhi-Lahore Bus Service (Sada-e-Sarhad)", e:"Crossed Wagah border; led to Lahore Declaration."},
+      {y:"2000", t:"Three new states created", e:"Chhattisgarh, Uttarakhand, Jharkhand carved out."}
+    ],
+    events:[
+      {y:"1999", t:"Kargil War (Operation Vijay)", e:"Pakistani intrusion repelled in Kashmir heights."},
+      {y:"2001", t:"Parliament attack in New Delhi", e:"13 December 2001; led to Operation Parakram."},
+      {y:"1999", t:"Indian Airlines IC-814 hijacking", e:"Plane taken to Kandahar; 3 terrorists released."}
+    ],
+    quotes:[
+      {y:"1996", t:"\"You can change friends but not neighbours\"", e:"On India-Pakistan relations."},
+      {y:"1998", t:"\"India is now a nuclear weapon state\"", e:"After Pokhran-II tests, May 1998."}
+    ]
+  },
+  {
+    name:"Manmohan Singh", short:"Manmohan", initials:"MMS",
+    tenure:"2004-2014", tenureLabel:"May 2004 - May 2014 (10y 4d)",
+    color1:"#0277bd", color2:"#01579b",
+    acts:[
+      {y:"2005", t:"MGNREGA - 100 days rural employment guarantee", e:"World's largest workfare programme."},
+      {y:"2005", t:"Right to Information Act (RTI)", e:"Empowered citizens to demand government info."},
+      {y:"2009", t:"Right to Education Act (RTE)", e:"Free & compulsory education for ages 6-14."},
+      {y:"2009", t:"UIDAI / Aadhaar programme launched", e:"Unique 12-digit ID for residents of India."},
+      {y:"2008", t:"Indo-US Civil Nuclear Deal (123 Agreement)", e:"Ended India's nuclear isolation; survived trust vote."},
+      {y:"2013", t:"National Food Security Act", e:"Subsidised foodgrains to 2/3 of population."}
+    ],
+    events:[
+      {y:"2008", t:"26/11 Mumbai terror attacks", e:"Lashkar-e-Taiba siege; 166 killed."},
+      {y:"2011", t:"Anna Hazare anti-corruption movement", e:"Demand for Jan Lokpal Bill."}
+    ],
+    quotes:[
+      {y:"2014", t:"\"History will be kinder to me than the media\"", e:"Famous final press conference remark."}
+    ]
+  },
+  {
+    name:"Narendra Modi", short:"Modi", initials:"NM",
+    tenure:"2014-present", tenureLabel:"May 2014 onwards",
+    color1:"#d84315", color2:"#bf360c",
+    acts:[
+      {y:"2014", t:"Swachh Bharat Abhiyan launched", e:"National cleanliness mission, 2 October 2014."},
+      {y:"2014", t:"Pradhan Mantri Jan Dhan Yojana", e:"Mass financial inclusion through bank accounts."},
+      {y:"2016", t:"Demonetisation of Rs 500 & Rs 1000 notes", e:"86% of currency in circulation withdrawn overnight."},
+      {y:"2017", t:"Goods and Services Tax (GST) rolled out", e:"'One nation, one tax' from 1 July 2017."},
+      {y:"2019", t:"Abrogation of Article 370 in J&K", e:"Special status revoked; J&K and Ladakh became UTs."},
+      {y:"2019", t:"Citizenship Amendment Act (CAA)", e:"Citizenship for persecuted minorities from 3 nations."},
+      {y:"2019", t:"PM-KISAN income support scheme", e:"Rs 6,000/year to small farmers."},
+      {y:"2018", t:"Ayushman Bharat / PMJAY launched", e:"Health cover up to Rs 5 lakh per family."},
+      {y:"2020", t:"National Education Policy (NEP) 2020", e:"First major education reform in 34 years."},
+      {y:"2023", t:"India's G20 Presidency / Delhi Declaration", e:"Hosted G20 Summit in September 2023."}
+    ],
+    events:[
+      {y:"2016", t:"Surgical strikes across LoC", e:"Response to Uri attack, September 2016."},
+      {y:"2019", t:"Balakot air strike in Pakistan", e:"Response to Pulwama attack on CRPF."},
+      {y:"2020", t:"COVID-19 lockdown & vaccination drive", e:"World's largest vaccination programme."},
+      {y:"2023", t:"Chandrayaan-3 lands near Moon's south pole", e:"India became 4th nation to soft-land on Moon."}
+    ],
+    quotes:[
+      {y:"2014", t:"\"Sabka Saath, Sabka Vikas\"", e:"Together with all, development for all."},
+      {y:"2014", t:"\"Minimum Government, Maximum Governance\"", e:"Core governance philosophy."}
+    ]
+  }
+];
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+var STATE = {
+  mode: "acts",
+  difficulty: "easy",
+  round: 0,        // 0-indexed
+  totalRounds: 5,
+  score: 0,
+  correct: 0,
+  total: 0,        // total connections attempted
+  streak: 0,
+  bestStreak: 0,
+  selectedPM: null,
+  selectedItem: null,
+  connections: [], // {pmIdx, itemIdx, isCorrect}
+  pmCards: [],     // current 5 PM objects
+  itemCards: [],   // current 5 item objects (each has {pmIdx, y, t, e, type})
+  timer: null,
+  timeLeft: 0,
+  maxTime: 90,
+  phase: "select", // select | reveal
+  drawing: false
+};
+
+var DIFF_TIMES = { easy:90, medium:60, hard:40 };
+
+/* Best score persistence */
+function loadStats(){
+  try{
+    var s = localStorage.getItem("pmquest_stats");
+    if(!s) return {best:0,plays:0,bestAcc:0,bestStreak:0};
+    return JSON.parse(s);
+  }catch(e){return {best:0,plays:0,bestAcc:0,bestStreak:0};}
+}
+function saveStats(stats){
+  try{ localStorage.setItem("pmquest_stats", JSON.stringify(stats)); }catch(e){}
+}
+
+/* ============================================================
+   START SCREEN BINDINGS
+   ============================================================ */
+var modeCards = document.querySelectorAll(".mode-card");
+modeCards.forEach(function(c){
+  c.addEventListener("click", function(){
+    modeCards.forEach(function(x){x.classList.remove("selected");});
+    c.classList.add("selected");
+    STATE.mode = c.getAttribute("data-mode");
+  });
+});
+
+var diffCards = document.querySelectorAll(".diff-card");
+diffCards.forEach(function(c){
+  c.addEventListener("click", function(){
+    diffCards.forEach(function(x){x.classList.remove("selected");});
+    c.classList.add("selected");
+    STATE.difficulty = c.getAttribute("data-diff");
+  });
+});
+
+document.querySelector(".howto-head").addEventListener("click", function(){
+  var ho = document.getElementById("howto");
+  ho.classList.toggle("open");
+  ho.querySelector(".howto-body").classList.toggle("hidden");
+});
+
+document.getElementById("play-btn").addEventListener("click", startGame);
+document.getElementById("back-btn").addEventListener("click", goHome);
+document.getElementById("home-btn").addEventListener("click", goHome);
+document.getElementById("play-again").addEventListener("click", startGame);
+
+document.getElementById("clear-btn").addEventListener("click", clearAll);
+document.getElementById("submit-btn").addEventListener("click", submitRound);
+document.getElementById("next-btn").addEventListener("click", nextRound);
+
+window.addEventListener("resize", function(){
+  if(!document.getElementById("game").classList.contains("hidden")){
+    redrawConnections();
+  }
+});
+
+refreshStartUI();
+
+function refreshStartUI(){
+  var stats = loadStats();
+  document.getElementById("best-score").textContent = stats.best || 0;
+  document.getElementById("play-count").textContent = stats.plays || 0;
+  document.getElementById("best-acc").textContent = (stats.bestAcc || 0) + "%";
+}
+
+function goHome(){
+  stopTimer();
+  document.getElementById("end").classList.add("hidden");
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("start").classList.remove("hidden");
+  refreshStartUI();
+}
+
+/* ============================================================
+   START NEW GAME
+   ============================================================ */
+function startGame(){
+  STATE.round = 0;
+  STATE.score = 0;
+  STATE.correct = 0;
+  STATE.total = 0;
+  STATE.streak = 0;
+  STATE.bestStreak = 0;
+  STATE.maxTime = DIFF_TIMES[STATE.difficulty];
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("end").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  setupRound();
+}
+
+/* ============================================================
+   ROUND SETUP — pick 5 PMs and 5 items based on mode
+   Each item has a unique correct PM.
+   ============================================================ */
+function setupRound(){
+  STATE.phase = "select";
+  STATE.connections = [];
+  STATE.selectedPM = null;
+  STATE.selectedItem = null;
+
+  // Build pool of PMs that have at least one item of the chosen mode/type
+  var pool = PMS.filter(function(p){
+    var arr = getModeArr(p, STATE.mode);
+    return arr && arr.length > 0;
+  });
+
+  // Difficulty: hard => prefer obscure PMs, easy => prefer well-known
+  // We'll just shuffle and pick 5, but for "easy" weight large entries first.
+  var picks = pickPMs(pool, 5, STATE.difficulty);
+
+  STATE.pmCards = picks.map(function(p){
+    var arr = getModeArr(p, STATE.mode);
+    var item = arr[Math.floor(Math.random()*arr.length)];
+    return { pm:p, item:item };
+  });
+
+  // itemCards in shuffled order
+  STATE.itemCards = shuffle(STATE.pmCards.map(function(c, i){
+    return Object.assign({}, c.item, { pmIdx:i, type:STATE.mode });
+  }));
+
+  // UI refresh
+  document.getElementById("round-val").textContent = (STATE.round+1) + "/" + STATE.totalRounds;
+  document.getElementById("round-num").textContent = STATE.round+1;
+  document.getElementById("score-val").textContent = STATE.score;
+  document.getElementById("correct-val").textContent = STATE.correct;
+  document.getElementById("mode-tag").textContent = STATE.mode.toUpperCase();
+  document.getElementById("right-title").textContent = rightColTitle(STATE.mode);
+  setFeedback("Tap a PM, then tap the matching item", "idle");
+
+  // submit/next/clear buttons
+  document.getElementById("submit-btn").classList.remove("hidden");
+  document.getElementById("submit-btn").disabled = true;
+  document.getElementById("submit-btn").textContent = "SUBMIT (0/5)";
+  document.getElementById("clear-btn").classList.remove("hidden");
+  document.getElementById("clear-btn").disabled = true;
+  document.getElementById("next-btn").classList.add("hidden");
+  document.getElementById("reveal-panel").classList.add("hidden");
+  document.getElementById("streak-badge").classList.remove("show");
+
+  renderColumns();
+  startTimer();
+  // small delay for layout, then position SVG
+  setTimeout(redrawConnections, 50);
+}
+
+function getModeArr(pm, mode){
+  if(mode==="tenure") return [{y:pm.tenure, t:"Tenure: "+pm.tenureLabel, e:"Total years as Prime Minister."}];
+  if(mode==="acts")   return pm.acts;
+  if(mode==="quotes") return pm.quotes;
+  if(mode==="events") return pm.events;
+  return [];
+}
+
+function rightColTitle(mode){
+  if(mode==="tenure") return "TENURE / YEARS";
+  if(mode==="acts")   return "ACT / POLICY";
+  if(mode==="quotes") return "FAMOUS QUOTE";
+  if(mode==="events") return "EVENT / WAR";
+  return "ITEM";
+}
+
+function pickPMs(pool, n, diff){
+  var copy = pool.slice();
+  // Bias by difficulty: easy = well-known long-tenure PMs first; hard = include obscure
+  if(diff==="easy"){
+    copy.sort(function(a,b){
+      // prefer PMs with longer tenure label or major presence
+      var rank = ["Modi","Manmohan","Vajpayee","Indira","Nehru","Rao","Shastri","Rajiv"];
+      var ai = rank.indexOf(a.short); var bi = rank.indexOf(b.short);
+      if(ai<0) ai=99; if(bi<0) bi=99;
+      return ai - bi;
+    });
+    // shuffle the top 8 to give variety
+    var top = copy.slice(0, Math.min(8, copy.length));
+    var rest = copy.slice(Math.min(8, copy.length));
+    return shuffle(top).slice(0,n).concat(rest).slice(0,n);
+  }
+  if(diff==="hard"){
+    // prefer including at least 2 obscure ones
+    var obscure = copy.filter(function(p){return ["Charan","Deve Gowda","Gujral","VP Singh","Desai"].indexOf(p.short)>=0;});
+    var well = copy.filter(function(p){return ["Charan","Deve Gowda","Gujral","VP Singh","Desai"].indexOf(p.short)<0;});
+    obscure = shuffle(obscure);
+    well = shuffle(well);
+    var picks = [];
+    if(obscure.length>=2) picks = obscure.slice(0,2);
+    while(picks.length<n && well.length>0){ picks.push(well.shift()); }
+    while(picks.length<n && obscure.length>0){ picks.push(obscure.shift()); }
+    return shuffle(picks).slice(0,n);
+  }
+  return shuffle(copy).slice(0,n);
+}
+
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+  }
+  return arr;
+}
+
+/* ============================================================
+   COLUMN RENDERING
+   ============================================================ */
+function renderColumns(){
+  var L = document.getElementById("col-left");
+  var R = document.getElementById("col-right");
+  L.innerHTML = ""; R.innerHTML = "";
+
+  STATE.pmCards.forEach(function(c, i){
+    var d = document.createElement("div");
+    d.className = "pm-card";
+    d.setAttribute("data-pm", String(i));
+    var avatarStyle = "background:linear-gradient(135deg,"+c.pm.color1+","+c.pm.color2+")";
+    d.innerHTML = ''+
+      '<div class="pm-photo" style="'+avatarStyle+'"><span>'+c.pm.initials+'</span></div>'+
+      '<div class="pm-info">'+
+        '<div class="pm-name">'+c.pm.short+'</div>'+
+        '<div class="pm-tenure">'+c.pm.tenure+'</div>'+
+      '</div>'+
+      '<div class="endpoint"></div>';
+    d.addEventListener("click", function(){ onPMClick(i); });
+    L.appendChild(d);
+  });
+
+  STATE.itemCards.forEach(function(it, i){
+    var d = document.createElement("div");
+    d.className = "item-card";
+    d.setAttribute("data-item", String(i));
+    var icon = modeIcon(it.type);
+    var primaryText = it.t;
+    if(STATE.mode==="tenure"){
+      primaryText = it.t.replace("Tenure: ", "");
+    }
+    d.innerHTML = ''+
+      '<div class="endpoint"></div>'+
+      '<div class="item-icon">'+icon+'</div>'+
+      '<div class="item-text">'+
+        (it.y ? '<span class="item-year">'+it.y+'</span>' : '')+
+        '<span class="item-desc">'+primaryText+'</span>'+
+      '</div>';
+    d.addEventListener("click", function(){ onItemClick(i); });
+    R.appendChild(d);
+  });
+}
+
+function modeIcon(type){
+  if(type==="tenure") return "T";
+  if(type==="acts")   return "A";
+  if(type==="quotes") return "Q";
+  if(type==="events") return "E";
+  return "*";
+}
+
+/* ============================================================
+   SELECTION & CONNECTION LOGIC
+   ============================================================ */
+function onPMClick(i){
+  if(STATE.phase!=="select") return;
+  var existing = findConnByPM(i);
+
+  if(existing!==-1){
+    // tap a connected PM => remove its connection
+    STATE.connections.splice(existing, 1);
+    STATE.selectedPM = null;
+    STATE.selectedItem = null;
+    refreshCardStates();
+    redrawConnections();
+    updateSubmitBtn();
+    return;
+  }
+
+  if(STATE.selectedPM === i){
+    STATE.selectedPM = null; // deselect
+  } else {
+    STATE.selectedPM = i;
+  }
+  // try to complete a pair
+  attemptConnection();
+  refreshCardStates();
+  redrawConnections();
+}
+
+function onItemClick(j){
+  if(STATE.phase!=="select") return;
+  var existing = findConnByItem(j);
+  if(existing!==-1){
+    STATE.connections.splice(existing, 1);
+    STATE.selectedPM = null;
+    STATE.selectedItem = null;
+    refreshCardStates();
+    redrawConnections();
+    updateSubmitBtn();
+    return;
+  }
+
+  if(STATE.selectedItem === j){
+    STATE.selectedItem = null;
+  } else {
+    STATE.selectedItem = j;
+  }
+  attemptConnection();
+  refreshCardStates();
+  redrawConnections();
+}
+
+function attemptConnection(){
+  if(STATE.selectedPM!==null && STATE.selectedItem!==null){
+    // ensure neither is already in a connection (we removed those above)
+    if(findConnByPM(STATE.selectedPM)!==-1 || findConnByItem(STATE.selectedItem)!==-1){
+      return;
+    }
+    STATE.connections.push({ pmIdx:STATE.selectedPM, itemIdx:STATE.selectedItem });
+    STATE.selectedPM = null;
+    STATE.selectedItem = null;
+    updateSubmitBtn();
+  }
+}
+
+function findConnByPM(i){
+  for(var k=0;k<STATE.connections.length;k++){
+    if(STATE.connections[k].pmIdx===i) return k;
+  }
+  return -1;
+}
+function findConnByItem(j){
+  for(var k=0;k<STATE.connections.length;k++){
+    if(STATE.connections[k].itemIdx===j) return k;
+  }
+  return -1;
+}
+
+function refreshCardStates(){
+  var pmEls = document.querySelectorAll(".pm-card");
+  var itEls = document.querySelectorAll(".item-card");
+  pmEls.forEach(function(el, i){
+    el.classList.remove("selected","connected","correct","wrong","disabled");
+    if(STATE.selectedPM===i) el.classList.add("selected");
+    if(findConnByPM(i)!==-1){
+      var conn = STATE.connections[findConnByPM(i)];
+      if(STATE.phase==="reveal"){
+        el.classList.add(conn.isCorrect ? "correct" : "wrong");
+      } else {
+        el.classList.add("connected");
+      }
+    }
+    if(STATE.phase==="reveal") el.classList.add("disabled");
+  });
+  itEls.forEach(function(el, j){
+    el.classList.remove("selected","connected","correct","wrong","disabled");
+    if(STATE.selectedItem===j) el.classList.add("selected");
+    if(findConnByItem(j)!==-1){
+      var conn = STATE.connections[findConnByItem(j)];
+      if(STATE.phase==="reveal"){
+        el.classList.add(conn.isCorrect ? "correct" : "wrong");
+      } else {
+        el.classList.add("connected");
+      }
+    }
+    if(STATE.phase==="reveal") el.classList.add("disabled");
+  });
+}
+
+function updateSubmitBtn(){
+  var n = STATE.connections.length;
+  var btn = document.getElementById("submit-btn");
+  btn.textContent = "SUBMIT (" + n + "/5)";
+  btn.disabled = (n < 5);
+  document.getElementById("clear-btn").disabled = (n===0 && STATE.selectedPM===null && STATE.selectedItem===null);
+}
+
+function clearAll(){
+  if(STATE.phase!=="select") return;
+  STATE.connections = [];
+  STATE.selectedPM = null;
+  STATE.selectedItem = null;
+  refreshCardStates();
+  redrawConnections();
+  updateSubmitBtn();
+}
+
+/* ============================================================
+   SVG CONNECTION LINES
+   ============================================================ */
+function redrawConnections(){
+  var svg = document.getElementById("svg-overlay");
+  if(!svg) return;
+  // size svg to cols container
+  var cols = document.getElementById("cols");
+  var rect = cols.getBoundingClientRect();
+  svg.setAttribute("width", rect.width);
+  svg.setAttribute("height", rect.height);
+  svg.setAttribute("viewBox", "0 0 " + rect.width + " " + rect.height);
+  svg.innerHTML = "";
+
+  // permanent connections
+  STATE.connections.forEach(function(c){
+    var pmEl = document.querySelector('.pm-card[data-pm="'+c.pmIdx+'"]');
+    var itEl = document.querySelector('.item-card[data-item="'+c.itemIdx+'"]');
+    if(!pmEl||!itEl) return;
+    var p1 = endpointPos(pmEl, "right", rect);
+    var p2 = endpointPos(itEl, "left", rect);
+    var stroke = "#5a3e15";
+    var w = 3;
+    var dash = "0";
+    if(STATE.phase==="reveal"){
+      stroke = c.isCorrect ? "#2e7d32" : "#c62828";
+      w = 4;
+    }
+    appendCurve(svg, p1, p2, stroke, w, dash, false);
+    appendDot(svg, p1, stroke);
+    appendDot(svg, p2, stroke);
+  });
+
+  // pending preview line: when one side selected
+  if(STATE.phase==="select"){
+    if(STATE.selectedPM!==null && STATE.selectedItem===null){
+      var pmEl = document.querySelector('.pm-card[data-pm="'+STATE.selectedPM+'"]');
+      if(pmEl){
+        var p1 = endpointPos(pmEl, "right", rect);
+        var p2 = { x: rect.width - 6, y: p1.y };
+        appendCurve(svg, p1, p2, "#ff9933", 2.5, "5,4", true);
+      }
+    } else if(STATE.selectedItem!==null && STATE.selectedPM===null){
+      var itEl = document.querySelector('.item-card[data-item="'+STATE.selectedItem+'"]');
+      if(itEl){
+        var p2 = endpointPos(itEl, "left", rect);
+        var p1 = { x: 6, y: p2.y };
+        appendCurve(svg, p1, p2, "#000080", 2.5, "5,4", true);
+      }
+    }
+  }
+}
+
+function endpointPos(el, side, parentRect){
+  var r = el.getBoundingClientRect();
+  var x = (side==="right") ? (r.right - parentRect.left) : (r.left - parentRect.left);
+  var y = (r.top + r.height/2) - parentRect.top;
+  return { x:x, y:y };
+}
+
+function appendCurve(svg, p1, p2, stroke, w, dash, animate){
+  var dx = (p2.x - p1.x);
+  var c1x = p1.x + dx*0.45;
+  var c1y = p1.y;
+  var c2x = p2.x - dx*0.45;
+  var c2y = p2.y;
+  var d = "M " + p1.x + " " + p1.y + " C " + c1x + " " + c1y + " " + c2x + " " + c2y + " " + p2.x + " " + p2.y;
+  var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+  path.setAttribute("d", d);
+  path.setAttribute("fill","none");
+  path.setAttribute("stroke", stroke);
+  path.setAttribute("stroke-width", String(w));
+  path.setAttribute("stroke-linecap", "round");
+  if(dash && dash !== "0") path.setAttribute("stroke-dasharray", dash);
+  if(animate){
+    path.setAttribute("opacity", "0.85");
+  }
+  svg.appendChild(path);
+}
+
+function appendDot(svg, p, color){
+  var c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+  c.setAttribute("cx", String(p.x));
+  c.setAttribute("cy", String(p.y));
+  c.setAttribute("r", "4");
+  c.setAttribute("fill", color);
+  svg.appendChild(c);
+}
+
+/* ============================================================
+   SUBMIT / SCORING
+   ============================================================ */
+function submitRound(){
+  if(STATE.phase!=="select") return;
+  if(STATE.connections.length<5) return;
+  stopTimer();
+  STATE.phase = "reveal";
+  // grade each connection
+  var gained = 0; var roundCorrect = 0;
+  STATE.connections.forEach(function(c){
+    var item = STATE.itemCards[c.itemIdx];
+    c.isCorrect = (item.pmIdx === c.pmIdx);
+    STATE.total++;
+    if(c.isCorrect){
+      STATE.correct++;
+      roundCorrect++;
+      STATE.streak++;
+      if(STATE.streak > STATE.bestStreak) STATE.bestStreak = STATE.streak;
+      gained += 20;
+      // streak bonus: +10 per streak above 3
+      if(STATE.streak >= 3) gained += 10;
+    } else {
+      STATE.streak = 0;
+    }
+  });
+
+  // time bonus only if perfect round
+  if(roundCorrect===5){
+    var bonus = Math.floor(STATE.timeLeft * 1.5);
+    gained += bonus;
+    showToast("PERFECT! +" + bonus + " time bonus");
+  }
+
+  STATE.score += gained;
+  document.getElementById("score-val").textContent = STATE.score;
+  document.getElementById("correct-val").textContent = STATE.correct;
+  setFeedback(roundCorrect + "/5 correct  +" + gained + " points", roundCorrect>=3 ? "ok" : "bad");
+
+  refreshCardStates();
+  redrawConnections();
+  showRevealPanel(roundCorrect);
+
+  // streak badge
+  if(STATE.streak >= 3){
+    var sb = document.getElementById("streak-badge");
+    sb.textContent = "STREAK x" + STATE.streak;
+    sb.classList.add("show");
+  }
+
+  document.getElementById("submit-btn").classList.add("hidden");
+  document.getElementById("clear-btn").classList.add("hidden");
+  document.getElementById("next-btn").classList.remove("hidden");
+  if(STATE.round+1 >= STATE.totalRounds){
+    document.getElementById("next-btn").textContent = "FINISH";
+  } else {
+    document.getElementById("next-btn").textContent = "NEXT ROUND";
+  }
+}
+
+function showRevealPanel(roundCorrect){
+  var panel = document.getElementById("reveal-panel");
+  var head  = document.getElementById("rp-head");
+  var body  = document.getElementById("rp-body");
+  head.textContent = "REVEAL  -  " + roundCorrect + "/5 CORRECT";
+  body.innerHTML = "";
+  STATE.connections.forEach(function(c){
+    var item = STATE.itemCards[c.itemIdx];
+    var userPM = STATE.pmCards[c.pmIdx].pm;
+    var trueIdx = item.pmIdx;
+    var truePM  = STATE.pmCards[trueIdx].pm;
+    var row = document.createElement("div");
+    row.className = "rp-row";
+    var mk = c.isCorrect ? '<div class="rp-mark ok">v</div>' : '<div class="rp-mark bad">x</div>';
+    var line2;
+    if(c.isCorrect){
+      line2 = '<span class="rp-correct">' + (item.e || "") + '</span>';
+    } else {
+      line2 = 'Belongs to: <span class="rp-correct">' + truePM.short + '</span> &middot; ' + (item.e || "");
+    }
+    row.innerHTML = mk +
+      '<div class="rp-text"><b>' + (item.y?item.y+' - ':'') + item.t + '</b><br>' +
+      'Your pick: ' + userPM.short + '<br>' +
+      line2 + '</div>';
+    body.appendChild(row);
+  });
+  panel.classList.remove("hidden");
+}
+
+function nextRound(){
+  document.getElementById("reveal-panel").classList.add("hidden");
+  STATE.round++;
+  if(STATE.round >= STATE.totalRounds){
+    endGame();
+    return;
+  }
+  setupRound();
+}
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+function startTimer(){
+  STATE.timeLeft = STATE.maxTime;
+  updateTimerUI();
+  stopTimer();
+  STATE.timer = setInterval(function(){
+    STATE.timeLeft -= 1;
+    if(STATE.timeLeft <= 0){
+      STATE.timeLeft = 0;
+      updateTimerUI();
+      stopTimer();
+      autoSubmitOnTimeout();
+      return;
+    }
+    updateTimerUI();
+  }, 1000);
+}
+function stopTimer(){
+  if(STATE.timer){ clearInterval(STATE.timer); STATE.timer=null; }
+}
+function updateTimerUI(){
+  var pct = Math.max(0, (STATE.timeLeft / STATE.maxTime) * 100);
+  document.getElementById("timer-fill").style.width = pct + "%";
+  var v = document.getElementById("time-val");
+  v.textContent = STATE.timeLeft;
+  if(STATE.timeLeft <= 10) v.classList.add("warn"); else v.classList.remove("warn");
+}
+function autoSubmitOnTimeout(){
+  if(STATE.phase!=="select") return;
+  // pad missing connections with random unused pairs (so we still score)
+  while(STATE.connections.length < 5){
+    var freePM = -1, freeItem = -1;
+    for(var i=0;i<5;i++){ if(findConnByPM(i)===-1){ freePM = i; break; } }
+    for(var j=0;j<5;j++){ if(findConnByItem(j)===-1){ freeItem = j; break; } }
+    if(freePM<0||freeItem<0) break;
+    STATE.connections.push({pmIdx:freePM, itemIdx:freeItem});
+  }
+  setFeedback("Time up! Auto-submitted.", "bad");
+  submitRound();
+}
+
+/* ============================================================
+   FEEDBACK / TOAST
+   ============================================================ */
+function setFeedback(text, kind){
+  var f = document.getElementById("feedback");
+  f.textContent = text;
+  f.classList.remove("ok","bad","idle");
+  f.classList.add(kind || "idle");
+}
+function showToast(t){
+  var el = document.getElementById("toast");
+  el.textContent = t;
+  el.classList.add("show");
+  setTimeout(function(){ el.classList.remove("show"); }, 1800);
+}
+
+/* ============================================================
+   END SCREEN
+   ============================================================ */
+function endGame(){
+  stopTimer();
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("end").classList.remove("hidden");
+
+  var acc = STATE.total>0 ? Math.round((STATE.correct/STATE.total)*100) : 0;
+  document.getElementById("final-score").textContent = STATE.score;
+  document.getElementById("end-correct").textContent = STATE.correct + "/" + STATE.total;
+  document.getElementById("end-acc").textContent = acc + "%";
+  document.getElementById("end-streak").textContent = STATE.bestStreak;
+
+  var stats = loadStats();
+  stats.plays = (stats.plays||0) + 1;
+  if(STATE.score > (stats.best||0)) stats.best = STATE.score;
+  if(acc > (stats.bestAcc||0)) stats.bestAcc = acc;
+  if(STATE.bestStreak > (stats.bestStreak||0)) stats.bestStreak = STATE.bestStreak;
+  saveStats(stats);
+  document.getElementById("end-best").textContent = stats.best;
+
+  var emoji = "*"; var title = "QUEST COMPLETE";
+  if(acc>=90){ emoji = "STAR"; title = "OUTSTANDING!"; }
+  else if(acc>=70){ emoji = "+"; title = "WELL DONE!"; }
+  else if(acc>=50){ emoji = "OK"; title = "GOOD EFFORT"; }
+  else { emoji = "?"; title = "KEEP LEARNING"; }
+  document.getElementById("end-emoji").textContent = emoji;
+  document.getElementById("end-title").textContent = title;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+// preload start UI
+refreshStartUI();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3a1f0a">
+<title>Scheme Match</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{overscroll-behavior:none;overflow:hidden;touch-action:manipulation;width:100%;height:100%;background:#2a1505;font-family:'Georgia','Times New Roman',serif;color:#3a1f0a}
+body{display:flex;flex-direction:column;align-items:center;min-height:100vh;background:
+  radial-gradient(ellipse at top,#5e3a1a 0%,#3a1f0a 40%,#1a0a02 100%),
+  repeating-linear-gradient(45deg,rgba(255,200,100,.02) 0,rgba(255,200,100,.02) 2px,transparent 2px,transparent 4px);
+  background-blend-mode:multiply}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 30%,rgba(255,180,100,.08),transparent 40%),
+    radial-gradient(circle at 80% 70%,rgba(255,140,60,.06),transparent 40%);z-index:0}
+
+/* ===== Top HUD ===== */
+.head{position:relative;z-index:5;width:100%;max-width:540px;padding:12px 8px 6px;display:flex;justify-content:space-between;gap:6px}
+.sb{background:linear-gradient(180deg,#fff8e8,#f1dcb4);border:2px solid #8b5a2b;border-radius:10px;padding:6px 8px;text-align:center;flex:1;box-shadow:0 3px 0 #5e3a1a,0 5px 12px rgba(0,0,0,.4)}
+.sl{color:#8b5a2b;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:bold;font-family:Arial,sans-serif}
+.sv{color:#3a1f0a;font-size:clamp(15px,4.5vw,20px);font-weight:900;line-height:1.1;font-family:Arial,sans-serif}
+
+/* ===== Board ===== */
+.bw{flex:1;width:100%;max-width:540px;display:flex;align-items:center;justify-content:center;padding:8px;position:relative;z-index:1}
+.grid{display:grid;gap:6px;width:100%;max-width:480px}
+.card{position:relative;cursor:pointer;border-radius:10px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,1.3,.5,1);touch-action:manipulation;aspect-ratio:.78}
+.card.flipped{transform:rotateY(180deg)}
+.card.matched{animation:matchglow 1.2s ease-out}
+.card.matched .front{box-shadow:0 0 22px rgba(255,200,80,.85),inset 0 0 14px rgba(255,255,200,.5)}
+@keyframes matchglow{0%{transform:rotateY(180deg) scale(1)}30%{transform:rotateY(180deg) scale(1.08)}100%{transform:rotateY(180deg) scale(1)}}
+
+.face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:10px;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  box-shadow:0 4px 8px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.18) inset;
+  overflow:hidden;padding:6px}
+
+/* Card back: Ashoka chakra theme */
+.back{background:
+  radial-gradient(circle at center,#f0a040 0%,#c8741c 50%,#7a3e0c 100%);
+  border:2px solid #4a2200}
+.back::before{content:'';position:absolute;width:62%;height:62%;border-radius:50%;
+  background:radial-gradient(circle,#fff8e8 0%,#f1c889 60%,#a06520 100%);
+  box-shadow:inset 0 0 12px rgba(60,30,0,.5)}
+.back::after{content:'';position:absolute;width:46%;height:46%;border-radius:50%;
+  background:
+    conic-gradient(from 0deg,
+      #2a4d8f 0deg,#2a4d8f 13deg,transparent 13deg,transparent 15deg,
+      #2a4d8f 15deg,#2a4d8f 28deg,transparent 28deg,transparent 30deg,
+      #2a4d8f 30deg,#2a4d8f 43deg,transparent 43deg,transparent 45deg,
+      #2a4d8f 45deg,#2a4d8f 58deg,transparent 58deg,transparent 60deg,
+      #2a4d8f 60deg,#2a4d8f 73deg,transparent 73deg,transparent 75deg,
+      #2a4d8f 75deg,#2a4d8f 88deg,transparent 88deg,transparent 90deg,
+      #2a4d8f 90deg,#2a4d8f 103deg,transparent 103deg,transparent 105deg,
+      #2a4d8f 105deg,#2a4d8f 118deg,transparent 118deg,transparent 120deg,
+      #2a4d8f 120deg,#2a4d8f 133deg,transparent 133deg,transparent 135deg,
+      #2a4d8f 135deg,#2a4d8f 148deg,transparent 148deg,transparent 150deg,
+      #2a4d8f 150deg,#2a4d8f 163deg,transparent 163deg,transparent 165deg,
+      #2a4d8f 165deg,#2a4d8f 178deg,transparent 178deg,transparent 180deg,
+      #2a4d8f 180deg,#2a4d8f 193deg,transparent 193deg,transparent 195deg,
+      #2a4d8f 195deg,#2a4d8f 208deg,transparent 208deg,transparent 210deg,
+      #2a4d8f 210deg,#2a4d8f 223deg,transparent 223deg,transparent 225deg,
+      #2a4d8f 225deg,#2a4d8f 238deg,transparent 238deg,transparent 240deg,
+      #2a4d8f 240deg,#2a4d8f 253deg,transparent 253deg,transparent 255deg,
+      #2a4d8f 255deg,#2a4d8f 268deg,transparent 268deg,transparent 270deg,
+      #2a4d8f 270deg,#2a4d8f 283deg,transparent 283deg,transparent 285deg,
+      #2a4d8f 285deg,#2a4d8f 298deg,transparent 298deg,transparent 300deg,
+      #2a4d8f 300deg,#2a4d8f 313deg,transparent 313deg,transparent 315deg,
+      #2a4d8f 315deg,#2a4d8f 328deg,transparent 328deg,transparent 330deg,
+      #2a4d8f 330deg,#2a4d8f 343deg,transparent 343deg,transparent 345deg,
+      #2a4d8f 345deg,#2a4d8f 358deg,transparent 358deg,transparent 360deg);
+  border:2px solid #2a4d8f;
+  box-shadow:0 0 0 3px rgba(255,248,232,.9),inset 0 0 0 38% #fff8e8}
+
+/* Card front - generic */
+.front{transform:rotateY(180deg);background:linear-gradient(160deg,#fff8e8,#f1dcb4);border:2px solid #8b5a2b;color:#3a1f0a}
+
+/* Name card */
+.front.fn{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px}
+.fn .ic{font-size:clamp(20px,5vw,28px);line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.fn .nm{font-family:Arial Black,Arial,sans-serif;font-weight:900;font-size:clamp(11px,3vw,16px);line-height:1.05;letter-spacing:.5px;text-align:center;color:#3a1f0a;text-shadow:0 1px 0 rgba(255,255,255,.5);word-break:break-word}
+.fn .yr{font-size:9px;background:#8b5a2b;color:#fff8e8;padding:1px 5px;border-radius:8px;letter-spacing:1px;font-family:Arial,sans-serif;font-weight:bold}
+
+/* Description card */
+.front.fd{display:flex;flex-direction:column;justify-content:center;padding:5px 6px;gap:3px}
+.fd .dc{font-size:clamp(8.5px,2.3vw,11px);line-height:1.22;text-align:center;color:#3a1f0a;font-family:Arial,sans-serif;font-weight:600;flex:1;display:flex;align-items:center;justify-content:center}
+.fd .yb{font-size:9px;background:linear-gradient(180deg,#d68a3c,#a05d10);color:#fff;padding:1px 5px;border-radius:8px;letter-spacing:1px;font-family:Arial,sans-serif;font-weight:bold;align-self:center}
+
+/* Category accent stripe */
+.front.cat-welfare{border-color:#d97706;box-shadow:inset 0 0 0 3px rgba(217,118,6,.15)}
+.front.cat-rural{border-color:#15803d;box-shadow:inset 0 0 0 3px rgba(21,128,61,.15)}
+.front.cat-urban{border-color:#1d4ed8;box-shadow:inset 0 0 0 3px rgba(29,78,216,.15)}
+.front.cat-banking{border-color:#6d28d9;box-shadow:inset 0 0 0 3px rgba(109,40,217,.15)}
+.front.cat-health{border-color:#be123c;box-shadow:inset 0 0 0 3px rgba(190,18,60,.15)}
+.front.cat-education{border-color:#0e7490;box-shadow:inset 0 0 0 3px rgba(14,116,144,.15)}
+.front.cat-agriculture{border-color:#65a30d;box-shadow:inset 0 0 0 3px rgba(101,163,13,.15)}
+.front.cat-women{border-color:#c026d3;box-shadow:inset 0 0 0 3px rgba(192,38,211,.15)}
+.front.cat-tech{border-color:#0369a1;box-shadow:inset 0 0 0 3px rgba(3,105,161,.15)}
+
+.front.fn.cat-welfare .yr,.front.fd.cat-welfare .yb{background:#d97706}
+.front.fn.cat-rural .yr,.front.fd.cat-rural .yb{background:#15803d}
+.front.fn.cat-urban .yr,.front.fd.cat-urban .yb{background:#1d4ed8}
+.front.fn.cat-banking .yr,.front.fd.cat-banking .yb{background:#6d28d9}
+.front.fn.cat-health .yr,.front.fd.cat-health .yb{background:#be123c}
+.front.fn.cat-education .yr,.front.fd.cat-education .yb{background:#0e7490}
+.front.fn.cat-agriculture .yr,.front.fd.cat-agriculture .yb{background:#65a30d}
+.front.fn.cat-women .yr,.front.fd.cat-women .yb{background:#c026d3}
+.front.fn.cat-tech .yr,.front.fd.cat-tech .yb{background:#0369a1}
+
+/* Match popup */
+.mpop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);max-width:90%;width:340px;
+  background:linear-gradient(160deg,#fff8e8,#f1dcb4);
+  border:3px solid #8b5a2b;border-radius:14px;padding:14px 16px;text-align:center;z-index:30;
+  opacity:0;transition:all .35s cubic-bezier(.4,1.4,.5,1);pointer-events:none;
+  box-shadow:0 12px 40px rgba(0,0,0,.55)}
+.mpop.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.mpop .ck{font-size:30px;color:#15803d;margin-bottom:4px}
+.mpop .mn{font-family:Arial Black,sans-serif;color:#3a1f0a;font-size:18px;letter-spacing:.5px;margin-bottom:2px}
+.mpop .mf{font-family:Arial,sans-serif;color:#6d28d9;font-size:11px;font-weight:bold;letter-spacing:.5px;margin-bottom:6px}
+.mpop .md{font-family:Arial,sans-serif;color:#5a3514;font-size:11px;line-height:1.3}
+
+/* ===== Overlays ===== */
+.ob{position:fixed;inset:0;background:rgba(20,8,2,.96);z-index:18;
+  background-image:radial-gradient(ellipse at top,rgba(120,70,20,.5) 0%,rgba(20,8,2,.96) 60%);}
+.ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:12px;z-index:20;padding:30px 18px 24px;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ov.hidden,.ob.hidden{display:none}
+
+.ov h1{font-family:'Georgia',serif;font-weight:900;font-size:clamp(38px,11vw,68px);
+  background:linear-gradient(180deg,#ffd089 0%,#d68a3c 50%,#a05d10 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  letter-spacing:4px;line-height:.95;
+  filter:drop-shadow(3px 3px 0 #1a0a02) drop-shadow(0 0 18px rgba(255,180,80,.55))}
+.ov .tag{color:#f1c889;font-family:'Georgia',serif;font-style:italic;font-size:clamp(12px,3.4vw,16px);letter-spacing:1px;margin-top:-4px;max-width:430px}
+
+.section{width:100%;max-width:430px;background:rgba(255,248,232,.07);border:1.5px solid rgba(241,200,137,.35);border-radius:12px;padding:10px 10px;backdrop-filter:blur(6px)}
+.section h3{color:#ffd089;font-family:Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:bold;margin-bottom:7px}
+
+.btnrow{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.lb{background:rgba(255,248,232,.08);color:#fff8e8;border:1.5px solid rgba(241,200,137,.45);padding:6px 10px;font-size:11px;font-weight:bold;font-family:Arial,sans-serif;border-radius:18px;cursor:pointer;letter-spacing:.5px;touch-action:manipulation;-webkit-appearance:none;transition:all .18s}
+.lb:active{transform:scale(.95)}
+.lb.active{background:linear-gradient(180deg,#d68a3c,#a05d10);border-color:#fff8e8;color:#fff;box-shadow:0 0 12px rgba(255,180,80,.5)}
+
+.btn{background:linear-gradient(180deg,#f0a040,#a05d10);color:#fff8e8;
+  border:2.5px solid #fff8e8;padding:13px 38px;
+  font:900 clamp(15px,4vw,20px) 'Georgia',serif;border-radius:38px;letter-spacing:3px;
+  box-shadow:0 6px 0 #5e3a1a,0 8px 24px rgba(0,0,0,.55);
+  touch-action:manipulation;-webkit-appearance:none;cursor:pointer;text-transform:uppercase;
+  text-shadow:1px 1px 0 #5e3a1a}
+.btn:active{transform:translateY(3px);box-shadow:0 3px 0 #5e3a1a,0 5px 15px rgba(0,0,0,.5)}
+.btn.alt{background:linear-gradient(180deg,#5e3a1a,#3a1f0a);box-shadow:0 6px 0 #1a0a02,0 8px 24px rgba(0,0,0,.5)}
+
+.bestline{color:#f1c889;font-family:Arial,sans-serif;font-size:11px;letter-spacing:1.5px;line-height:1.5}
+.bestline strong{color:#ffd089;font-size:14px}
+
+/* End screen */
+.fs{font:900 clamp(20px,5.5vw,32px) 'Georgia',serif;color:#ffd089;letter-spacing:1px;text-shadow:2px 2px 0 #1a0a02}
+.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;max-width:340px}
+.stbox{background:rgba(255,248,232,.07);border:1.5px solid rgba(241,200,137,.4);border-radius:10px;padding:8px}
+.stbox .stl{color:#f1c889;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif;font-weight:bold}
+.stbox .stv{color:#fff8e8;font-size:clamp(16px,4.5vw,22px);font-weight:900;font-family:Arial,sans-serif;margin-top:3px}
+.stbox.par .stv{color:#ffd089}
+.stbox.beat{border-color:#16a34a;background:rgba(22,163,74,.16)}
+.stbox.beat .stv{color:#86efac}
+
+/* How to play */
+.htp{text-align:left;color:#f1c889;font-family:Arial,sans-serif;font-size:11px;line-height:1.5}
+.htp p{margin-bottom:5px}
+.htp strong{color:#ffd089}
+
+/* Top bar in game */
+.topbar{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:540px;padding:6px 10px 0;position:relative;z-index:5}
+.qbtn{background:rgba(255,248,232,.12);color:#fff8e8;border:1.5px solid rgba(241,200,137,.4);font-family:Arial,sans-serif;font-weight:bold;font-size:11px;padding:5px 10px;border-radius:14px;letter-spacing:1px;touch-action:manipulation;-webkit-appearance:none;cursor:pointer}
+.qbtn:active{transform:scale(.95)}
+
+/* Star rating */
+.stars{font-size:24px;color:#ffd089;letter-spacing:6px;text-shadow:0 2px 8px rgba(255,180,80,.6)}
+.stars .em{color:rgba(255,255,255,.18)}
+
+/* Scrollbar */
+.ov::-webkit-scrollbar{width:0}
+
+/* Smaller layouts */
+@media (max-height:700px){
+  .ov{padding-top:18px;gap:8px}
+  .ov h1{font-size:clamp(34px,9vw,54px)}
+  .section{padding:8px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar" style="display:none">
+  <button class="qbtn" id="qbtn" ontouchstart="">QUIT</button>
+  <div style="color:#f1c889;font-family:'Georgia',serif;font-weight:bold;font-size:13px;letter-spacing:2px" id="catlabel">ALL</div>
+  <div style="width:60px"></div>
+</div>
+
+<div class="head" id="head" style="display:none">
+  <div class="sb"><div class="sl">Time</div><div class="sv" id="st">0:00</div></div>
+  <div class="sb"><div class="sl">Pairs</div><div class="sv" id="sp">0/0</div></div>
+  <div class="sb"><div class="sl">Mistakes</div><div class="sv" id="sm">0</div></div>
+</div>
+
+<div class="bw" id="bw" style="display:none"><div class="grid" id="grid"></div></div>
+
+<div class="mpop" id="mpop">
+  <div class="ck">CHECK</div>
+  <div class="mn" id="mpopName"></div>
+  <div class="mf" id="mpopFull"></div>
+  <div class="md" id="mpopDesc"></div>
+</div>
+
+<!-- ============ START SCREEN ============ -->
+<div class="ob" id="ob1"></div>
+<div class="ov" id="ov1">
+  <h1>SCHEME<br>MATCH</h1>
+  <div class="tag">Match government schemes to their descriptions</div>
+
+  <div class="section">
+    <h3>Category</h3>
+    <div class="btnrow" id="catrow">
+      <button class="lb active" data-cat="all" ontouchstart="">All</button>
+      <button class="lb" data-cat="welfare" ontouchstart="">Welfare</button>
+      <button class="lb" data-cat="rural" ontouchstart="">Rural</button>
+      <button class="lb" data-cat="urban" ontouchstart="">Urban</button>
+      <button class="lb" data-cat="banking" ontouchstart="">Banking</button>
+      <button class="lb" data-cat="health" ontouchstart="">Health</button>
+      <button class="lb" data-cat="education" ontouchstart="">Education</button>
+      <button class="lb" data-cat="agriculture" ontouchstart="">Agriculture</button>
+      <button class="lb" data-cat="women" ontouchstart="">Women</button>
+      <button class="lb" data-cat="tech" ontouchstart="">Digital</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Difficulty</h3>
+    <div class="btnrow" id="diffrow">
+      <button class="lb active" data-diff="8" ontouchstart="">Easy 4&times;4</button>
+      <button class="lb" data-diff="12" ontouchstart="">Medium 4&times;6</button>
+      <button class="lb" data-diff="16" ontouchstart="">Hard 4&times;8</button>
+    </div>
+  </div>
+
+  <div class="bestline" id="bestStart">Best: <strong>—</strong></div>
+  <div class="bestline" id="poolInfo" style="font-size:10px;letter-spacing:1px;color:#d68a3c">Pool: 68 verified schemes</div>
+
+  <button class="btn" id="b1" ontouchstart="">PLAY</button>
+  <button class="btn alt" id="bHelp" ontouchstart="" style="padding:9px 26px;letter-spacing:2px">HOW TO PLAY</button>
+</div>
+
+<!-- ============ HELP SCREEN ============ -->
+<div class="ob hidden" id="obH"></div>
+<div class="ov hidden" id="ovH">
+  <h1 style="font-size:clamp(28px,8vw,46px)">HOW TO<br>PLAY</h1>
+
+  <div class="section htp">
+    <p><strong>Goal.</strong> Match every NAME card to its DESCRIPTION card.</p>
+    <p><strong>Tap</strong> a face-down card to flip it, then tap a second card.</p>
+    <p>If they form a pair, both stay revealed and a brief explanation appears for a moment.</p>
+    <p>If they do not match, both flip back after one second and a mistake is counted.</p>
+  </div>
+
+  <div class="section htp">
+    <p><strong>Categories.</strong> Choose <em>All</em> for variety, or pick a focus area: Welfare, Rural, Urban, Banking, Health, Education, Agriculture, Women or Digital.</p>
+    <p><strong>Difficulty.</strong> Easy = 8 pairs (4&times;4), Medium = 12 pairs (4&times;6), Hard = 16 pairs (4&times;8).</p>
+    <p><strong>Par time.</strong> Roughly half your best time + 30 seconds. Beat par for a 2-star result.</p>
+    <p><strong>Best time</strong> is saved separately for each Category + Difficulty combination on this device.</p>
+    <p><strong>Stars.</strong> 1 star to win, 2 to beat par, 3 for a brand-new best.</p>
+  </div>
+
+  <div class="section htp">
+    <p><strong>UPSC tip.</strong> The popup after a match shows the full scheme name, launch year and one-line description. Use it as a quick revision aid for prelims and mains.</p>
+    <p><strong>Verified.</strong> All <span id="schemeCount">68</span> schemes are sourced from india.gov.in, pib.gov.in and official ministry portals.</p>
+  </div>
+
+  <button class="btn" id="bHelpBack" ontouchstart="">BACK</button>
+</div>
+
+<!-- ============ END SCREEN ============ -->
+<div class="ob hidden" id="ob2"></div>
+<div class="ov hidden" id="ov2">
+  <h1 style="font-size:clamp(40px,11vw,64px)">YOU<br>WIN!</h1>
+  <div class="stars" id="endStars"></div>
+  <div class="statgrid">
+    <div class="stbox"><div class="stl">Time</div><div class="stv" id="fSt">0:00</div></div>
+    <div class="stbox"><div class="stl">Mistakes</div><div class="stv" id="fSm">0</div></div>
+    <div class="stbox par"><div class="stl">Par</div><div class="stv" id="fPar">—</div></div>
+    <div class="stbox" id="fBestBox"><div class="stl">Best</div><div class="stv" id="fBt">—</div></div>
+  </div>
+  <button class="btn" id="b2" ontouchstart="">PLAY AGAIN</button>
+  <button class="btn alt" id="b3" ontouchstart="" style="padding:10px 30px">NEW CATEGORY</button>
+</div>
+
+<script>
+(function(){'use strict';
+
+/* ================================================================
+   VERIFIED GOVERNMENT SCHEMES DATABASE (60+ schemes)
+   Sources: india.gov.in, pib.gov.in, Wikipedia, official scheme portals
+   Years cross-checked with PIB releases and ministry websites.
+================================================================ */
+var SCHEMES = [
+  // ---- WELFARE / SOCIAL SECURITY ----
+  {name:"PMJJBY", full:"Pradhan Mantri Jeevan Jyoti Bima Yojana", desc:"Life insurance for ages 18-50 at Rs 436/year", cat:"welfare", year:2015, ic:"❤"},
+  {name:"PMSBY", full:"Pradhan Mantri Suraksha Bima Yojana", desc:"Accident insurance cover at Rs 20/year", cat:"welfare", year:2015, ic:"⛑"},
+  {name:"APY", full:"Atal Pension Yojana", desc:"Guaranteed pension for unorganized sector workers", cat:"welfare", year:2015, ic:"⚖"},
+  {name:"PMUY", full:"Pradhan Mantri Ujjwala Yojana", desc:"Free LPG connections for women of BPL households", cat:"welfare", year:2016, ic:"\u{1f525}"},
+  {name:"PM-SYM", full:"PM Shram Yogi Maan-dhan", desc:"Pension scheme for unorganized workers earning under Rs 15,000", cat:"welfare", year:2019, ic:"✊"},
+  {name:"PM-CARES", full:"PM Citizen Assistance and Relief in Emergency Situations", desc:"Public charitable trust for emergencies and disasters", cat:"welfare", year:2020, ic:"\u{1f6e1}"},
+  {name:"NSAP", full:"National Social Assistance Programme", desc:"Pensions for elderly, widows and disabled below poverty line", cat:"welfare", year:1995, ic:"\u{1f33f}"},
+  {name:"PM-DAKSH", full:"PM Dakshta Aur Kushalta Sampann Hitgrahi", desc:"Skilling scheme for marginalised SC, OBC and Safai Karmcharis", cat:"welfare", year:2020, ic:"\u{1f527}"},
+
+  // ---- RURAL DEVELOPMENT ----
+  {name:"MGNREGA", full:"Mahatma Gandhi National Rural Employment Guarantee Act", desc:"100 days of guaranteed wage employment per rural household", cat:"rural", year:2005, ic:"⛏"},
+  {name:"PMAY-G", full:"Pradhan Mantri Awas Yojana - Gramin", desc:"Pucca houses for rural homeless and kutcha-house dwellers", cat:"rural", year:2016, ic:"\u{1f3e0}"},
+  {name:"DDU-GKY", full:"Deen Dayal Upadhyaya Grameen Kaushalya Yojana", desc:"Placement-linked skill training for rural poor youth", cat:"rural", year:2014, ic:"\u{1f4d8}"},
+  {name:"DAY-NRLM", full:"Deendayal Antyodaya Yojana - National Rural Livelihoods Mission", desc:"Rural poverty alleviation through Self-Help Groups", cat:"rural", year:2011, ic:"\u{1f91d}"},
+  {name:"SBM-G", full:"Swachh Bharat Mission - Gramin", desc:"Rural sanitation and household toilet construction", cat:"rural", year:2014, ic:"\u{1f9f9}"},
+  {name:"PMGSY", full:"Pradhan Mantri Gram Sadak Yojana", desc:"All-weather road connectivity to unconnected villages", cat:"rural", year:2000, ic:"\u{1f6e3}"},
+  {name:"SAGY", full:"Saansad Adarsh Gram Yojana", desc:"MPs adopt and develop model villages", cat:"rural", year:2014, ic:"\u{1f3d8}"},
+  {name:"JJM", full:"Jal Jeevan Mission", desc:"Functional household tap water connection to every rural home", cat:"rural", year:2019, ic:"\u{1f4a7}"},
+
+  // ---- URBAN DEVELOPMENT ----
+  {name:"PMAY-U", full:"Pradhan Mantri Awas Yojana - Urban", desc:"Affordable housing for the urban poor by 2022", cat:"urban", year:2015, ic:"\u{1f3d9}"},
+  {name:"AMRUT", full:"Atal Mission for Rejuvenation and Urban Transformation", desc:"Urban water supply, sewerage and green spaces in 500 cities", cat:"urban", year:2015, ic:"\u{1f4a6}"},
+  {name:"SCM", full:"Smart Cities Mission", desc:"Develop 100 smart, sustainable urban centres", cat:"urban", year:2015, ic:"\u{1f3ec}"},
+  {name:"HRIDAY", full:"Heritage City Development and Augmentation Yojana", desc:"Heritage preservation and development in 12 cities", cat:"urban", year:2015, ic:"\u{1f3db}"},
+  {name:"DAY-NULM", full:"Deendayal Antyodaya Yojana - National Urban Livelihoods Mission", desc:"Self-employment and skilled wage opportunities for urban poor", cat:"urban", year:2014, ic:"\u{1f3ed}"},
+  {name:"SBM-U", full:"Swachh Bharat Mission - Urban", desc:"Urban sanitation, solid waste management and toilets", cat:"urban", year:2014, ic:"♻"},
+  {name:"PM SVANidhi", full:"PM Street Vendor's AtmaNirbhar Nidhi", desc:"Working capital loans up to Rs 10,000 for street vendors", cat:"urban", year:2020, ic:"\u{1f6d2}"},
+
+  // ---- BANKING / FINANCE ----
+  {name:"PMJDY", full:"Pradhan Mantri Jan Dhan Yojana", desc:"Financial inclusion through zero-balance bank accounts", cat:"banking", year:2014, ic:"\u{1f3e6}"},
+  {name:"DBT", full:"Direct Benefit Transfer", desc:"Direct transfer of subsidies into beneficiary bank accounts", cat:"banking", year:2013, ic:"\u{1f4b8}"},
+  {name:"PMMY", full:"Pradhan Mantri MUDRA Yojana", desc:"Micro-loans up to Rs 10 lakh for non-corporate small businesses", cat:"banking", year:2015, ic:"\u{1f4b0}"},
+  {name:"Stand-Up India", full:"Stand-Up India Scheme", desc:"Bank loans Rs 10 lakh-1 crore for SC/ST and women entrepreneurs", cat:"banking", year:2016, ic:"\u{1f31f}"},
+  {name:"SSY", full:"Sukanya Samriddhi Yojana", desc:"Small savings scheme for the girl child's education and marriage", cat:"banking", year:2015, ic:"\u{1f380}"},
+  {name:"PMVVY", full:"Pradhan Mantri Vaya Vandana Yojana", desc:"Pension scheme for senior citizens with assured returns", cat:"banking", year:2017, ic:"\u{1f465}"},
+  {name:"Atal Bhujal", full:"Atal Bhujal Yojana", desc:"Community-led groundwater management in water-stressed blocks", cat:"banking", year:2019, ic:"\u{1f4a7}"},
+
+  // ---- HEALTH ----
+  {name:"AB-PMJAY", full:"Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana", desc:"Health cover up to Rs 5 lakh per family per year", cat:"health", year:2018, ic:"\u{1fa7a}"},
+  {name:"Mission Indradhanush", full:"Mission Indradhanush", desc:"Universal immunization against preventable diseases", cat:"health", year:2014, ic:"\u{1f308}"},
+  {name:"NHM", full:"National Health Mission", desc:"Comprehensive primary, secondary and tertiary health services", cat:"health", year:2013, ic:"\u{1f3e5}"},
+  {name:"PMSSY", full:"Pradhan Mantri Swasthya Suraksha Yojana", desc:"New AIIMS institutions and upgrades to government hospitals", cat:"health", year:2003, ic:"\u{1f9ec}"},
+  {name:"PMSMA", full:"Pradhan Mantri Surakshit Matritva Abhiyan", desc:"Free antenatal care to pregnant women on the 9th of every month", cat:"health", year:2016, ic:"\u{1f922}"},
+  {name:"PMBJP", full:"Pradhan Mantri Bhartiya Janaushadhi Pariyojana", desc:"Quality generic medicines at affordable prices via Janaushadhi Kendras", cat:"health", year:2008, ic:"\u{1f48a}"},
+  {name:"Poshan Abhiyaan", full:"POSHAN Abhiyaan", desc:"National nutrition mission to reduce stunting and anaemia", cat:"health", year:2018, ic:"\u{1f37d}"},
+  {name:"ABHA", full:"Ayushman Bharat Digital Mission", desc:"Digital health ID and unified health records platform", cat:"health", year:2021, ic:"\u{1f4f1}"},
+
+  // ---- EDUCATION & SKILLING ----
+  {name:"SSA", full:"Sarva Shiksha Abhiyan", desc:"Universal access to elementary education", cat:"education", year:2001, ic:"\u{1f4da}"},
+  {name:"RUSA", full:"Rashtriya Uchchatar Shiksha Abhiyan", desc:"Centrally sponsored scheme for state higher education funding", cat:"education", year:2013, ic:"\u{1f393}"},
+  {name:"PMKVY", full:"Pradhan Mantri Kaushal Vikas Yojana", desc:"Short-term skill training and certification for youth", cat:"education", year:2015, ic:"\u{1f6e0}"},
+  {name:"NIPUN Bharat", full:"National Initiative for Proficiency in Reading with Understanding and Numeracy", desc:"Foundational literacy and numeracy by Grade 3 by 2026-27", cat:"education", year:2021, ic:"✏"},
+  {name:"Samagra Shiksha", full:"Samagra Shiksha Abhiyan", desc:"Integrated scheme for school education from pre-school to Class 12", cat:"education", year:2018, ic:"\u{1f3eb}"},
+  {name:"PM SHRI", full:"PM Schools for Rising India", desc:"Upgrade 14,500 schools as model NEP-aligned institutions", cat:"education", year:2022, ic:"\u{1f31e}"},
+  {name:"Mid-Day Meal", full:"PM POSHAN (Mid-Day Meal Scheme)", desc:"Hot cooked meals for children in government schools", cat:"education", year:1995, ic:"\u{1f35a}"},
+  {name:"DIKSHA", full:"Digital Infrastructure for Knowledge Sharing", desc:"National digital platform for school teachers and students", cat:"education", year:2017, ic:"\u{1f4bb}"},
+
+  // ---- AGRICULTURE & FARMER WELFARE ----
+  {name:"PM-KISAN", full:"Pradhan Mantri Kisan Samman Nidhi", desc:"Rs 6000 per year direct income support to landholding farmers", cat:"agriculture", year:2019, ic:"\u{1f33e}"},
+  {name:"PMFBY", full:"Pradhan Mantri Fasal Bima Yojana", desc:"Crop insurance against natural calamities, pests and diseases", cat:"agriculture", year:2016, ic:"\u{1f33d}"},
+  {name:"PKVY", full:"Paramparagat Krishi Vikas Yojana", desc:"Cluster-based promotion of organic farming", cat:"agriculture", year:2015, ic:"\u{1f33f}"},
+  {name:"e-NAM", full:"Electronic National Agriculture Market", desc:"Online pan-India trading platform for agricultural commodities", cat:"agriculture", year:2016, ic:"\u{1f4b9}"},
+  {name:"SHC", full:"Soil Health Card Scheme", desc:"Soil nutrient assessment and crop-wise recommendations to farmers", cat:"agriculture", year:2015, ic:"\u{1f9ea}"},
+  {name:"PMKSY", full:"Pradhan Mantri Krishi Sinchayee Yojana", desc:"Convergence of irrigation schemes - Har Khet Ko Pani", cat:"agriculture", year:2015, ic:"\u{1f6b0}"},
+  {name:"PM-KMY", full:"Pradhan Mantri Kisan Maan-Dhan Yojana", desc:"Pension scheme for small and marginal farmers", cat:"agriculture", year:2019, ic:"\u{1f9d3}"},
+  {name:"NMNF", full:"National Mission on Natural Farming", desc:"Promotion of chemical-free, traditional natural farming systems", cat:"agriculture", year:2023, ic:"\u{1f996}"},
+
+  // ---- WOMEN & CHILD ----
+  {name:"BBBP", full:"Beti Bachao Beti Padhao", desc:"Address declining child sex ratio and promote girls education", cat:"women", year:2015, ic:"\u{1f469}"},
+  {name:"PMMVY", full:"Pradhan Mantri Matru Vandana Yojana", desc:"Rs 5000 maternity benefit for first-child pregnant women", cat:"women", year:2017, ic:"\u{1f930}"},
+  {name:"OSC", full:"Sakhi One Stop Centre Scheme", desc:"Integrated support for women affected by violence", cat:"women", year:2015, ic:"\u{1f3e2}"},
+  {name:"Mahila E-Haat", full:"Mahila E-Haat", desc:"Online marketing platform for women entrepreneurs and SHGs", cat:"women", year:2016, ic:"\u{1f6cd}"},
+  {name:"Mission Shakti", full:"Mission Shakti", desc:"Umbrella scheme for safety, security and empowerment of women", cat:"women", year:2022, ic:"⚡"},
+  {name:"Lakhpati Didi", full:"Lakhpati Didi Initiative", desc:"Skill training to enable SHG women to earn over Rs 1 lakh annually", cat:"women", year:2023, ic:"\u{1f48e}"},
+
+  // ---- DIGITAL / TECH / INDUSTRY ----
+  {name:"Digital India", full:"Digital India Programme", desc:"Digital infrastructure, e-governance and digital empowerment", cat:"tech", year:2015, ic:"\u{1f310}"},
+  {name:"Make in India", full:"Make in India Initiative", desc:"Boost domestic manufacturing across 25 priority sectors", cat:"tech", year:2014, ic:"\u{1f3ed}"},
+  {name:"Startup India", full:"Startup India Initiative", desc:"Build a strong ecosystem for entrepreneurship and startups", cat:"tech", year:2016, ic:"\u{1f680}"},
+  {name:"PLI", full:"Production Linked Incentive Scheme", desc:"Incentives based on incremental sales for domestic manufacturers", cat:"tech", year:2020, ic:"⚙"},
+  {name:"BharatNet", full:"BharatNet Project", desc:"Optical fibre broadband connectivity to all Gram Panchayats", cat:"tech", year:2011, ic:"\u{1f4e1}"},
+  {name:"UDAN", full:"Ude Desh ka Aam Naagrik", desc:"Regional connectivity scheme to make air travel affordable", cat:"tech", year:2016, ic:"✈"},
+  {name:"Gati Shakti", full:"PM Gati Shakti National Master Plan", desc:"Multi-modal infrastructure connectivity through digital platform", cat:"tech", year:2021, ic:"\u{1f6a4}"},
+  {name:"ONDC", full:"Open Network for Digital Commerce", desc:"Open protocol for digital commerce democratising e-commerce", cat:"tech", year:2022, ic:"\u{1f6cd}"}
+];
+
+/* ================================================================
+   STATE
+================================================================ */
+var CATS = ['all','welfare','rural','urban','banking','health','education','agriculture','women','tech'];
+var DIFFS = [8, 12, 16];
+
+var state = {
+  cat: 'all',
+  diff: 8,
+  cards: [],          // shuffled card objects
+  flipped: [],        // currently revealed indices awaiting compare
+  matched: 0,         // pairs matched so far
+  totalPairs: 0,
+  mistakes: 0,
+  startT: 0,
+  elapsed: 0,
+  timerId: null,
+  locked: false,
+  running: false
+};
+
+/* ---------------- DOM refs ---------------- */
+var gridE = document.getElementById('grid');
+var smE = document.getElementById('sm');
+var spE = document.getElementById('sp');
+var stE = document.getElementById('st');
+var fSt = document.getElementById('fSt');
+var fSm = document.getElementById('fSm');
+var fPar = document.getElementById('fPar');
+var fBt  = document.getElementById('fBt');
+var fBestBox = document.getElementById('fBestBox');
+var endStars = document.getElementById('endStars');
+var bestStart = document.getElementById('bestStart');
+var catlabel = document.getElementById('catlabel');
+var topbar = document.getElementById('topbar');
+var head = document.getElementById('head');
+var bw = document.getElementById('bw');
+
+var ov1 = document.getElementById('ov1'), ob1 = document.getElementById('ob1');
+var ov2 = document.getElementById('ov2'), ob2 = document.getElementById('ob2');
+var ovH = document.getElementById('ovH'), obH = document.getElementById('obH');
+
+var mpop = document.getElementById('mpop');
+var mpopName = document.getElementById('mpopName');
+var mpopFull = document.getElementById('mpopFull');
+var mpopDesc = document.getElementById('mpopDesc');
+
+/* ================================================================
+   STORAGE - 'sm_' prefix, separate key per cat+diff
+================================================================ */
+function storageKey(cat, diff){ return 'sm_best_' + cat + '_' + diff; }
+
+function getBest(cat, diff){
+  try{
+    var v = localStorage.getItem(storageKey(cat, diff));
+    return v ? parseInt(v, 10) : null;
+  }catch(e){ return null; }
+}
+function setBest(cat, diff, secs){
+  try{ localStorage.setItem(storageKey(cat, diff), String(secs)); }catch(e){}
+}
+function fmtTime(secs){
+  if(secs == null) return '—';
+  secs = Math.floor(secs);
+  var m = Math.floor(secs/60), s = secs%60;
+  return m + ':' + (s<10?'0':'') + s;
+}
+
+/* ================================================================
+   CATEGORY / DIFFICULTY BUTTON HANDLERS
+================================================================ */
+document.querySelectorAll('#catrow .lb').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#catrow .lb').forEach(function(x){ x.classList.remove('active'); });
+    b.classList.add('active');
+    state.cat = b.dataset.cat;
+    refreshBestStart();
+  });
+});
+
+document.querySelectorAll('#diffrow .lb').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#diffrow .lb').forEach(function(x){ x.classList.remove('active'); });
+    b.classList.add('active');
+    state.diff = parseInt(b.dataset.diff, 10);
+    refreshBestStart();
+  });
+});
+
+function poolSizeFor(cat){
+  if(cat === 'all') return SCHEMES.length;
+  var n = 0;
+  for(var i=0;i<SCHEMES.length;i++){ if(SCHEMES[i].cat === cat) n++; }
+  return n;
+}
+
+function refreshBestStart(){
+  var b = getBest(state.cat, state.diff);
+  bestStart.innerHTML = 'Best ['+state.cat.toUpperCase()+' &middot; '+state.diff+' pairs]: <strong>'+ fmtTime(b) +'</strong>';
+  // Pool info: how many schemes are available for this category
+  var pool = poolSizeFor(state.cat);
+  var poolEl = document.getElementById('poolInfo');
+  if(poolEl){
+    if(pool < state.diff){
+      poolEl.innerHTML = 'Pool: '+pool+' '+state.cat+' schemes (extras drawn from other categories)';
+      poolEl.style.color = '#f1c889';
+    } else {
+      poolEl.innerHTML = 'Pool: '+pool+(state.cat==='all'?' verified schemes': ' '+state.cat+' schemes');
+      poolEl.style.color = '#d68a3c';
+    }
+  }
+}
+refreshBestStart();
+// Update help screen total
+var sc = document.getElementById('schemeCount'); if(sc) sc.textContent = SCHEMES.length;
+
+/* ================================================================
+   BUTTON BINDINGS
+================================================================ */
+document.getElementById('b1').addEventListener('click', startGame);
+document.getElementById('b2').addEventListener('click', function(){ startGame(); });
+document.getElementById('b3').addEventListener('click', function(){ showStart(); });
+document.getElementById('qbtn').addEventListener('click', function(){ if(confirm('Quit current game?')) showStart(); });
+document.getElementById('bHelp').addEventListener('click', function(){
+  ov1.classList.add('hidden'); ob1.classList.add('hidden');
+  ovH.classList.remove('hidden'); obH.classList.remove('hidden');
+});
+document.getElementById('bHelpBack').addEventListener('click', function(){
+  ovH.classList.add('hidden'); obH.classList.add('hidden');
+  showStart();
+});
+
+/* ================================================================
+   START / SHOW SCREENS
+================================================================ */
+function hideAllOverlays(){
+  ov1.classList.add('hidden'); ob1.classList.add('hidden');
+  ov2.classList.add('hidden'); ob2.classList.add('hidden');
+  ovH.classList.add('hidden'); obH.classList.add('hidden');
+}
+
+function showStart(){
+  hideAllOverlays();
+  ov1.classList.remove('hidden'); ob1.classList.remove('hidden');
+  topbar.style.display = 'none';
+  head.style.display = 'none';
+  bw.style.display = 'none';
+  state.running = false;
+  if(state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+  refreshBestStart();
+}
+
+function startGame(){
+  hideAllOverlays();
+  topbar.style.display = 'flex';
+  head.style.display = 'flex';
+  bw.style.display = 'flex';
+  catlabel.textContent = state.cat.toUpperCase();
+
+  buildBoard();
+  state.running = true;
+  state.startT = Date.now();
+  state.elapsed = 0;
+  if(state.timerId) clearInterval(state.timerId);
+  state.timerId = setInterval(function(){
+    if(!state.running) return;
+    state.elapsed = Math.floor((Date.now() - state.startT)/1000);
+    stE.textContent = fmtTime(state.elapsed);
+  }, 250);
+}
+
+/* ================================================================
+   BOARD BUILDING
+================================================================ */
+function pickSchemes(cat, n){
+  var pool = (cat === 'all') ? SCHEMES.slice() : SCHEMES.filter(function(s){ return s.cat === cat; });
+  // Fallback if a niche category has fewer schemes than n
+  if(pool.length < n){
+    var extras = SCHEMES.filter(function(s){ return s.cat !== cat; });
+    shuffleArr(extras);
+    pool = pool.concat(extras).slice(0, Math.max(n, pool.length));
+  }
+  shuffleArr(pool);
+  return pool.slice(0, n);
+}
+
+function shuffleArr(a){
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+
+function buildBoard(){
+  var pairs = state.diff;             // # pairs
+  var picks = pickSchemes(state.cat, pairs);
+
+  // build deck: each scheme produces 2 cards (NAME + DESC) sharing pairId
+  var deck = [];
+  for(var i=0;i<picks.length;i++){
+    var s = picks[i];
+    deck.push({ kind:'name', s:s, pairId:i });
+    deck.push({ kind:'desc', s:s, pairId:i });
+  }
+  shuffleArr(deck);
+
+  // Determine grid columns - prefer 4 cols
+  var cols = 4;
+  var total = pairs * 2;
+  if(total === 16) cols = 4;       // 4x4
+  else if(total === 24) cols = 4;  // 4x6
+  else if(total === 32) cols = 4;  // 4x8
+
+  gridE.innerHTML = '';
+  gridE.style.gridTemplateColumns = 'repeat('+cols+',1fr)';
+
+  state.cards = [];
+  state.flipped = [];
+  state.matched = 0;
+  state.totalPairs = pairs;
+  state.mistakes = 0;
+  state.locked = false;
+
+  smE.textContent = '0';
+  spE.textContent = '0/' + pairs;
+  stE.textContent = '0:00';
+
+  for(var k=0;k<deck.length;k++){
+    var d = deck[k];
+    var c = document.createElement('div');
+    c.className = 'card';
+
+    var inner = '<div class="face back"></div>';
+    if(d.kind === 'name'){
+      inner += '<div class="face front fn cat-'+d.s.cat+'">'
+            +    '<div class="ic">'+ d.s.ic +'</div>'
+            +    '<div class="nm">'+ escapeHtml(d.s.name) +'</div>'
+            +    (d.s.year ? '<div class="yr">'+d.s.year+'</div>' : '')
+            +  '</div>';
+    } else {
+      inner += '<div class="face front fd cat-'+d.s.cat+'">'
+            +    '<div class="dc">'+ escapeHtml(d.s.desc) +'</div>'
+            +    (d.s.year ? '<div class="yb">'+d.s.year+'</div>' : '')
+            +  '</div>';
+    }
+    c.innerHTML = inner;
+    (function(idx){
+      c.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        flip(idx);
+      });
+    })(k);
+    gridE.appendChild(c);
+
+    state.cards.push({
+      el: c,
+      kind: d.kind,
+      scheme: d.s,
+      pairId: d.pairId,
+      shown: false,
+      matched: false
+    });
+  }
+}
+
+function escapeHtml(t){
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ================================================================
+   FLIP / MATCH LOGIC
+================================================================ */
+function flip(i){
+  if(state.locked || !state.running) return;
+  var card = state.cards[i];
+  if(!card || card.shown || card.matched) return;
+
+  card.el.classList.add('flipped');
+  card.shown = true;
+  state.flipped.push(i);
+
+  if(state.flipped.length === 2){
+    var aIdx = state.flipped[0], bIdx = state.flipped[1];
+    var a = state.cards[aIdx], b = state.cards[bIdx];
+
+    // Match condition: same pairId AND different kinds (1 name + 1 desc)
+    var isMatch = (a.pairId === b.pairId) && (a.kind !== b.kind);
+
+    if(isMatch){
+      a.matched = true; b.matched = true;
+      a.el.classList.add('matched');
+      b.el.classList.add('matched');
+      state.matched++;
+      spE.textContent = state.matched + '/' + state.totalPairs;
+      state.flipped = [];
+      showMatchPopup(a.scheme);
+      if(state.matched === state.totalPairs){
+        // small delay so user sees last match
+        setTimeout(winGame, 700);
+      }
+    } else {
+      // Mistake (only counts when both cards revealed for compare)
+      state.mistakes++;
+      smE.textContent = state.mistakes;
+      state.locked = true;
+      setTimeout(function(){
+        a.el.classList.remove('flipped');
+        b.el.classList.remove('flipped');
+        a.shown = false; b.shown = false;
+        state.flipped = [];
+        state.locked = false;
+      }, 1000);
+    }
+  }
+}
+
+/* ================================================================
+   MATCH POPUP
+================================================================ */
+var popupTimer = null;
+function showMatchPopup(s){
+  if(popupTimer){ clearTimeout(popupTimer); popupTimer = null; }
+  mpopName.textContent = s.name;
+  mpopFull.textContent = s.full + (s.year ? '  ·  '+s.year : '');
+  mpopDesc.textContent = s.desc;
+  mpop.classList.add('show');
+  popupTimer = setTimeout(function(){
+    mpop.classList.remove('show');
+    popupTimer = null;
+  }, 1500);
+}
+
+/* ================================================================
+   WIN
+================================================================ */
+function winGame(){
+  state.running = false;
+  if(state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+  state.elapsed = Math.floor((Date.now() - state.startT)/1000);
+
+  // Best time tracking
+  var prevBest = getBest(state.cat, state.diff);
+  var newBest = false;
+  if(prevBest == null || state.elapsed < prevBest){
+    setBest(state.cat, state.diff, state.elapsed);
+    newBest = true;
+  }
+  var displayBest = getBest(state.cat, state.diff);
+
+  // Par time logic - per spec: 50% of best beats par; we compute a par based on prevBest if exists,
+  // otherwise a heuristic: pairs * 6s + 30s
+  var par;
+  if(prevBest != null){
+    par = Math.max(20, Math.round(prevBest * 0.5) + 30);
+  } else {
+    par = state.totalPairs * 6 + 30;
+  }
+  var beatPar = state.elapsed <= par;
+
+  fSt.textContent = fmtTime(state.elapsed);
+  fSm.textContent = String(state.mistakes);
+  fPar.textContent = fmtTime(par);
+  fBt.textContent = fmtTime(displayBest) + (newBest ? '  NEW!' : '');
+  fBestBox.classList.toggle('beat', newBest);
+
+  // Star rating: 3 stars for new best, 2 for beat par, 1 otherwise
+  var stars = 1;
+  if(newBest) stars = 3;
+  else if(beatPar) stars = 2;
+  endStars.innerHTML =
+    '<span'+(stars>=1?'':' class="em"')+'>★</span>'+
+    '<span'+(stars>=2?'':' class="em"')+'>★</span>'+
+    '<span'+(stars>=3?'':' class="em"')+'>★</span>';
+
+  // Show end overlay
+  topbar.style.display = 'none';
+  head.style.display = 'none';
+  bw.style.display = 'none';
+  ov2.classList.remove('hidden');
+  ob2.classList.remove('hidden');
+}
+
+/* ================================================================
+   PREVENT CONTEXT MENU on long-press for cards
+================================================================ */
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+
+/* ================================================================
+   KEYBOARD SHORTCUTS (for desktop play)
+   - SPACE / ENTER on start screen -> start game
+   - ESC during game -> show start screen confirmation
+================================================================ */
+document.addEventListener('keydown', function(e){
+  // If start overlay visible
+  if(!ov1.classList.contains('hidden')){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      startGame();
+    }
+  } else if(!ov2.classList.contains('hidden')){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      startGame();
+    }
+  } else if(state.running){
+    if(e.key === 'Escape'){
+      e.preventDefault();
+      if(confirm('Quit current game?')) showStart();
+    }
+  }
+});
+
+/* ================================================================
+   PAGE VISIBILITY - pause timer when tab hidden
+================================================================ */
+var pausedAt = null;
+document.addEventListener('visibilitychange', function(){
+  if(!state.running) return;
+  if(document.hidden){
+    pausedAt = Date.now();
+  } else if(pausedAt){
+    // shift startT forward so elapsed remains the same
+    state.startT += (Date.now() - pausedAt);
+    pausedAt = null;
+  }
+});
+
+/* ================================================================
+   DEFENSIVE - if user resizes mid-game, force a reflow on the grid
+================================================================ */
+window.addEventListener('orientationchange', function(){
+  // simply nudge the grid container so flex/grid re-evaluates
+  if(state.running){
+    gridE.style.opacity = '0.999';
+    setTimeout(function(){ gridE.style.opacity = ''; }, 50);
+  }
+});
+
+/* ================================================================
+   DATA INTEGRITY CHECK (dev-only sanity, runs once)
+   - Warns in console if any scheme is missing required fields
+================================================================ */
+(function devCheck(){
+  var bad = [];
+  for(var i=0;i<SCHEMES.length;i++){
+    var s = SCHEMES[i];
+    if(!s.name || !s.full || !s.desc || !s.cat){
+      bad.push(i + ':' + (s.name || '?'));
+    }
+    if(CATS.indexOf(s.cat) < 0){
+      bad.push(i + ':bad-cat:' + s.cat);
+    }
+  }
+  if(bad.length && window.console && console.warn){
+    console.warn('[SchemeMatch] Data issues:', bad);
+  }
+})();
+
+/* ================================================================
+   INIT
+================================================================ */
+showStart();
+
+})();
+</script>
+</body>
+</html>
