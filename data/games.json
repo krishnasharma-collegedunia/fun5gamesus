@@ -289,20 +289,20 @@
   },
   {
     "id": 34,
-    "title": "Skibidi Defender",
-    "slug": "skibididefender",
-    "category": "action",
-    "thumbnail": "assets/thumbnails/skibididefender.svg",
-    "game_url": "public/games/skibididefender.html",
-    "description": "Tap to defeat waves of toilet enemies! Upgrade damage, fire-rate, and shields. Boss every 5 waves. How long can you survive?",
+    "title": "Skibidi Toilet",
+    "slug": "skibiditoilet",
+    "category": "casual",
+    "thumbnail": "assets/thumbnails/skibiditoilet.svg",
+    "game_url": "public/games/skibiditoilet.html",
+    "description": "Whack-a-toilet madness! Tap pop-up skibidi toilets for points, but avoid the bombs. Combos = bonus points!",
     "featured": true,
     "trending": true,
     "tags": [
-      "action",
-      "shooter",
-      "defense"
+      "casual",
+      "arcade",
+      "viral"
     ],
-    "controls": "Tap enemies to attack. Buy upgrades between waves.",
+    "controls": "Tap orange skibidi heads. Avoid black bomb heads. 60 seconds!",
     "rating": 4.8
   },
   {

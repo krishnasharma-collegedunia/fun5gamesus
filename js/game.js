@@ -11,20 +11,16 @@
   var currentGame = null;
   var iframeLoaded = false;
 
-  // Mobile game catalog (top 12 famous, links to fun5games.com)
+  // Top 8 famous mobile games — real Apple App Store CDN icons (matches fun5games.com)
   var DOWNLOAD_GAMES = [
-    { name: 'Subway Surfers',  cat: 'Endless Runner', icon: 'assets/mobile-icons/subwaysurfers.svg' },
-    { name: 'Candy Crush Saga',cat: 'Match-3',        icon: 'assets/mobile-icons/candycrush.svg' },
-    { name: 'Free Fire',       cat: 'Battle Royale',  icon: 'assets/mobile-icons/freefire.svg' },
-    { name: 'PUBG Mobile',     cat: 'Shooter',        icon: 'assets/mobile-icons/pubgmobile.svg' },
-    { name: 'Clash of Clans',  cat: 'Strategy',       icon: 'assets/mobile-icons/clashofclans.svg' },
-    { name: 'Among Us',        cat: 'Party',          icon: 'assets/mobile-icons/amongus.svg' },
-    { name: 'Minecraft',       cat: 'Sandbox',        icon: 'assets/mobile-icons/minecraft.svg' },
-    { name: 'Roblox',          cat: 'Platform',       icon: 'assets/mobile-icons/roblox.svg' },
-    { name: 'Temple Run',      cat: 'Endless Runner', icon: 'assets/mobile-icons/templerun.svg' },
-    { name: 'Angry Birds',     cat: 'Puzzle',         icon: 'assets/mobile-icons/angrybirds.svg' },
-    { name: 'Pokémon GO',      cat: 'Adventure',      icon: 'assets/mobile-icons/pokemongo.svg' },
-    { name: 'Brawl Stars',     cat: 'Action',         icon: 'assets/mobile-icons/brawlstars.svg' }
+    { name: 'Free Fire',        cat: 'Action',   icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/4b/8d/ba/4b8dba37-a240-f450-9f99-c3a611c96536/AppIcon-1767797054-1x_U007emarketing-0-8-0-85-220-0.png/256x256bb.jpg' },
+    { name: 'Subway Surfers',   cat: 'Arcade',   icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/41/db/f2/41dbf2b2-7039-6239-6d0e-0e34354d3809/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/256x256bb.jpg' },
+    { name: 'Candy Crush Saga', cat: 'Puzzle',   icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/2a/2b/e1/2a2be159-9be1-1453-6047-b7418ca4d673/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/256x256bb.jpg' },
+    { name: 'PUBG Mobile',      cat: 'Action',   icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/10/13/c2/1013c2bb-c728-f6e0-073e-54879d5820e9/AppIcon-0-0-1x_U007emarketing-0-7-0-85-220.png/256x256bb.jpg' },
+    { name: 'Clash of Clans',   cat: 'Strategy', icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/06/60/72/066072dd-d9b4-5fe7-1533-9800177c0514/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/256x256bb.jpg' },
+    { name: 'Among Us',         cat: 'Casual',   icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ea/7d/cb/ea7dcb8c-6652-f0b6-c3e7-bab7d47c6997/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/256x256bb.jpg' },
+    { name: 'Minecraft',        cat: 'Adventure',icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/22/d9/2d/22d92dca-ecec-60da-a0fc-df0d35040447/AppIcon-0-0-1x_U007emarketing-0-10-0-85-220.png/256x256bb.jpg' },
+    { name: 'Roblox',           cat: 'Adventure',icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/f9/7a/7c/f97a7cbe-4cab-7449-b9a3-9cc9b9d0a877/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/256x256bb.jpg' }
   ];
 
   document.addEventListener('DOMContentLoaded', init);
