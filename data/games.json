@@ -9,7 +9,11 @@
     "description": "Match-3 puzzle with hearts, roses, rings, gifts! 30 levels, special pieces (lightning, bombs), cascading combos. Like Candy Crush!",
     "featured": true,
     "trending": true,
-    "tags": ["casual", "puzzle", "match-3"],
+    "tags": [
+      "casual",
+      "puzzle",
+      "match-3"
+    ],
     "controls": "Swap adjacent pieces to match 3+ in a row. Build combos!",
     "rating": 4.9
   },
@@ -23,7 +27,11 @@
     "description": "Swipe to shoot perfect arc shots! 10 levels with moving hoops, wind, and trick shots. Get SWISH bonuses and FIRE combos!",
     "featured": true,
     "trending": true,
-    "tags": ["action", "sports", "basketball"],
+    "tags": [
+      "action",
+      "sports",
+      "basketball"
+    ],
     "controls": "Drag from ball to aim, release to shoot. Build combos!",
     "rating": 4.9
   },
@@ -37,7 +45,11 @@
     "description": "Endless boat racing! Dodge rocks, logs, jet skis. Collect coins, grab turbos and shields. How far can you go?",
     "featured": true,
     "trending": true,
-    "tags": ["casual", "racing", "endless"],
+    "tags": [
+      "casual",
+      "racing",
+      "endless"
+    ],
     "controls": "Drag to steer left/right. Tap to use turbo.",
     "rating": 4.8
   },
@@ -51,7 +63,11 @@
     "description": "Tap to defeat waves of toilet enemies! Upgrade damage, fire-rate, and shields. Boss every 5 waves. How long can you survive?",
     "featured": true,
     "trending": true,
-    "tags": ["action", "shooter", "defense"],
+    "tags": [
+      "action",
+      "shooter",
+      "defense"
+    ],
     "controls": "Tap enemies to attack. Buy upgrades between waves.",
     "rating": 4.8
   },
@@ -65,7 +81,11 @@
     "description": "Pick the perfect outfit for 5 themed events: Beach Party, Office, Gala Night, Hiking, and more! Get scored on style.",
     "featured": true,
     "trending": true,
-    "tags": ["casual", "fashion", "puzzle"],
+    "tags": [
+      "casual",
+      "fashion",
+      "puzzle"
+    ],
     "controls": "Tap tabs for hair, top, bottom, shoes. Tap items to apply, then submit.",
     "rating": 4.7
   },
@@ -79,7 +99,11 @@
     "description": "Drag a black hole around the city to consume cars, buildings, and asteroids! Grow bigger as you devour everything in sight.",
     "featured": true,
     "trending": true,
-    "tags": ["casual", "arcade", "addictive"],
+    "tags": [
+      "casual",
+      "arcade",
+      "addictive"
+    ],
     "controls": "Drag to move the hole. Consume objects smaller than you to grow bigger.",
     "rating": 4.9
   },
@@ -93,7 +117,11 @@
     "description": "Block flying soccer balls with quick reflexes! Drag to dive, tap to jump. How many shots can you save?",
     "featured": true,
     "trending": true,
-    "tags": ["action", "sports", "soccer"],
+    "tags": [
+      "action",
+      "sports",
+      "soccer"
+    ],
     "controls": "Drag to move keeper. Tap to jump. Block the ball!",
     "rating": 4.8
   },
@@ -107,7 +135,11 @@
     "description": "Slice flying fruits with lightning-fast swipes! Juicy physics, combo multipliers, and explosive bombs.",
     "featured": true,
     "trending": true,
-    "tags": ["arcade", "slicing", "casual"],
+    "tags": [
+      "arcade",
+      "slicing",
+      "casual"
+    ],
     "controls": "Swipe or click and drag to slice fruits. Avoid bombs!",
     "rating": 4.9
   },
@@ -121,7 +153,11 @@
     "description": "A neon retro snake reimagined! Glide across a pixel grid, eat glowing apples, and grow longer.",
     "featured": true,
     "trending": true,
-    "tags": ["snake", "retro", "arcade"],
+    "tags": [
+      "snake",
+      "retro",
+      "arcade"
+    ],
     "controls": "Arrow keys or swipe to change direction",
     "rating": 4.8
   },
@@ -135,7 +171,11 @@
     "description": "Tap to flap your wings and weave through endless pipes! Classic side-scroller with pixel-art charm.",
     "featured": true,
     "trending": true,
-    "tags": ["arcade", "casual", "endless"],
+    "tags": [
+      "arcade",
+      "casual",
+      "endless"
+    ],
     "controls": "Tap / Click / Space to flap",
     "rating": 4.7
   },
@@ -149,7 +189,11 @@
     "description": "Catch falling coins and gems in your basket while dodging bombs! Build combos for massive multipliers.",
     "featured": true,
     "trending": false,
-    "tags": ["arcade", "casual", "catch"],
+    "tags": [
+      "arcade",
+      "casual",
+      "catch"
+    ],
     "controls": "Drag or Arrow keys to move the basket",
     "rating": 4.6
   },
@@ -163,7 +207,11 @@
     "description": "Smash through colorful neon bricks with a bouncing ball. Progress through levels.",
     "featured": true,
     "trending": true,
-    "tags": ["arcade", "breakout", "classic"],
+    "tags": [
+      "arcade",
+      "breakout",
+      "classic"
+    ],
     "controls": "Drag or Arrow keys to move paddle. Tap / Space to launch.",
     "rating": 4.8
   },
@@ -177,7 +225,11 @@
     "description": "Aim and shoot colored bubbles to match 3 or more! Classic bubble shooter with chain reactions.",
     "featured": true,
     "trending": true,
-    "tags": ["puzzle", "shooter", "casual"],
+    "tags": [
+      "puzzle",
+      "shooter",
+      "casual"
+    ],
     "controls": "Aim with mouse/touch, tap or click to shoot.",
     "rating": 4.9
   },
@@ -191,7 +243,11 @@
     "description": "Sort colored liquids into matching tubes! A relaxing yet challenging puzzle.",
     "featured": true,
     "trending": true,
-    "tags": ["puzzle", "sorting", "casual"],
+    "tags": [
+      "puzzle",
+      "sorting",
+      "casual"
+    ],
     "controls": "Tap a tube to pick up liquid, tap another to pour.",
     "rating": 4.7
   },
@@ -205,7 +261,11 @@
     "description": "Tap to stack blocks and build the tallest tower! Time your drops for PERFECT combos.",
     "featured": true,
     "trending": true,
-    "tags": ["arcade", "timing", "casual"],
+    "tags": [
+      "arcade",
+      "timing",
+      "casual"
+    ],
     "controls": "Tap or click to drop the block.",
     "rating": 4.8
   },
@@ -219,7 +279,11 @@
     "description": "Classic block-stacking puzzle! Arrange falling tetrominoes to clear lines. Speed increases as you level up.",
     "featured": true,
     "trending": true,
-    "tags": ["puzzle", "classic", "arcade"],
+    "tags": [
+      "puzzle",
+      "classic",
+      "arcade"
+    ],
     "controls": "Arrow keys or swipe to move. Tap or Up arrow to rotate.",
     "rating": 4.9
   },
@@ -233,7 +297,11 @@
     "description": "Slide and merge numbered tiles to reach 2048! The iconic addictive puzzle.",
     "featured": true,
     "trending": true,
-    "tags": ["puzzle", "numbers", "casual"],
+    "tags": [
+      "puzzle",
+      "numbers",
+      "casual"
+    ],
     "controls": "Arrow keys or swipe to slide tiles",
     "rating": 4.9
   },
@@ -247,7 +315,11 @@
     "description": "Flip cards and match pairs to clear the board. Choose 4x4 or 6x6 difficulty.",
     "featured": false,
     "trending": true,
-    "tags": ["puzzle", "memory", "cards"],
+    "tags": [
+      "puzzle",
+      "memory",
+      "cards"
+    ],
     "controls": "Tap or click cards to flip and match pairs",
     "rating": 4.5
   },
@@ -261,7 +333,11 @@
     "description": "Top-down neon space shooter! Blast through waves of enemy ships, dodge incoming fire.",
     "featured": true,
     "trending": true,
-    "tags": ["action", "shooter", "space"],
+    "tags": [
+      "action",
+      "shooter",
+      "space"
+    ],
     "controls": "Drag or WASD/Arrows to move. Auto-fire enabled.",
     "rating": 4.8
   },
@@ -275,7 +351,12 @@
     "description": "60-second arithmetic rush! Build exam-level speed calculation for SSC, Banking, Railways.",
     "featured": true,
     "trending": false,
-    "tags": ["brain", "math", "aptitude", "exam-prep"],
+    "tags": [
+      "brain",
+      "math",
+      "aptitude",
+      "exam-prep"
+    ],
     "controls": "Tap the correct option. Build combos for bonus points.",
     "rating": 4.9
   },
@@ -289,7 +370,11 @@
     "description": "Classic 9x9 Sudoku with 4 difficulty levels. Hints, pencil marks, mistake counter, auto-save.",
     "featured": true,
     "trending": false,
-    "tags": ["brain", "puzzle", "logic"],
+    "tags": [
+      "brain",
+      "puzzle",
+      "logic"
+    ],
     "controls": "Tap a cell, then tap a number 1-9.",
     "rating": 4.9
   },
@@ -303,7 +388,11 @@
     "description": "260+ verified General Knowledge MCQs for UPSC, SSC, Banking exams.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "quiz", "gk"],
+    "tags": [
+      "brain",
+      "quiz",
+      "gk"
+    ],
     "controls": "Tap the correct option. Blitz mode: 60s.",
     "rating": 4.9
   },
@@ -317,7 +406,11 @@
     "description": "Find the next number in the pattern! Essential for Bank PO and SSC quant sections.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "math", "aptitude"],
+    "tags": [
+      "brain",
+      "math",
+      "aptitude"
+    ],
     "controls": "Tap the correct answer.",
     "rating": 4.8
   },
@@ -331,7 +424,10 @@
     "description": "Decode letter-number patterns and ciphers. SSC and Banking reasoning section practice.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "reasoning"],
+    "tags": [
+      "brain",
+      "reasoning"
+    ],
     "controls": "Analyze pattern, tap correct answer.",
     "rating": 4.8
   },
@@ -345,7 +441,10 @@
     "description": "Train working memory: Digit Span, Pattern Grid, Sequence modes.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "memory"],
+    "tags": [
+      "brain",
+      "memory"
+    ],
     "controls": "Memorize then reproduce sequence.",
     "rating": 4.8
   },
@@ -359,7 +458,10 @@
     "description": "Group 16 words into 4 themed categories. NYT Connections style.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "vocabulary"],
+    "tags": [
+      "brain",
+      "vocabulary"
+    ],
     "controls": "Tap 4 words that belong together, then SUBMIT.",
     "rating": 4.9
   },
@@ -373,7 +475,10 @@
     "description": "Master exam vocabulary: Synonyms, Antonyms, and Analogies. 419 word pairs.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "vocabulary"],
+    "tags": [
+      "brain",
+      "vocabulary"
+    ],
     "controls": "Tap the matching word.",
     "rating": 4.8
   },
@@ -387,7 +492,10 @@
     "description": "Master Indian Geography: States, Capitals, Rivers, Neighbors.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "geography"],
+    "tags": [
+      "brain",
+      "geography"
+    ],
     "controls": "Read the clue, tap the correct state.",
     "rating": 4.8
   },
@@ -401,7 +509,10 @@
     "description": "Daily 5x5 crossword with Indian GK and vocabulary clues.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "crossword"],
+    "tags": [
+      "brain",
+      "crossword"
+    ],
     "controls": "Tap a cell, use the on-screen keyboard.",
     "rating": 4.9
   },
@@ -415,7 +526,10 @@
     "description": "Rapid-fire 60-second GK challenge. 210+ verified statements.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "quiz"],
+    "tags": [
+      "brain",
+      "quiz"
+    ],
     "controls": "Tap TRUE or FALSE.",
     "rating": 4.8
   },
@@ -429,7 +543,10 @@
     "description": "Find the item that doesn't belong! 400+ classification puzzles.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "reasoning"],
+    "tags": [
+      "brain",
+      "reasoning"
+    ],
     "controls": "Tap the odd item.",
     "rating": 4.8
   },
@@ -443,64 +560,12 @@
     "description": "Speed-drill Data Interpretation questions for Bank PO, SSC, CAT.",
     "featured": false,
     "trending": false,
-    "tags": ["brain", "di", "aptitude"],
+    "tags": [
+      "brain",
+      "di",
+      "aptitude"
+    ],
     "controls": "Analyze chart, tap correct answer.",
     "rating": 4.8
-  },
-  {
-    "id": 26,
-    "title": "Constitution Quest",
-    "slug": "constitution",
-    "category": "upsc",
-    "thumbnail": "assets/thumbnails/constitution.svg",
-    "game_url": "public/games/constitution.html",
-    "description": "Drag Indian Constitution articles to their correct Parts. UPSC Polity practice.",
-    "featured": false,
-    "trending": false,
-    "tags": ["upsc", "polity"],
-    "controls": "Drag the article card to the correct Part.",
-    "rating": 4.9
-  },
-  {
-    "id": 27,
-    "title": "Timeline Rush",
-    "slug": "timelinerush",
-    "category": "upsc",
-    "thumbnail": "assets/thumbnails/timelinerush.svg",
-    "game_url": "public/games/timelinerush.html",
-    "description": "Order Indian history events chronologically. 240 verified events across 5 eras.",
-    "featured": false,
-    "trending": false,
-    "tags": ["upsc", "history"],
-    "controls": "Drag events into correct order.",
-    "rating": 4.9
-  },
-  {
-    "id": 28,
-    "title": "Scheme Match",
-    "slug": "schemematch",
-    "category": "upsc",
-    "thumbnail": "assets/thumbnails/schemematch.svg",
-    "game_url": "public/games/schemematch.html",
-    "description": "Memory-match game with 68 verified government schemes.",
-    "featured": false,
-    "trending": false,
-    "tags": ["upsc", "schemes"],
-    "controls": "Tap pairs to match scheme name to description.",
-    "rating": 4.9
-  },
-  {
-    "id": 29,
-    "title": "PM Quest",
-    "slug": "pmquest",
-    "category": "upsc",
-    "thumbnail": "assets/thumbnails/pmquest.svg",
-    "game_url": "public/games/pmquest.html",
-    "description": "Connect Indian Prime Ministers to their iconic acts, events, and quotes.",
-    "featured": false,
-    "trending": false,
-    "tags": ["upsc", "history"],
-    "controls": "Tap a PM, then tap the matching item.",
-    "rating": 4.9
   }
 ]
