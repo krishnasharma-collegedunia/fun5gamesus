@@ -160,6 +160,51 @@
     // Also clicking thumbnail starts game
     var preview = document.getElementById('thumbPreview');
     if (preview) preview.addEventListener('click', startGame);
+
+    // Close button — exits gameplay back to preview
+    var closeBtn = document.getElementById('gameCloseBtn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeGame();
+      });
+    }
+  }
+
+  function closeGame() {
+    if (!iframeLoaded) return;
+    var container = document.getElementById('gameFrameContainer');
+    var preview = document.getElementById('thumbPreview');
+    var wrapper = document.getElementById('gameFrameWrapper');
+    var loading = document.getElementById('gameLoading');
+    var ctaWrap = document.getElementById('playCtaWrap');
+    var iframe = document.getElementById('gameIframe');
+
+    // Stop iframe (prevents background audio/script)
+    if (iframe) {
+      iframe.src = 'about:blank';
+      iframe.remove();
+    }
+
+    // Reset UI to preview state
+    if (container) container.classList.remove('playing');
+    if (wrapper) wrapper.classList.add('hidden');
+    if (loading) loading.classList.add('hidden');
+    if (preview) preview.classList.remove('hidden');
+    if (ctaWrap) ctaWrap.classList.remove('hidden');
+
+    iframeLoaded = false;
+
+    // Scroll back up so user sees the preview
+    setTimeout(function () {
+      document.getElementById('gameFrameContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+
+    // Track close event
+    if (window.fun5track) {
+      window.fun5track('game_close', { slug: currentGame ? currentGame.slug : 'unknown' });
+    }
   }
 
   function setupControls() {

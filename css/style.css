@@ -650,6 +650,49 @@ body::before { display: none; }
   }
 }
 
+/* Close button — only visible during gameplay */
+.game-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  line-height: 1;
+}
+
+.play202-frame-container.playing .game-close-btn {
+  display: flex;
+}
+
+.game-close-btn:hover,
+.game-close-btn:active {
+  background: var(--red);
+  border-color: #fff;
+  transform: scale(1.08);
+}
+
+@media (min-width: 768px) {
+  .game-close-btn { width: 42px; height: 42px; font-size: 20px; top: 12px; right: 12px; }
+}
+
 /* Yellow PLAY GAME button (the big CTA, like play202) */
 .play202-cta-wrap {
   text-align: center;
