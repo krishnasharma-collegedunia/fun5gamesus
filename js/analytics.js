@@ -9,10 +9,10 @@
 (function () {
   'use strict';
 
-  var GA_ID = 'G-XXXXXXXXXX'; // <-- Replace with real GA4 ID
+  var GA_ID = 'G-D16NB8WW33'; // Fun5Games production GA4 Measurement ID
 
   // Don't load if placeholder still set (no analytics in dev/preview)
-  if (GA_ID === 'G-XXXXXXXXXX') {
+  if (!GA_ID || GA_ID.indexOf('XXXXX') !== -1) {
     window.gtag = function () { /* noop until real ID */ };
     window.fun5track = function () {};
     return;
