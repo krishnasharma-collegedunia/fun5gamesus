@@ -85,8 +85,8 @@
         <a class="rewards-btn" href="index.html#games">Let's Play 🔥 More Games</a>
       </div>
 
-      <!-- AD SLOT (Taboola placeholder) -->
-      <div class="play202-ad-slot">
+      <!-- AD SLOT #1: PRE-GAME (top banner / interstitial-style, like play202 green PLAY button) -->
+      <div class="play202-ad-slot" id="adPreGame" data-ad-slot="pre_game" data-ad-size="320x50,300x250">
         <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
@@ -111,6 +111,11 @@
         <div class="tag-row" id="gameTags"></div>
       </div>
 
+      <!-- AD SLOT #2: MID-PAGE (between How to Play and Download section) -->
+      <div class="ad-slot ad-mid" id="adMid" data-ad-slot="game_mid" data-ad-size="300x250,336x280">
+        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
+      </div>
+
       <!-- DOWNLOAD GAMES SECTION (fun5games.com mobile games) -->
       <section class="download-section">
         <div class="section-head">
@@ -124,8 +129,8 @@
         </a>
       </section>
 
-      <!-- BOTTOM AD -->
-      <div class="ad-slot ad-bottom">
+      <!-- AD SLOT #3: BOTTOM (300x250 / 336x280 native) -->
+      <div class="ad-slot ad-bottom" id="adBottom" data-ad-slot="bottom_native" data-ad-size="300x250,336x280">
         <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
@@ -135,6 +140,19 @@
         <div class="game-grid" id="relatedGrid"></div>
       </section>
 
+      <!-- AD SLOT #4: TABOOLA NATIVE FEED ("Around the Web" / Discovery) -->
+      <div class="ad-slot ad-native-feed" id="adNativeFeed" data-ad-slot="taboola_feed" data-ad-size="responsive">
+        <div class="ad-inner"><span class="ad-text">Recommended Stories</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AD SLOT #5: STICKY BOTTOM BANNER (floats above content) -->
+  <div class="ad-sticky-wrap" id="adStickyWrap">
+    <button class="ad-sticky-close" id="adStickyClose" aria-label="Close ad">✕</button>
+    <div class="ad-slot ad-sticky" id="adSticky" data-ad-slot="sticky_bottom" data-ad-size="320x50,728x90">
+      <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
     </div>
   </div>
 

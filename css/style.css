@@ -187,6 +187,95 @@ body::before { display: none; }
 
 .ad-mid .ad-inner { min-height: 130px; }
 .ad-below .ad-inner { min-height: 200px; }
+.ad-footer .ad-inner { min-height: 200px; }
+.ad-bottom .ad-inner { min-height: 200px; }
+
+/* === STICKY BOTTOM AD (Vertoz/AdSense banner) === */
+.ad-sticky-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.10);
+  padding: 6px 8px 6px 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ad-sticky-wrap.hidden { display: none; }
+
+.ad-sticky {
+  flex: 1;
+  max-width: 728px;
+  padding: 0;
+  margin: 0;
+}
+
+.ad-sticky .ad-inner {
+  min-height: 50px;
+  border: 1px dashed #cbd5e1;
+}
+
+.ad-sticky-close {
+  position: absolute;
+  top: -14px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1f2937;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 91;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  padding: 0;
+  line-height: 1;
+}
+
+.ad-sticky-close:hover { background: var(--red); }
+
+/* Add bottom padding when sticky ad is showing so it doesn't cover content */
+body.has-sticky-ad { padding-bottom: 70px; }
+
+@media (min-width: 768px) {
+  .ad-sticky .ad-inner { min-height: 90px; }
+  body.has-sticky-ad { padding-bottom: 110px; }
+}
+
+/* === NATIVE FEED ad (Taboola-style) === */
+.ad-native-feed {
+  margin-top: 24px;
+  padding: 14px 0;
+}
+
+.ad-native-feed .ad-inner {
+  min-height: 280px;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(180deg, #f9fafb, #f3f4f6);
+  position: relative;
+}
+
+.ad-native-feed .ad-inner::after {
+  content: '🔄 Discovery widget loads here when Vertoz/Taboola tag is added';
+  position: absolute;
+  bottom: 8px;
+  font-size: 9px;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
 
 /* ===== CATEGORY NAV ===== */
 .cat-nav-wrap {

@@ -55,9 +55,9 @@
     </div>
   </section>
 
-  <!-- TOP AD (prominent for Taboola) -->
+  <!-- AD SLOT #1: TOP BANNER (Vertoz/Taboola) -->
   <div class="container">
-    <div class="ad-slot ad-top">
+    <div class="ad-slot ad-top" id="adTop" data-ad-slot="header" data-ad-size="320x50,728x90">
       <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
     </div>
   </div>
@@ -86,9 +86,9 @@
     </div>
   </section>
 
-  <!-- MID AD -->
+  <!-- AD SLOT #2: MID-PAGE (in-content native, after game grid) -->
   <div class="container">
-    <div class="ad-slot ad-mid">
+    <div class="ad-slot ad-mid" id="adMid" data-ad-slot="in_content_1" data-ad-size="300x250,336x280">
       <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
     </div>
   </div>
@@ -129,6 +129,21 @@
       </div>
     </div>
   </section>
+
+  <!-- AD SLOT #3: FOOTER REGION (300x250 native) -->
+  <div class="container">
+    <div class="ad-slot ad-footer" id="adFooter" data-ad-slot="footer_native" data-ad-size="300x250,336x280">
+      <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
+    </div>
+  </div>
+
+  <!-- AD SLOT #4: STICKY BOTTOM BANNER (floats above content) -->
+  <div class="ad-sticky-wrap" id="adStickyWrap">
+    <button class="ad-sticky-close" id="adStickyClose" aria-label="Close ad">✕</button>
+    <div class="ad-slot ad-sticky" id="adSticky" data-ad-slot="sticky_bottom" data-ad-size="320x50,728x90">
+      <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="site-footer">

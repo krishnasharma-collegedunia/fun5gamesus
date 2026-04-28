@@ -79,3 +79,36 @@
   }, true);
 
 })();
+
+/* === Sticky Ad Bottom Bar Behavior === */
+(function () {
+  'use strict';
+  document.addEventListener('DOMContentLoaded', function () {
+    var sticky = document.getElementById('adStickyWrap');
+    var closeBtn = document.getElementById('adStickyClose');
+    if (!sticky) return;
+
+    // Mark body so content gets bottom padding
+    document.body.classList.add('has-sticky-ad');
+
+    // Close button hides the sticky ad for the session
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        sticky.classList.add('hidden');
+        document.body.classList.remove('has-sticky-ad');
+        try { sessionStorage.setItem('hideStickyAd', '1'); } catch (er) {}
+        if (window.fun5track) window.fun5track('ad_dismiss', { slot: 'sticky_bottom' });
+      });
+    }
+
+    // Respect previous dismissal in this session
+    try {
+      if (sessionStorage.getItem('hideStickyAd') === '1') {
+        sticky.classList.add('hidden');
+        document.body.classList.remove('has-sticky-ad');
+      }
+    } catch (er) {}
+  });
+})();
+
