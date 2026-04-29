@@ -1,5 +1,5 @@
 /* ========================================
-   Fun5Games — Analytics
+   Prepp Games — Analytics
    GA4 + custom event tracking for games
    ========================================
    TO ACTIVATE: Replace G-XXXXXXXXXX with real GA4 Measurement ID
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  var GA_ID = 'G-D16NB8WW33'; // Fun5Games production GA4 Measurement ID
+  var GA_ID = 'G-D16NB8WW33'; // Prepp Games production GA4 Measurement ID
 
   // Don't load if placeholder still set (no analytics in dev/preview)
   if (!GA_ID || GA_ID.indexOf('XXXXX') !== -1) {

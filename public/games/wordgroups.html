@@ -942,7 +942,7 @@ shareBtn.addEventListener('click', function(e){
   e.stopPropagation(); e.preventDefault();
   var emojiText = buildEmojiGridPlain();
   var outcome = state._lastWon ? ("solved with " + state.mistakes + " mistakes") : ("got " + state.solved.length + "/4 groups");
-  var txt = "Word Groups Puzzle #" + (state.puzzleIdx + 1) + " — " + outcome + "\n\n" + emojiText + "\n\nI scored " + (state._lastScore||0) + " on Word Groups at fun5games.us — can you beat it?";
+  var txt = "Word Groups Puzzle #" + (state.puzzleIdx + 1) + " — " + outcome + "\n\n" + emojiText + "\n\nI scored " + (state._lastScore||0) + " on Word Groups at prepp.in/games — can you beat it?";
   copyText(txt);
   shareBtn.classList.add('copied');
   shareBtn.textContent = "COPIED!";

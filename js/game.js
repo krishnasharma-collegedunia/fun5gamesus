@@ -1,5 +1,5 @@
 /* ========================================
-   Fun5Games - Game Detail Page (play202-style)
+   Prepp Games - Game Detail Page (play202-style)
    PLAY button click -> iframe loads
    Download Games section -> fun5games.com
    ======================================== */
@@ -44,7 +44,7 @@
     renderDownloadGames();
     setupPageLeave();
 
-    console.log('[Fun5Games] Loaded: ' + currentGame.title);
+    console.log('[Prepp Games] Loaded: ' + currentGame.title);
   }
 
   function goHome() { window.location.href = 'index.html'; }
@@ -55,16 +55,16 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       allGames = await res.json();
     } catch (e) {
-      console.error('[Fun5Games] Failed to load games:', e);
+      console.error('[Prepp Games] Failed to load games:', e);
       allGames = [];
     }
   }
 
   function updateMeta() {
-    document.title = currentGame.title + ' - Play Free | Fun5Games';
+    document.title = currentGame.title + ' - Play Free | Prepp Games';
     var desc = 'Play ' + currentGame.title + ' free! ' + currentGame.description;
     document.getElementById('metaDesc').content = desc;
-    document.getElementById('ogTitle').content = currentGame.title + ' - Fun5Games';
+    document.getElementById('ogTitle').content = currentGame.title + ' - Prepp Games';
     document.getElementById('ogDesc').content = desc;
 
     var ld = {

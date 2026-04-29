@@ -1,5 +1,5 @@
 /* ========================================
-   Fun5Games — play202-inspired Casual Portal
+   Prepp Games — play202-inspired Casual Portal
    Light theme · Mobile-first · Taboola-friendly
    ======================================== */
 
@@ -464,7 +464,7 @@ body.has-sticky-ad { padding-bottom: 70px; }
   .play-button { font-size: 13px; padding: 10px; }
 }
 
-/* ===== DOWNLOAD BANNER (homepage CTA to fun5games.com) ===== */
+/* ===== DOWNLOAD BANNER (homepage CTA to preppgames.com) ===== */
 .download-banner {
   display: flex;
   align-items: center;
@@ -809,7 +809,7 @@ body.has-sticky-ad { padding-bottom: 70px; }
 .play202-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(250, 204, 21, 0.55); }
 .play202-cta:active { transform: translateY(0); }
 
-/* Rewards card (links to fun5games.com) */
+/* Rewards card (links to preppgames.com) */
 .play202-rewards-card {
   background: var(--bg-card);
   border: 1px solid var(--border);

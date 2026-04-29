@@ -1257,7 +1257,7 @@ function goStart(){
 
 // ===== Share score =====
 function shareScore(){
-  var txt='I scored '+score+' on Odd One Out ('+diffLabels[difficulty]+')! '+correct+' correct, '+statAcc.textContent+' accuracy — can you beat it at fun5games.us?';
+  var txt='I scored '+score+' on Odd One Out ('+diffLabels[difficulty]+')! '+correct+' correct, '+statAcc.textContent+' accuracy — can you beat it at prepp.in/games?';
   var showToast=function(){toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1400)};
   try{
     if(navigator.clipboard && navigator.clipboard.writeText){

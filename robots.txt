@@ -3,4 +3,4 @@ Allow: /
 Disallow: /data/
 Disallow: /assets/mobile-icons/
 
-Sitemap: https://fun5games.us/sitemap.xml
+Sitemap: https://prepp.in/games/sitemap.xml

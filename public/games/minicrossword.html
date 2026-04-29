@@ -1172,7 +1172,7 @@ function quitToStart(){
 }
 
 function shareScore(){
-  var txt = 'I solved Mini Crossword #' + PUZZLES[state.puzzleIdx].id + ' in ' + fmtTime(state.elapsed) + ' on fun5games.us — can you beat it?';
+  var txt = 'I solved Mini Crossword #' + PUZZLES[state.puzzleIdx].id + ' in ' + fmtTime(state.elapsed) + ' on prepp.in/games — can you beat it?';
   try{
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(txt);

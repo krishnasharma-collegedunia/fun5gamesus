@@ -1,5 +1,5 @@
 /* ========================================
-   Fun5Games - Homepage Script
+   Prepp Games - Homepage Script
    ======================================== */
 
 (function () {
@@ -24,7 +24,7 @@
     renderGames();
     setupFilters();
     updateSectionHeading('all');
-    console.log('[Fun5Games] Loaded ' + allGames.length + ' games.');
+    console.log('[Prepp Games] Loaded ' + allGames.length + ' games.');
   }
 
   async function loadGames() {
@@ -34,7 +34,7 @@
       allGames = await res.json();
       filteredGames = allGames.slice();
     } catch (e) {
-      console.error('[Fun5Games] Failed to load games:', e);
+      console.error('[Prepp Games] Failed to load games:', e);
       allGames = [];
       filteredGames = [];
     }
