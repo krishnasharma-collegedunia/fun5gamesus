@@ -1,0 +1,37 @@
+# ads.txt for Prepp Games (operated by 3.14 Digital)
+# Spec: https://iabtechlab.com/ads-txt/
+#
+# Format: <DOMAIN>, <PUBLISHER ACCOUNT ID>, <RELATIONSHIP>, <CERT AUTHORITY ID>
+# RELATIONSHIP: DIRECT (you have direct contract) | RESELLER (third-party authorized)
+#
+# Last Updated: April 2026
+# ============================================================
+
+# === GOOGLE ADSENSE ===
+# Replace pub-XXXXXXXXXXXXXXXX with real AdSense Publisher ID
+# Find at: https://www.google.com/adsense/new/u/0/pub-XXXXXXXX/myads/sites
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# === VERTOZ (Hyperad) ===
+# Replace VERTOZ_SELLER_ID with the ID Vertoz provides during onboarding
+# Vertoz will email you the exact line to paste — usually:
+# vertoz.com, <YOUR-SELLER-ID>, DIRECT
+# Vertoz also resells through these SSPs (typical entries — confirm with Vertoz):
+# vertoz.com, VERTOZ_SELLER_ID, DIRECT
+
+# === TABOOLA (Native/Discovery Ads) ===
+# Required if running Taboola native widgets
+# Replace TABOOLA_PUBLISHER_ID with ID from Taboola dashboard
+# taboola.com, TABOOLA_PUBLISHER_ID, DIRECT, c228e6794e811952
+
+# === GOOGLE AD MANAGER (if using GAM) ===
+# google.com, pub-XXXXXXXXXXXXXXXX, RESELLER, f08c47fec0942fa0
+
+# ============================================================
+# NOTES:
+# - ads.txt MUST be at root: https://prepp.in/ads.txt (NOT prepp.in/games/ads.txt)
+# - ads.txt is plain text, served as text/plain
+# - Update this file whenever you add/remove an ad network
+# - Crawlers (Google, Vertoz) re-check every 24-48 hours
+# - Standard format - no JSON, no XML
+# ============================================================
