@@ -5,6 +5,94 @@
 
 ---
 
+## ⏰ WHERE WE LEFT OFF (May 2, 2026)
+
+```
+✅ DONE
+├── 32 games built & live on fun5games.us
+├── Brand rebranded: Fun5Games → Prepp Games
+├── Hosting target: prepp.in/games (Prepp tech team handles this)
+├── ads.txt deployed with 17 Vertoz authorized seller lines
+├── Google Analytics 4 active (G-D16NB8WW33)
+├── 9 ad slots ready (waiting for Vertoz tags)
+├── robots.txt + sitemap.xml live
+├── 4 legal pages (about/contact/terms/privacy) all on Prepp branding
+├── Close (✕) button on iframe gameplay
+├── play202-style game flow (PLAY → iframe loads in place)
+├── Real Apple App Store icons in "Download Top Mobile Games" section
+
+⏳ PENDING (waiting on others)
+├── Vertoz approval (24-48h after May 2 — should clear by May 4)
+├── Vertoz will email/Slack actual ad tag JS snippets
+├── Prepp tech team needs to redeploy prepp.in/games occasionally
+│   (when we push updates to GitHub)
+└── Prepp tech team handles prepp.in/ads.txt at root (already done)
+
+🎯 LIKELY NEXT TASKS (when continuing this project)
+├── Receive Vertoz ad tags → integrate into 9 ad slots
+├── Test ad fill rate on mobile + desktop
+├── Monitor GA4 → Vertoz dashboard for CPM
+├── (optional) Add more games based on engagement data
+└── (optional) A/B test ad placements
+```
+
+---
+
+## 🚀 BOOTSTRAP A NEW CLAUDE SESSION (read this FIRST)
+
+If you're a new Claude session picking up this project, here's how to get full context in 30 seconds:
+
+### Step 1: Clone or open existing local copy
+
+**Local path on Krishna's Mac (existing):**
+```
+/Users/dell/Library/Mobile Documents/com~apple~CloudDocs/Claude code/PlayZone
+```
+
+**OR fresh clone on a different machine:**
+```bash
+git clone https://github.com/krishnasharma-collegedunia/fun5gamesus.git
+cd fun5gamesus
+```
+
+### Step 2: Tell user this is what you'll do
+
+Read these files in order:
+1. `CONTEXT.md` (this file) — full architecture & state
+2. `data/games.json` — all 32 games config
+3. `index.html` + `game.html` — main page templates
+4. `js/script.js` + `js/game.js` + `js/analytics.js` — core logic
+5. `css/style.css` — single stylesheet (light/dark themes)
+
+### Step 3: Verify deployment status
+
+```bash
+# Check git sync
+git status
+git log origin/main --oneline -5
+
+# Check live site
+curl -sI https://fun5games.us/ | head -3
+curl -s https://fun5games.us/ads.txt | head -5
+```
+
+### Step 4: SSH access to server (testing site)
+
+```bash
+ssh root@64.227.184.30
+cd /var/www/fun5games-us
+git pull origin main
+```
+
+### What's where
+
+| Domain | Hosting | Update |
+|---|---|---|
+| **fun5games.us** | DigitalOcean (root@64.227.184.30) | I have SSH access, auto-pull |
+| **prepp.in/games** | Prepp's own infra | Prepp tech team pulls from GitHub |
+
+---
+
 ## 📌 Project Overview
 
 **Prepp Games** is the games section of [Prepp.in](https://prepp.in) (operated by 3.14 Digital, a Collegedunia subsidiary). It's a free HTML5 games portal for Indian competitive exam aspirants (UPSC/SSC/Banking/Railways) — also accessible at fun5games.us for testing.
