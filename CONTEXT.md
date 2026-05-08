@@ -1,18 +1,20 @@
 # 🎮 Prepp Games — Project Context
 
-**Last Updated:** May 2, 2026
-**Status:** Production-ready · Vertoz approval pending (24-48h)
+**Last Updated:** May 8, 2026
+**Status:** Production-ready · Vertoz approval imminent (1-2 days per Ayushmann, May 7)
 
 ---
 
-## ⏰ WHERE WE LEFT OFF (May 2, 2026)
+## ⏰ WHERE WE LEFT OFF (May 8, 2026)
 
 ```
 ✅ DONE
-├── 32 games built & live on fun5games.us
+├── 32 games built & live on fun5games.us + prepp.in/games
 ├── Brand rebranded: Fun5Games → Prepp Games
 ├── Hosting target: prepp.in/games (Prepp tech team handles this)
 ├── ads.txt deployed with 17 Vertoz authorized seller lines
+├── prepp.in/ads.txt LIVE & VERIFIED (screenshot confirmed May 7)
+│   └── Prepp team added their own google.com pub-4304762948491681 line on top
 ├── Google Analytics 4 active (G-D16NB8WW33)
 ├── 9 ad slots ready (waiting for Vertoz tags)
 ├── robots.txt + sitemap.xml live
@@ -22,11 +24,12 @@
 ├── Real Apple App Store icons in "Download Top Mobile Games" section
 
 ⏳ PENDING (waiting on others)
-├── Vertoz approval (24-48h after May 2 — should clear by May 4)
+├── Vertoz approval — Ayushmann said May 7 "1-2 din mein aa jayega"
+│   → Expected by Friday May 8 / weekend
 ├── Vertoz will email/Slack actual ad tag JS snippets
 ├── Prepp tech team needs to redeploy prepp.in/games occasionally
 │   (when we push updates to GitHub)
-└── Prepp tech team handles prepp.in/ads.txt at root (already done)
+└── ✅ Prepp tech team handled prepp.in/ads.txt at root (DONE — verified)
 
 🎯 LIKELY NEXT TASKS (when continuing this project)
 ├── Receive Vertoz ad tags → integrate into 9 ad slots
@@ -173,7 +176,7 @@ Constitution Quest, Timeline Rush, Scheme Match, PM Quest
 
 ## 💰 Monetization Setup (Vertoz)
 
-### Status: Approval pending (24-48h from May 2, 2026)
+### Status: Approval imminent — 1-2 days per Ayushmann (May 7, 2026)
 
 ### 9 Ad Slots Ready
 
@@ -215,8 +218,9 @@ sharethrough.com, izM1hGJl, DIRECT, d53b998a7bd4ecd3
 
 ### Vertoz Contact
 - **Person:** Ayushmann Rai (Vertoz)
-- **Status as of May 2:** Asked for approval after ads.txt + games deployed
-- **Next step:** Vertoz sends actual ad tag JS snippets → integrate into ad slots
+- **Status as of May 7:** ads.txt verified live on prepp.in root; Ayushmann said approval in 1-2 days
+- **Expected approval:** Friday May 8 / weekend
+- **Next step:** Vertoz sends actual ad tag JS snippets → integrate into 9 ad slots → push to GitHub → Prepp team redeploys prepp.in/games → test fill rate (incognito + mobile + desktop) → monitor GA4 + Vertoz dashboard for CPM
 
 ---
 
@@ -364,6 +368,9 @@ Two parallel deployments:
 ## 🔑 Latest Git Commits (most recent first)
 
 ```
+1a31abc Add README.md — landing doc on GitHub pointing to CONTEXT.md
+5328429 Update CONTEXT.md: add Bootstrap section with local path + pending tasks
+603bf8e Add CONTEXT.md — comprehensive project context for future sessions
 c09a39d ads.txt: Add 17 Vertoz authorized seller lines
 a66ee6b Add ads.txt template
 daba5d7 Rebrand: Fun5Games -> Prepp Games (hosting at prepp.in/games)
@@ -375,7 +382,6 @@ aa5e255 Add Google Analytics 4 with custom event tracking
 c35a77f Fix thumbnail clipping site-wide
 9e88b37 Fix Basketball Slam: ovbg z-index hiding content
 2e36827 Fix iOS iframe rendering: position:fixed -> absolute (8 games)
-614cd2e Real Apple App Store icons + Skibidi Toilet game
 ```
 
 ---
