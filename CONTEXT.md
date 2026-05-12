@@ -1,11 +1,11 @@
 # 🎮 Prepp Games — Project Context
 
-**Last Updated:** May 8, 2026
-**Status:** Production-ready · Vertoz approval imminent (1-2 days per Ayushmann, May 7)
+**Last Updated:** May 12, 2026
+**Status:** Production-ready · Vertoz approved · 13 ad placements with Vertoz-styled placeholders live · waiting for actual ad tag JS
 
 ---
 
-## ⏰ WHERE WE LEFT OFF (May 8, 2026)
+## ⏰ WHERE WE LEFT OFF (May 12, 2026)
 
 ```
 ✅ DONE
@@ -13,10 +13,22 @@
 ├── Brand rebranded: Fun5Games → Prepp Games
 ├── Hosting target: prepp.in/games (Prepp tech team handles this)
 ├── ads.txt deployed with 17 Vertoz authorized seller lines
-├── prepp.in/ads.txt LIVE & VERIFIED (screenshot confirmed May 7)
+├── prepp.in/ads.txt LIVE & VERIFIED (May 7)
 │   └── Prepp team added their own google.com pub-4304762948491681 line on top
-├── Google Analytics 4 active (G-D16NB8WW33)
-├── 9 ad slots ready (waiting for Vertoz tags)
+├── Vertoz APPROVED ✅ — Ayushmann sent ad placement plan (5 attachments,
+│   including INTERSTITIAL.png) on May 11
+├── 13 Vertoz-styled ad placeholders implemented matching Ayushmann's screenshots
+│   (visible red italic size labels so Ayushmann can verify placements)
+├── 320x480 interstitial modal — fires on game card click (homepage), 5s
+│   countdown then Skip Ad ✕ button
+├── Google Analytics 4 active (G-D16NB8WW33) — 17 unique events tracked
+│   (page_view, game_view, game_play, game_iframe_loaded, game_close,
+│   game_reload, game_fullscreen, game_error, nav_click, footer_link_click,
+│   category_filter, game_select, download_click, ad_dismiss,
+│   interstitial_shown, interstitial_dismiss, scroll_depth, time_on_page)
+├── Bug fix May 12: Skibidi Toilet — inline style.bottom='-100%' was
+│   overriding CSS .up class, toilets stayed invisible. Removed inline
+│   style overrides; now relies on classList toggling. (commit f2f95b4)
 ├── robots.txt + sitemap.xml live
 ├── 4 legal pages (about/contact/terms/privacy) all on Prepp branding
 ├── Close (✕) button on iframe gameplay
@@ -24,12 +36,14 @@
 ├── Real Apple App Store icons in "Download Top Mobile Games" section
 
 ⏳ PENDING (waiting on others)
-├── Vertoz approval — Ayushmann said May 7 "1-2 din mein aa jayega"
-│   → Expected by Friday May 8 / weekend
-├── Vertoz will email/Slack actual ad tag JS snippets
-├── Prepp tech team needs to redeploy prepp.in/games occasionally
-│   (when we push updates to GitHub)
-└── ✅ Prepp tech team handled prepp.in/ads.txt at root (DONE — verified)
+├── Vertoz to send actual ad tag JS snippets — 13 unique tags requested:
+│   • 4 × 728x90 (with 320x50 mobile fallback)
+│   • 5 × 970x250 (with 300x250 mobile fallback)
+│   • 1 × 970x90 (with 728x90 / 320x50 fallback)
+│   • 2 × 300x600 (desktop ≥1280px only, hide on mobile)
+│   • 1 × 320x480 (static interstitial)
+├── Prepp tech team (Kunal) needs to redeploy prepp.in/games on next release
+│   to pick up Vertoz placeholders + GA4 tracking + Skibidi fix
 
 🎯 LIKELY NEXT TASKS (when continuing this project)
 ├── Receive Vertoz ad tags → integrate into 9 ad slots
@@ -176,24 +190,36 @@ Constitution Quest, Timeline Rush, Scheme Match, PM Quest
 
 ## 💰 Monetization Setup (Vertoz)
 
-### Status: Approval imminent — 1-2 days per Ayushmann (May 7, 2026)
+### Status: APPROVED ✅ (May 11, 2026) — placeholders live, awaiting ad tag JS
 
-### 9 Ad Slots Ready
+### 13 Vertoz Ad Placements
 
-**Homepage (4):**
-- `#adTop` — Header banner (320x50 / 728x90)
-- `#adMid` — In-content native (300x250 / 336x280)
-- `#adFooter` — Footer native
-- `#adSticky` — Sticky bottom banner (with ✕ close button)
+**Homepage (5 visible + 1 interstitial modal):**
+- `#adTop` — 728x90 above category filters (mobile: 320x50)
+- `#adInGrid` — 728x90 injected after 6th game card via JS (full-width via grid-column 1/-1)
+- `#adMid` — 970x250 after games grid (mobile: 300x250)
+- `#adFooter` — 970x250 after About Prepp Games (mobile: 300x250)
+- `#adSticky` — 728x90 sticky bottom (mobile: 320x50)
+- `#adInterstitial` — 320x480 modal, fires on game card PLAY click,
+  5s countdown then Skip Ad ✕ button. Tracks interstitial_shown +
+  interstitial_dismiss with seconds_viewed.
 
-**Game page (5):**
-- `#adPreGame` — Above game preview
-- `#adMid` — Between How-to-Play and Download section
-- `#adBottom` — Below Download section
-- `#adNativeFeed` — Taboola Discovery Feed
-- `#adSticky` — Sticky bottom
+**Game page (7):**
+- `#adSidebarLeft` — 300x600 left rail (desktop ≥1280px only)
+- `#adSidebarRight` — 300x600 right rail (desktop ≥1280px only)
+- `#adPreGame` — 970x90 / 728x90 below game preview (mobile: 320x50)
+- `#adMid` — 970x250 between How-to-Play and Download (mobile: 300x250)
+- `#adBottom` — 970x250 between Download and Related games
+- `#adNativeFeed` — 970x250 after Related games
+- `#adSticky` — 728x90 sticky bottom (mobile: 320x50)
 
-Each slot has `data-ad-slot="..."` and `data-ad-size="..."` for tag targeting.
+Each slot has:
+- `data-ad-slot="..."` (semantic name, e.g., `header`, `after_grid`, `sidebar_left`)
+- `data-ad-size="..."` (comma-separated primary + mobile fallback sizes)
+- Visible red italic size label inside placeholder (for review/verification)
+
+**Placeholder visual** matches Ayushmann's screenshots — dashed red border
++ prominent size label so Vertoz tag swap-in is a clean 1:1 replacement.
 
 ### ads.txt Lines (deployed at prepp.in/ads.txt)
 ```
@@ -231,14 +257,35 @@ sharethrough.com, izM1hGJl, DIRECT, d53b998a7bd4ecd3
 - **File:** `js/analytics.js` (loaded on all 6 HTML pages)
 - **Privacy:** `anonymize_ip: true`, `SameSite=None;Secure`
 
-### Custom Events Tracked
-- `page_view` (auto)
-- `game_select` — Game card click on homepage
-- `game_play` — PLAY GAME button click on game page
-- `game_close` — Close X button click
-- `category_filter` — Category pill click
-- `download_click` — Click to fun5games.com
-- `ad_dismiss` — Sticky ad close
+### Custom Events Tracked (17 total — comprehensive coverage)
+
+**Navigation & Discovery:**
+- `page_view` (auto via gtag)
+- `nav_click` — Header nav links (params: link_text, link_url, location)
+- `footer_link_click` — Footer About/Contact/Terms/Privacy
+- `category_filter` — Category pill click (param: category)
+- `game_select` — Game card click (params: slug, source = homepage_grid / related_games)
+
+**Game Interactions:**
+- `game_view` — Game page loaded with valid slug (params: game_slug, game_title, game_category, game_rating)
+- `game_play` — PLAY GAME button click (param: slug)
+- `game_iframe_loaded` — iframe `load` event fires (params: game_slug, latency_ms)
+- `game_close` — ✕ Close button (params: game_slug, game_title, time_played_seconds)
+- `game_reload` — 🔄 Reload button (params: game_slug, time_played_seconds_before_reload)
+- `game_fullscreen` — ⛶ Fullscreen toggle (params: game_slug, action = enter/exit)
+- `game_error` — Slug missing/not found OR iframe load fails (params: reason, game_slug)
+
+**Downloads:**
+- `download_click` — Any fun5games.com link (params: link_url, link_text, source = banner / download_grid / download_section / header_nav / link)
+
+**Ads & Monetization:**
+- `ad_dismiss` — Sticky ad ✕ close (param: slot = "sticky_bottom")
+- `interstitial_shown` — 320x480 modal appears (params: game_slug, trigger = "homepage_card_click")
+- `interstitial_dismiss` — Skip Ad clicked (params: game_slug, seconds_viewed)
+
+**Engagement Quality:**
+- `scroll_depth` — 25/50/75/100 milestones (fires once per milestone per page, params: percent, page)
+- `time_on_page` — On visibilitychange/pagehide (params: seconds, page)
 
 ---
 
@@ -342,15 +389,28 @@ Two parallel deployments:
 
 ---
 
-## 🔮 Future Tasks (when Vertoz approves)
+## 🔮 Future Tasks (when Vertoz tags arrive)
 
-1. **Receive Vertoz ad tags** (will be JS snippets)
-2. **Plug into 9 ad slots** by ID
-3. **Test ad fill rate** in incognito + mobile + desktop
-4. **Monitor GA4 + Vertoz dashboard** for CPM/RPM
-5. **Optional:** Add `game_complete` event when games actually finish (not just play)
-6. **Optional:** A/B test ad placements
-7. **Optional:** Add more games based on engagement data
+1. **Receive 13 Vertoz ad tags** (JS snippets — request: separate tags per
+   placement for granular CPM/fill-rate tracking, NOT shared tags)
+2. **Plug into placeholders** — replace `<div class="ad-inner">...</div>` content
+   in each slot with Vertoz `<script>` tag. The placeholders are already
+   class-named (`.ad-728x90`, `.ad-970x250`, etc.) and sized correctly.
+3. **Test ad fill rate** — incognito + mobile + desktop + tablet
+4. **Verify CLS (Cumulative Layout Shift)** — min-heights already set on
+   placeholders so ad load shouldn't cause content jump
+5. **Monitor GA4 Reports:**
+   - Funnel: page_view → game_select → game_play → game_iframe_loaded → game_close
+   - Drop-off analysis using scroll_depth + time_on_page
+   - Ad performance: interstitial_dismiss.seconds_viewed distribution
+   - Game performance: game_iframe_loaded.latency_ms p95 by game
+   - Mobile vs Desktop: scroll_depth percentile by device
+6. **Vertoz dashboard:** Track CPM/RPM per slot (since each has separate tag)
+7. **Tell Prepp tech (Kunal)** to redeploy prepp.in/games once Vertoz tags
+   are integrated and tested on fun5games.us
+8. **Optional:** Add `game_complete` event when games actually finish
+9. **Optional:** A/B test ad placements based on RPM data
+10. **Optional:** Add more games based on engagement data
 
 ---
 
@@ -368,6 +428,13 @@ Two parallel deployments:
 ## 🔑 Latest Git Commits (most recent first)
 
 ```
+f2f95b4 Fix Skibidi Toilet: inline style overriding CSS .up class (toilets invisible bug)
+76d25f2 Expand GA4 tracking: 17 events covering navigation, games, ads, engagement
+dee44c8 Upgrade sticky + remaining game page placeholders to Vertoz styling (728x90 sticky + 3x 970x250)
+c1160a7 Move interstitial trigger from game.html PLAY → homepage card click
+b9f9da8 Add Vertoz interstitial 320x480 placeholder on PLAY click
+412ddc8 Add Vertoz ad placement placeholders matching Ayushmann's suggested layout (13 slots)
+91c2298 Update CONTEXT.md: May 8 status — ads.txt verified live on prepp.in
 1a31abc Add README.md — landing doc on GitHub pointing to CONTEXT.md
 5328429 Update CONTEXT.md: add Bootstrap section with local path + pending tasks
 603bf8e Add CONTEXT.md — comprehensive project context for future sessions
@@ -378,10 +445,6 @@ daba5d7 Rebrand: Fun5Games -> Prepp Games (hosting at prepp.in/games)
 3a9a145 Add close (X) button on game iframe
 b941486 Activate GA4 Measurement ID G-D16NB8WW33
 aa5e255 Add Google Analytics 4 with custom event tracking
-2a07d5f Add robots.txt and sitemap.xml (37 URLs)
-c35a77f Fix thumbnail clipping site-wide
-9e88b37 Fix Basketball Slam: ovbg z-index hiding content
-2e36827 Fix iOS iframe rendering: position:fixed -> absolute (8 games)
 ```
 
 ---
