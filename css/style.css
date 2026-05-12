@@ -1534,3 +1534,36 @@ body.has-sticky-ad { padding-bottom: 70px; }
 
 .interstitial-close:hover { background: #ef4444; }
 .interstitial-close:active { transform: translateY(1px); }
+
+/* ===== STICKY-specific Vertoz overrides =====
+   Keep sticky height compact even when ad-vertoz/ad-728x90 are applied. */
+.ad-sticky.ad-vertoz .ad-inner {
+  min-height: 50px;
+  flex-direction: row;
+  gap: 10px;
+  border-width: 1px;
+  padding: 4px 12px;
+}
+
+.ad-sticky.ad-vertoz .ad-size-label {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ad-sticky.ad-vertoz .ad-text {
+  font-size: 8px;
+}
+
+/* No "→ 320x50 mobile" subtitle inside sticky — too cramped */
+.ad-sticky.ad-vertoz .ad-size-label::after {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .ad-sticky.ad-vertoz .ad-inner {
+    min-height: 90px;
+  }
+  .ad-sticky.ad-vertoz .ad-size-label {
+    font-size: 20px;
+  }
+}
