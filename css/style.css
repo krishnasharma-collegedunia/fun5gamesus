@@ -1306,3 +1306,146 @@ body.has-sticky-ad { padding-bottom: 70px; }
 @media print {
   .ad-slot, .header-nav, .game-controls { display: none; }
 }
+
+/* ========================================
+   VERTOZ AD PLACEHOLDERS (May 2026)
+   Visible size labels for review before real tag integration.
+   Layout/positions match Ayushmann's screenshots.
+   ======================================== */
+
+/* Vertoz placeholder visual — prominent size label like in Ayushmann's screenshots */
+.ad-vertoz .ad-inner {
+  position: relative;
+  background: #fafafa;
+  border: 2px dashed #ef4444;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ad-vertoz .ad-size-label {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ef4444;
+  font-style: italic;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.ad-vertoz .ad-text {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+@media (max-width: 600px) {
+  .ad-vertoz .ad-size-label { font-size: 18px; }
+}
+
+/* Size-specific min-heights & widths — match exact Vertoz sizes */
+.ad-728x90 .ad-inner {
+  min-height: 90px;
+  max-width: 728px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ad-970x250 .ad-inner {
+  min-height: 250px;
+  max-width: 970px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ad-970x90 .ad-inner {
+  min-height: 90px;
+  max-width: 970px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ad-300x600 .ad-inner {
+  min-height: 600px;
+  width: 300px;
+  margin: 0 auto;
+}
+
+/* Mobile fallback for big banners (970x250 won't fit) */
+@media (max-width: 700px) {
+  .ad-970x250 .ad-inner {
+    min-height: 250px;
+    max-width: 100%;
+  }
+  .ad-970x250 .ad-size-label::after {
+    content: ' → 300x250 mobile';
+    font-size: 11px;
+    font-style: normal;
+    color: #64748b;
+    display: block;
+    margin-top: 6px;
+  }
+  .ad-970x90 .ad-size-label::after {
+    content: ' → 320x50 mobile';
+    font-size: 11px;
+    font-style: normal;
+    color: #64748b;
+    display: block;
+    margin-top: 6px;
+  }
+  .ad-728x90 .ad-size-label::after {
+    content: ' → 320x50 mobile';
+    font-size: 11px;
+    font-style: normal;
+    color: #64748b;
+    display: block;
+    margin-top: 6px;
+  }
+}
+
+/* Vertoz Slot B: In-grid 728x90 — spans full game grid width */
+.ad-in-grid {
+  grid-column: 1 / -1;
+  margin: 14px 0;
+  padding: 0;
+}
+
+/* Game page 3-column stage row: [300x600 left] [preview] [300x600 right] */
+.game-stage-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.game-stage-center {
+  min-width: 0;
+}
+
+/* Sidebars hidden on mobile/tablet — only show when viewport is wide enough */
+.game-stage-sidebar {
+  display: none;
+  padding: 0;
+}
+
+@media (min-width: 1280px) {
+  .game-stage-row {
+    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    gap: 24px;
+  }
+  .game-stage-sidebar {
+    display: block;
+    position: sticky;
+    top: 80px;
+  }
+  .game-stage-sidebar .ad-inner {
+    min-height: 600px;
+    width: 300px;
+  }
+}

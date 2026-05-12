@@ -44,8 +44,22 @@
     var grid = document.getElementById('gameGrid');
     if (!grid) return;
     grid.innerHTML = filteredGames.map(function (game, idx) {
-      return createCard(game, idx);
+      var card = createCard(game, idx);
+      // Vertoz Slot B: inject in-grid 728x90 ad after 6th card (between row 1 and row 2 on desktop)
+      if (idx === 5 && filteredGames.length > 7) {
+        card += createInGridAd();
+      }
+      return card;
     }).join('');
+  }
+
+  function createInGridAd() {
+    return '<div class="ad-slot ad-in-grid ad-vertoz ad-728x90" id="adInGrid" data-ad-slot="in_grid_1" data-ad-size="728x90,320x100">' +
+      '<div class="ad-inner">' +
+        '<span class="ad-size-label">728x90</span>' +
+        '<span class="ad-text">Advertisement</span>' +
+      '</div>' +
+    '</div>';
   }
 
   function createCard(game, idx) {

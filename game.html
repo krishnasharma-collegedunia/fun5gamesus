@@ -57,37 +57,64 @@
         <h1 class="play202-title" id="gameTitle">LOADING...</h1>
       </div>
 
-      <!-- GAME PREVIEW / IFRAME -->
-      <div class="play202-frame-container" id="gameFrameContainer">
-        <!-- Close button (only visible when game is playing) -->
-        <button class="game-close-btn" id="gameCloseBtn" aria-label="Close game" ontouchstart="">✕</button>
-        <!-- Thumbnail preview (shown before PLAY clicked) -->
-        <div class="play202-thumb-preview" id="thumbPreview">
-          <img id="thumbPreviewImg" alt="" loading="eager">
-        </div>
-        <!-- iframe wrapper (hidden until PLAY clicked) -->
-        <div class="play202-frame-wrapper hidden" id="gameFrameWrapper">
-          <div class="game-loading hidden" id="gameLoading">
-            <div class="spinner"></div>
-            <p>Loading game...</p>
+      <!-- GAME STAGE ROW: [300x600 left] [game preview + CTA] [300x600 right] -->
+      <div class="game-stage-row">
+
+        <!-- VERTOZ SLOT E: 300x600 LEFT SIDEBAR -->
+        <aside class="game-stage-sidebar ad-slot ad-vertoz ad-300x600" id="adSidebarLeft" data-ad-slot="sidebar_left" data-ad-size="300x600,300x250">
+          <div class="ad-inner">
+            <span class="ad-size-label">300x600</span>
+            <span class="ad-text">Advertisement</span>
+          </div>
+        </aside>
+
+        <!-- GAME PREVIEW + PLAY CTA (center column) -->
+        <div class="game-stage-center">
+          <!-- GAME PREVIEW / IFRAME -->
+          <div class="play202-frame-container" id="gameFrameContainer">
+            <!-- Close button (only visible when game is playing) -->
+            <button class="game-close-btn" id="gameCloseBtn" aria-label="Close game" ontouchstart="">✕</button>
+            <!-- Thumbnail preview (shown before PLAY clicked) -->
+            <div class="play202-thumb-preview" id="thumbPreview">
+              <img id="thumbPreviewImg" alt="" loading="eager">
+            </div>
+            <!-- iframe wrapper (hidden until PLAY clicked) -->
+            <div class="play202-frame-wrapper hidden" id="gameFrameWrapper">
+              <div class="game-loading hidden" id="gameLoading">
+                <div class="spinner"></div>
+                <p>Loading game...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PLAY GAME BUTTON (yellow, like play202) -->
+          <div class="play202-cta-wrap" id="playCtaWrap">
+            <button class="play202-cta" id="playGameBtn" ontouchstart="">▶ PLAY GAME</button>
           </div>
         </div>
+
+        <!-- VERTOZ SLOT F: 300x600 RIGHT SIDEBAR -->
+        <aside class="game-stage-sidebar ad-slot ad-vertoz ad-300x600" id="adSidebarRight" data-ad-slot="sidebar_right" data-ad-size="300x600,300x250">
+          <div class="ad-inner">
+            <span class="ad-size-label">300x600</span>
+            <span class="ad-text">Advertisement</span>
+          </div>
+        </aside>
+
       </div>
 
-      <!-- PLAY GAME BUTTON (yellow, like play202) -->
-      <div class="play202-cta-wrap" id="playCtaWrap">
-        <button class="play202-cta" id="playGameBtn" ontouchstart="">▶ PLAY GAME</button>
+      <!-- VERTOZ SLOT G: 970x90 / 728x90 BELOW game preview -->
+      <div class="ad-slot ad-vertoz ad-970x90" id="adPreGame" data-ad-slot="below_preview" data-ad-size="970x90,728x90,320x50">
+        <div class="ad-inner">
+          <span class="ad-size-label">970x90 / 728x90</span>
+          <span class="ad-text">Advertisement</span>
+        </div>
       </div>
 
       <!-- "MORE GAMES" CARD (links to homepage like play202) -->
       <div class="play202-rewards-card">
         <p class="rewards-text">Discover more free games — pick your favorite!</p>
         <a class="rewards-btn" href="index.html#games">Let's Play 🔥 More Games</a>
-      </div>
-
-      <!-- AD SLOT #1: PRE-GAME (top banner / interstitial-style, like play202 green PLAY button) -->
-      <div class="play202-ad-slot" id="adPreGame" data-ad-slot="pre_game" data-ad-size="320x50,300x250">
-        <div class="ad-inner"><span class="ad-text">Advertisement</span></div>
       </div>
 
       <!-- GAME META + CONTROLS -->
