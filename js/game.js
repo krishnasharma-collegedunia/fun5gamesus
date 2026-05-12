@@ -10,6 +10,8 @@
   var allGames = [];
   var currentGame = null;
   var iframeLoaded = false;
+  var gamePlayStartTime = 0;   // ms timestamp when PLAY was clicked (for time_played tracking)
+  var iframeLoadStartTime = 0; // ms timestamp when iframe.src was set (for latency tracking)
 
   // Top 8 famous mobile games — real Apple App Store CDN icons (matches fun5games.com)
   var DOWNLOAD_GAMES = [
@@ -29,10 +31,18 @@
     await loadGames();
 
     var slug = new URLSearchParams(window.location.search).get('slug');
-    if (!slug) { goHome(); return; }
+    if (!slug) {
+      if (window.fun5track) window.fun5track('game_error', { reason: 'missing_slug' });
+      goHome();
+      return;
+    }
 
     currentGame = allGames.find(function (g) { return g.slug === slug; });
-    if (!currentGame) { goHome(); return; }
+    if (!currentGame) {
+      if (window.fun5track) window.fun5track('game_error', { reason: 'slug_not_found', slug: slug });
+      goHome();
+      return;
+    }
 
     updateMeta();
     updateHeader();
@@ -43,6 +53,16 @@
     renderRelated();
     renderDownloadGames();
     setupPageLeave();
+
+    // Fire game_view event — game page successfully loaded with valid game data
+    if (window.fun5track) {
+      window.fun5track('game_view', {
+        game_slug: currentGame.slug,
+        game_title: currentGame.title,
+        game_category: currentGame.category,
+        game_rating: currentGame.rating
+      });
+    }
 
     console.log('[Prepp Games] Loaded: ' + currentGame.title);
   }
@@ -118,6 +138,7 @@
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (iframeLoaded) return;
       iframeLoaded = true;
+      gamePlayStartTime = Date.now();
 
       var container = document.getElementById('gameFrameContainer');
       var preview = document.getElementById('thumbPreview');
@@ -133,7 +154,8 @@
       wrapper.classList.remove('hidden');
       if (loading) loading.classList.remove('hidden');
 
-      // Create iframe
+      // Create iframe — track load latency
+      iframeLoadStartTime = Date.now();
       var iframe = document.createElement('iframe');
       iframe.src = currentGame.game_url + '?v=' + Date.now();
       iframe.id = 'gameIframe';
@@ -145,6 +167,22 @@
 
       iframe.addEventListener('load', function () {
         if (loading) loading.classList.add('hidden');
+        var latency = Date.now() - iframeLoadStartTime;
+        if (window.fun5track) {
+          window.fun5track('game_iframe_loaded', {
+            game_slug: currentGame.slug,
+            latency_ms: latency
+          });
+        }
+      });
+
+      iframe.addEventListener('error', function () {
+        if (window.fun5track) {
+          window.fun5track('game_error', {
+            reason: 'iframe_load_failed',
+            game_slug: currentGame.slug
+          });
+        }
       });
 
       setTimeout(function () { if (loading) loading.classList.add('hidden'); }, 8000);
@@ -203,10 +241,16 @@
       document.getElementById('gameFrameContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
 
-    // Track close event
+    // Track close event with time played
     if (window.fun5track) {
-      window.fun5track('game_close', { slug: currentGame ? currentGame.slug : 'unknown' });
+      var played = gamePlayStartTime ? Math.round((Date.now() - gamePlayStartTime) / 1000) : 0;
+      window.fun5track('game_close', {
+        game_slug: currentGame ? currentGame.slug : 'unknown',
+        game_title: currentGame ? currentGame.title : '',
+        time_played_seconds: played
+      });
     }
+    gamePlayStartTime = 0;
   }
 
   function setupControls() {
@@ -219,6 +263,7 @@
         document.getElementById('playGameBtn').click();
         return;
       }
+      var entering = !document.fullscreenElement && !container.classList.contains('fullscreen');
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else if (container.requestFullscreen) {
@@ -228,6 +273,12 @@
       } else {
         container.classList.toggle('fullscreen');
         fsBtn.textContent = container.classList.contains('fullscreen') ? '✖ Exit' : '⛶ Full Screen';
+      }
+      if (window.fun5track) {
+        window.fun5track('game_fullscreen', {
+          game_slug: currentGame ? currentGame.slug : 'unknown',
+          action: entering ? 'enter' : 'exit'
+        });
       }
     });
 
@@ -240,8 +291,18 @@
       if (iframe) {
         var loading = document.getElementById('gameLoading');
         if (loading) loading.classList.remove('hidden');
+        iframeLoadStartTime = Date.now();
         iframe.src = currentGame.game_url + '?v=' + Date.now();
         setTimeout(function () { if (loading) loading.classList.add('hidden'); }, 8000);
+        if (window.fun5track) {
+          var played = gamePlayStartTime ? Math.round((Date.now() - gamePlayStartTime) / 1000) : 0;
+          window.fun5track('game_reload', {
+            game_slug: currentGame.slug,
+            game_title: currentGame.title,
+            time_played_seconds_before_reload: played
+          });
+        }
+        gamePlayStartTime = Date.now(); // reset clock for next round
       }
     });
 
