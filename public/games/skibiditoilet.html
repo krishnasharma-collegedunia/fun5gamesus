@@ -164,7 +164,6 @@ function whack(idx){
     state.score=Math.max(0,state.score-5);
     state.combo=0;
     showPopup(h.el,'-5','miss');
-    h.toilet.style.bottom='-100%';
     h.active=false;
     h.bomb=false;
     h.toilet.classList.remove('up','bomb');
@@ -184,7 +183,6 @@ function whack(idx){
   h.active=false;
   setTimeout(function(){
     h.toilet.classList.remove('up','hit');
-    h.toilet.style.bottom='-100%';
   },300);
   // Combo flash
   if(state.combo===3)flashCombo('TRIPLE!');
@@ -245,11 +243,10 @@ function spawn(){
   setTimeout(function(){
     if(h.active){
       h.toilet.classList.remove('up','bomb');
-      h.toilet.style.bottom='-100%';
       h.active=false;
       h.bomb=false;
       // Missed - reset combo
-      if(!h.bomb)state.combo=0;
+      state.combo=0;
     }
   },stayTime);
 }
@@ -275,7 +272,6 @@ function startGame(){
   holes.forEach(function(h){
     h.active=false;h.bomb=false;
     h.toilet.classList.remove('up','bomb','hit');
-    h.toilet.style.bottom='-100%';
   });
   ob.classList.add('hidden');
   ov.classList.add('hidden');
