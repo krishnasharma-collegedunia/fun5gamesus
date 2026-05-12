@@ -183,21 +183,9 @@
     </div>
   </div>
 
-  <!-- VERTOZ SLOT H: INTERSTITIAL 320x480 (shown on PLAY click, static for now) -->
-  <div class="interstitial-overlay hidden" id="interstitialOverlay" aria-hidden="true" role="dialog" aria-label="Advertisement">
-    <div class="interstitial-modal">
-      <div class="ad-slot ad-vertoz ad-320x480" id="adInterstitial" data-ad-slot="interstitial" data-ad-size="320x480">
-        <div class="ad-inner">
-          <span class="ad-size-label">320x480</span>
-          <span class="ad-text">Advertisement</span>
-        </div>
-      </div>
-      <div class="interstitial-footer">
-        <span class="interstitial-countdown" id="interstitialCountdown">Game starts in 5s</span>
-        <button class="interstitial-close hidden" id="interstitialClose" aria-label="Close ad and start game">Skip Ad ✕</button>
-      </div>
-    </div>
-  </div>
+  <!-- Interstitial 320x480 lives on homepage (index.html) — triggers on game card click,
+       not on game.html PLAY click. -->
+
 
   <!-- FOOTER -->
   <footer class="site-footer">

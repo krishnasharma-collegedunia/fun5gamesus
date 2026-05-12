@@ -112,8 +112,10 @@
     var playBtn = document.getElementById('playGameBtn');
     if (!playBtn) return;
 
-    // Actual iframe-load logic (runs AFTER interstitial dismisses)
-    var loadGame = function () {
+    // Interstitial is shown on the HOMEPAGE on card click — not here.
+    // On game.html, PLAY just loads the iframe directly.
+    var startGame = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       if (iframeLoaded) return;
       iframeLoaded = true;
 
@@ -155,13 +157,6 @@
       }, 100);
     };
 
-    // PLAY click handler — shows interstitial first, then loads game
-    var startGame = function (e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (iframeLoaded) return;
-      showInterstitial(loadGame);
-    };
-
     playBtn.addEventListener('click', startGame);
 
     // Also clicking thumbnail starts game
@@ -176,68 +171,6 @@
         e.stopPropagation();
         closeGame();
       });
-    }
-  }
-
-  /**
-   * VERTOZ SLOT H — Interstitial 320x480 modal.
-   * Shows on PLAY click. 5s countdown, then Skip Ad button.
-   * When dismissed, runs callback (which loads the game iframe).
-   */
-  function showInterstitial(onDismiss) {
-    var overlay = document.getElementById('interstitialOverlay');
-    var countdownEl = document.getElementById('interstitialCountdown');
-    var closeBtn = document.getElementById('interstitialClose');
-
-    // Fallback: if interstitial DOM missing, load game immediately
-    if (!overlay) { onDismiss(); return; }
-
-    var seconds = 5;
-    var startTime = Date.now();
-
-    overlay.classList.remove('hidden');
-    overlay.setAttribute('aria-hidden', 'false');
-
-    if (closeBtn) closeBtn.classList.add('hidden');
-    if (countdownEl) {
-      countdownEl.style.display = '';
-      countdownEl.textContent = 'Game starts in ' + seconds + 's';
-    }
-
-    if (window.fun5track) {
-      window.fun5track('interstitial_shown', {
-        game_slug: currentGame ? currentGame.slug : '',
-        game_title: currentGame ? currentGame.title : ''
-      });
-    }
-
-    var tick = setInterval(function () {
-      seconds--;
-      if (seconds > 0) {
-        if (countdownEl) countdownEl.textContent = 'Game starts in ' + seconds + 's';
-      } else {
-        clearInterval(tick);
-        if (countdownEl) countdownEl.style.display = 'none';
-        if (closeBtn) closeBtn.classList.remove('hidden');
-      }
-    }, 1000);
-
-    var dismiss = function () {
-      clearInterval(tick);
-      overlay.classList.add('hidden');
-      overlay.setAttribute('aria-hidden', 'true');
-      var elapsed = Math.round((Date.now() - startTime) / 1000);
-      if (window.fun5track) {
-        window.fun5track('interstitial_dismiss', {
-          game_slug: currentGame ? currentGame.slug : '',
-          seconds_viewed: elapsed
-        });
-      }
-      onDismiss();
-    };
-
-    if (closeBtn) {
-      closeBtn.onclick = dismiss;
     }
   }
 
