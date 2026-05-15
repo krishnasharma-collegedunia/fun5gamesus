@@ -1,56 +1,59 @@
 # 🎮 Prepp Games — Project Context
 
-**Last Updated:** May 12, 2026
-**Status:** Production-ready · Vertoz approved · 13 ad placements with Vertoz-styled placeholders live · waiting for actual ad tag JS
+**Last Updated:** May 15, 2026
+**Status:** LIVE — 13 Vertoz banner/display tags integrated & working on fun5games.us · interstitial (overlayads.js) DISABLED (breaks homepage) · awaiting ad fill (new account, normal) + Ayushmann interstitial guidance
 
 ---
 
-## ⏰ WHERE WE LEFT OFF (May 12, 2026)
+## ⏰ WHERE WE LEFT OFF (May 15, 2026)
 
 ```
 ✅ DONE
 ├── 32 games built & live on fun5games.us + prepp.in/games
 ├── Brand rebranded: Fun5Games → Prepp Games
-├── Hosting target: prepp.in/games (Prepp tech team handles this)
-├── ads.txt deployed with 17 Vertoz authorized seller lines
-├── prepp.in/ads.txt LIVE & VERIFIED (May 7)
+├── ads.txt deployed; prepp.in/ads.txt LIVE & VERIFIED (May 7)
 │   └── Prepp team added their own google.com pub-4304762948491681 line on top
-├── Vertoz APPROVED ✅ — Ayushmann sent ad placement plan (5 attachments,
-│   including INTERSTITIAL.png) on May 11
-├── 13 Vertoz-styled ad placeholders implemented matching Ayushmann's screenshots
-│   (visible red italic size labels so Ayushmann can verify placements)
-├── 320x480 interstitial modal — fires on game card click (homepage), 5s
-│   countdown then Skip Ad ✕ button
-├── Google Analytics 4 active (G-D16NB8WW33) — 17 unique events tracked
-│   (page_view, game_view, game_play, game_iframe_loaded, game_close,
-│   game_reload, game_fullscreen, game_error, nav_click, footer_link_click,
-│   category_filter, game_select, download_click, ad_dismiss,
-│   interstitial_shown, interstitial_dismiss, scroll_depth, time_on_page)
-├── Bug fix May 12: Skibidi Toilet — inline style.bottom='-100%' was
-│   overriding CSS .up class, toilets stayed invisible. Removed inline
-│   style overrides; now relies on classList toggling. (commit f2f95b4)
-├── robots.txt + sitemap.xml live
-├── 4 legal pages (about/contact/terms/privacy) all on Prepp branding
-├── Close (✕) button on iframe gameplay
-├── play202-style game flow (PLAY → iframe loads in place)
-├── Real Apple App Store icons in "Download Top Mobile Games" section
+├── Vertoz APPROVED (May 11) — Ayushmann sent placement plan + 14 ad tags
+│   (prepp tags.txt + prepp tags (1).txt in ~/Downloads)
+├── 13 Vertoz banner/display tags INTEGRATED & browser-verified on
+│   fun5games.us (May 15):
+│   • All slots fire correct token+size ad requests, HTTP 200
+│   • Programmatic demand active (bt=programmatic postbacks)
+│   • Zero JS console errors
+│   • Currently empty.gif / no-fill — NORMAL for new account,
+│     ramps up 24-72h (NOT a code issue)
+│   • .ad-live CSS: unfilled slots collapse cleanly (no ugly boxes)
+├── In-grid ad (#adInGrid) injected via createElement in script.js
+│   (scripts set via innerHTML do NOT execute — DOM injection required)
+├── GA4 active (G-D16NB8WW33) — 17 events (see Analytics section)
+├── Skibidi Toilet bug fixed (commit f2f95b4)
+├── robots.txt + sitemap.xml live; 4 legal pages on Prepp branding
+├── play202-style game flow; real Apple icons in Download section
 
-⏳ PENDING (waiting on others)
-├── Vertoz to send actual ad tag JS snippets — 13 unique tags requested:
-│   • 4 × 728x90 (with 320x50 mobile fallback)
-│   • 5 × 970x250 (with 300x250 mobile fallback)
-│   • 1 × 970x90 (with 728x90 / 320x50 fallback)
-│   • 2 × 300x600 (desktop ≥1280px only, hide on mobile)
-│   • 1 × 320x480 (static interstitial)
-├── Prepp tech team (Kunal) needs to redeploy prepp.in/games on next release
-│   to pick up Vertoz placeholders + GA4 tracking + Skibidi fix
+⚠️ INTERSTITIAL DISABLED
+├── overlayads.js (IXE150328V0593CG, 320x480) made the HOMEPAGE
+│   UNRESPONSIVE in browser testing (screenshot + DOM extraction
+│   both timed out; game.html WITHOUT it loads perfectly)
+├── Commented out in index.html (preserved for quick restore)
+├── Custom modal + countdown + card-click interception was REMOVED
+│   from script.js when integrating (Vertoz was meant to self-manage)
+└── NEEDS Ayushmann/Vertoz guidance on correct deployment before
+    re-enabling (async load? trigger config? different script?)
 
-🎯 LIKELY NEXT TASKS (when continuing this project)
-├── Receive Vertoz ad tags → integrate into 9 ad slots
-├── Test ad fill rate on mobile + desktop
-├── Monitor GA4 → Vertoz dashboard for CPM
-├── (optional) Add more games based on engagement data
-└── (optional) A/B test ad placements
+⏳ PENDING
+├── Vertoz ad FILL — currently no-fill (empty.gif). Expected to
+│   ramp 24-72h after going live, or once Ayushmann confirms
+│   campaigns/demand are active. No code change needed when it fills.
+├── Interstitial fix — waiting on Ayushmann re: overlayads.js
+├── Prepp tech (Kunal) — redeploy prepp.in/games on next release
+│   ONCE fill confirmed + interstitial sorted (don't redeploy piecemeal)
+└── Spare tag IXY973988VE9E5GC (970x250) unused — backup inventory
+
+🎯 NEXT TASKS
+├── Ayushmann: confirm fill timeline + fix interstitial deployment
+├── Monitor GA4 + Vertoz dashboard for CPM/RPM per slot once filled
+├── Re-enable interstitial once Vertoz gives correct method
+└── Tell Kunal to redeploy prepp.in/games (final step)
 ```
 
 ---
@@ -190,36 +193,51 @@ Constitution Quest, Timeline Rush, Scheme Match, PM Quest
 
 ## 💰 Monetization Setup (Vertoz)
 
-### Status: APPROVED ✅ (May 11, 2026) — placeholders live, awaiting ad tag JS
+### Status: LIVE (May 15, 2026) — 13 banner tags integrated & working; interstitial disabled
 
-### 13 Vertoz Ad Placements
+### 🔑 COMPLETE TAG → SLOT MAPPING (source: ~/Downloads/prepp tags (1).txt)
 
-**Homepage (5 visible + 1 interstitial modal):**
-- `#adTop` — 728x90 above category filters (mobile: 320x50)
-- `#adInGrid` — 728x90 injected after 6th game card via JS (full-width via grid-column 1/-1)
-- `#adMid` — 970x250 after games grid (mobile: 300x250)
-- `#adFooter` — 970x250 after About Prepp Games (mobile: 300x250)
-- `#adSticky` — 728x90 sticky bottom (mobile: 320x50)
-- `#adInterstitial` — 320x480 modal, fires on game card PLAY click,
-  5s countdown then Skip Ad ✕ button. Tracks interstitial_shown +
-  interstitial_dismiss with seconds_viewed.
+Tag base URL: `//banner.incrementxserv.com/<path>?vzId=<ID>&vzR=`
+- `scripts/pageads.js` — most banner slots
+- `ixads/pageads.js` — the DISPLAY_970x250_1..5 set
+- `scripts/overlayads.js` — interstitial (DISABLED — see below)
 
-**Game page (7):**
-- `#adSidebarLeft` — 300x600 left rail (desktop ≥1280px only)
-- `#adSidebarRight` — 300x600 right rail (desktop ≥1280px only)
-- `#adPreGame` — 970x90 / 728x90 below game preview (mobile: 320x50)
-- `#adMid` — 970x250 between How-to-Play and Download (mobile: 300x250)
-- `#adBottom` — 970x250 between Download and Related games
-- `#adNativeFeed` — 970x250 after Related games
-- `#adSticky` — 728x90 sticky bottom (mobile: 320x50)
+| Slot ID | Page | Size | Vertoz Tag ID | Path | Status |
+|---|---|---|---|---|---|
+| `adTop` | home | 728x90 | `IXB835851V0E320B` | scripts/pageads.js | ✅ live |
+| `adInGrid` | home | 728x90 | `IXK716502V4595E6` | scripts/pageads.js | ✅ live (JS-injected) |
+| `adMid` | home | 970x250 | `IXR543272V95G4B8` | ixads/pageads.js | ✅ live |
+| `adFooter` | home | 970x250 | `IXF179982VD0DB55` | ixads/pageads.js | ✅ live |
+| `adSticky` | home | 728x90 | `IXQ850276V0D358B` | scripts/pageads.js | ✅ live |
+| `adSidebarLeft` | game | 300x600 | `IXE895614V7D1HGH` | scripts/pageads.js | ✅ live |
+| `adSidebarRight` | game | 300x600 | `IXA977414V5F5H19` | scripts/pageads.js | ✅ live |
+| `adPreGame` | game | 970x90 | `IXB586694VB63633` | scripts/pageads.js | ✅ live |
+| `adMid` | game | 970x250 | `IXE770740V83434E` | ixads/pageads.js | ✅ live |
+| `adBottom` | game | 970x250 | `IXM198322V38GD2D` | ixads/pageads.js | ✅ live |
+| `adNativeFeed` | game | 970x250 | `IXP396675VEC5B59` | ixads/pageads.js | ✅ live |
+| `adSticky` | game | 728x90 | `IXJ265919V051CDC` | scripts/pageads.js | ✅ live |
+| `adInterstitial` | home | 320x480 | `IXE150328V0593CG` | scripts/overlayads.js | ⚠️ DISABLED |
+| _(spare)_ | — | 970x250 | `IXY973988VE9E5GC` | scripts/pageads.js | unused backup |
 
-Each slot has:
-- `data-ad-slot="..."` (semantic name, e.g., `header`, `after_grid`, `sidebar_left`)
-- `data-ad-size="..."` (comma-separated primary + mobile fallback sizes)
-- Visible red italic size label inside placeholder (for review/verification)
+### Integration Pattern (validated in browser May 15)
 
-**Placeholder visual** matches Ayushmann's screenshots — dashed red border
-+ prominent size label so Vertoz tag swap-in is a clean 1:1 replacement.
+- Placeholder `.ad-inner` content replaced with `<script src=Vertoz tag>`
+- Class: `ad-vertoz` (red placeholder) → `ad-live` (transparent, collapses
+  when empty). Size class (`.ad-728x90` etc.) kept for CLS guard.
+- `#adInGrid` is JS-injected by `script.js` → `injectInGridAd()` via
+  `createElement` (scripts in `innerHTML` do NOT execute).
+- Verified: all slots fire correct token+size requests, HTTP 200,
+  `bt=programmatic` postbacks, zero console errors. `empty.gif`/no-fill
+  is normal for a new account (ramps 24-72h).
+
+### ⚠️ INTERSTITIAL ISSUE (overlayads.js)
+
+`overlayads.js` (IXE150328V0593CG) made the **homepage unresponsive** —
+browser screenshot + DOM extraction timed out repeatedly. `game.html`
+(no overlayads.js) loads perfectly → confirmed it's the culprit.
+**Commented out in index.html** (preserved for restore). Custom modal +
+countdown + card-click interception already removed from script.js during
+integration. **BLOCKED on Ayushmann/Vertoz** for correct deployment method.
 
 ### ads.txt Lines (deployed at prepp.in/ads.txt)
 ```
@@ -243,10 +261,18 @@ sharethrough.com, izM1hGJl, DIRECT, d53b998a7bd4ecd3
 ```
 
 ### Vertoz Contact
-- **Person:** Ayushmann Rai (Vertoz)
-- **Status as of May 7:** ads.txt verified live on prepp.in root; Ayushmann said approval in 1-2 days
-- **Expected approval:** Friday May 8 / weekend
-- **Next step:** Vertoz sends actual ad tag JS snippets → integrate into 9 ad slots → push to GitHub → Prepp team redeploys prepp.in/games → test fill rate (incognito + mobile + desktop) → monitor GA4 + Vertoz dashboard for CPM
+- **Person:** Ayushmann Rai (Vertoz / IncrementX)
+- **May 11:** Approved; sent 14 tags (`~/Downloads/prepp tags.txt` + `prepp tags (1).txt`)
+- **May 15:** 13 banner tags integrated & browser-verified on fun5games.us
+- **OPEN with Ayushmann (2 items):**
+  1. **Interstitial fix** — `overlayads.js` (IXE150328V0593CG) hangs the
+     homepage. Need correct deployment guidance (async? trigger config?
+     different script/method?).
+  2. **Ad fill timeline** — all slots fire correctly but return
+     `empty.gif` (no-fill). When will demand/campaigns go live so ads
+     actually render? (Expected normal ramp 24-72h for new account.)
+- **Final step (after both resolved):** tell Prepp tech (Kunal) to
+  redeploy prepp.in/games — do NOT redeploy piecemeal.
 
 ---
 
@@ -428,6 +454,10 @@ Two parallel deployments:
 ## 🔑 Latest Git Commits (most recent first)
 
 ```
+c872a8b Disable Vertoz interstitial (overlayads.js) — makes homepage unresponsive
+936aacc Integrate all 13 Vertoz ad tags (pattern validated via adTop test)
+4b8bf23 TEST: integrate first Vertoz tag in #adTop (728x90) to validate pattern
+8ccba1f Update CONTEXT.md: May 12 — Vertoz approved, 13 placements, 17 GA4 events
 f2f95b4 Fix Skibidi Toilet: inline style overriding CSS .up class (toilets invisible bug)
 76d25f2 Expand GA4 tracking: 17 events covering navigation, games, ads, engagement
 dee44c8 Upgrade sticky + remaining game page placeholders to Vertoz styling (728x90 sticky + 3x 970x250)
