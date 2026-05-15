@@ -30,23 +30,28 @@
 ├── robots.txt + sitemap.xml live; 4 legal pages on Prepp branding
 ├── play202-style game flow; real Apple icons in Download section
 
-⚠️ INTERSTITIAL DISABLED
-├── overlayads.js (IXE150328V0593CG, 320x480) made the HOMEPAGE
-│   UNRESPONSIVE in browser testing (screenshot + DOM extraction
-│   both timed out; game.html WITHOUT it loads perfectly)
-├── Commented out in index.html (preserved for quick restore)
-├── Custom modal + countdown + card-click interception was REMOVED
-│   from script.js when integrating (Vertoz was meant to self-manage)
-└── NEEDS Ayushmann/Vertoz guidance on correct deployment before
-    re-enabling (async load? trigger config? different script?)
+✅ INTERSTITIAL RE-ENABLED (hang fixed)
+├── Root cause of earlier hang: overlayads.js was placed MID-BODY
+│   (after sticky wrap, before footer) → synchronous external script
+│   blocked HTML parsing → homepage froze
+├── FIX (per Ayushmann "body par lagana hai"): moved overlayads.js to
+│   the LAST element in <body>, AFTER <script src="js/script.js">,
+│   right before </body> → non-blocking, content+JS load first
+├── Browser-verified May 15: homepage loads perfectly, screenshot OK,
+│   no hang, banners still firing correctly (commit 7f5a994)
+├── Custom modal + countdown + card-click interception REMOVED from
+│   script.js — Vertoz overlayads.js self-manages overlay/timing/close
+└── Interstitial overlay not visually shown yet — expected: no-fill
+    (new account) OR overlayads.js timer/trigger logic. Confirm actual
+    display with Ayushmann once fill is active.
 
 ⏳ PENDING
-├── Vertoz ad FILL — currently no-fill (empty.gif). Expected to
-│   ramp 24-72h after going live, or once Ayushmann confirms
-│   campaigns/demand are active. No code change needed when it fills.
-├── Interstitial fix — waiting on Ayushmann re: overlayads.js
+├── Vertoz ad FILL — currently no-fill (empty.gif) on ALL slots incl.
+│   interstitial. Expected to ramp 24-72h, or once Ayushmann confirms
+│   campaigns/demand are active. NO code change needed when it fills.
+├── Confirm interstitial actually displays once fill is live
 ├── Prepp tech (Kunal) — redeploy prepp.in/games on next release
-│   ONCE fill confirmed + interstitial sorted (don't redeploy piecemeal)
+│   ONCE fill confirmed (don't redeploy piecemeal)
 └── Spare tag IXY973988VE9E5GC (970x250) unused — backup inventory
 
 🎯 NEXT TASKS
@@ -216,7 +221,7 @@ Tag base URL: `//banner.incrementxserv.com/<path>?vzId=<ID>&vzR=`
 | `adBottom` | game | 970x250 | `IXM198322V38GD2D` | ixads/pageads.js | ✅ live |
 | `adNativeFeed` | game | 970x250 | `IXP396675VEC5B59` | ixads/pageads.js | ✅ live |
 | `adSticky` | game | 728x90 | `IXJ265919V051CDC` | scripts/pageads.js | ✅ live |
-| `adInterstitial` | home | 320x480 | `IXE150328V0593CG` | scripts/overlayads.js | ⚠️ DISABLED |
+| `adInterstitial` | home | 320x480 | `IXE150328V0593CG` | scripts/overlayads.js | ✅ live (body-end, non-blocking) |
 | _(spare)_ | — | 970x250 | `IXY973988VE9E5GC` | scripts/pageads.js | unused backup |
 
 ### Integration Pattern (validated in browser May 15)
@@ -230,14 +235,17 @@ Tag base URL: `//banner.incrementxserv.com/<path>?vzId=<ID>&vzR=`
   `bt=programmatic` postbacks, zero console errors. `empty.gif`/no-fill
   is normal for a new account (ramps 24-72h).
 
-### ⚠️ INTERSTITIAL ISSUE (overlayads.js)
+### ✅ INTERSTITIAL RESOLVED (overlayads.js — body-end placement)
 
-`overlayads.js` (IXE150328V0593CG) made the **homepage unresponsive** —
-browser screenshot + DOM extraction timed out repeatedly. `game.html`
-(no overlayads.js) loads perfectly → confirmed it's the culprit.
-**Commented out in index.html** (preserved for restore). Custom modal +
-countdown + card-click interception already removed from script.js during
-integration. **BLOCKED on Ayushmann/Vertoz** for correct deployment method.
+Earlier `overlayads.js` (IXE150328V0593CG) made the **homepage
+unresponsive** because it was placed MID-BODY (synchronous external
+script blocked HTML parsing). Per Ayushmann ("body par lagana hai"),
+moved it to the **LAST element in `<body>`** — after
+`<script src="js/script.js">`, right before `</body>`. Now non-blocking;
+browser-verified homepage loads perfectly (commit 7f5a994). Custom modal
++ countdown + card-click interception removed; overlayads.js self-manages
+its own overlay/timing/close. Overlay not visually shown yet (no-fill /
+Vertoz trigger logic) — confirm display with Ayushmann once fill active.
 
 ### ads.txt Lines (deployed at prepp.in/ads.txt)
 ```
@@ -263,15 +271,16 @@ sharethrough.com, izM1hGJl, DIRECT, d53b998a7bd4ecd3
 ### Vertoz Contact
 - **Person:** Ayushmann Rai (Vertoz / IncrementX)
 - **May 11:** Approved; sent 14 tags (`~/Downloads/prepp tags.txt` + `prepp tags (1).txt`)
-- **May 15:** 13 banner tags integrated & browser-verified on fun5games.us
-- **OPEN with Ayushmann (2 items):**
-  1. **Interstitial fix** — `overlayads.js` (IXE150328V0593CG) hangs the
-     homepage. Need correct deployment guidance (async? trigger config?
-     different script/method?).
-  2. **Ad fill timeline** — all slots fire correctly but return
-     `empty.gif` (no-fill). When will demand/campaigns go live so ads
-     actually render? (Expected normal ramp 24-72h for new account.)
-- **Final step (after both resolved):** tell Prepp tech (Kunal) to
+- **May 15:** ALL 14 tags integrated & browser-verified on fun5games.us
+  (13 banner + interstitial). Interstitial hang FIXED by moving
+  overlayads.js to end of <body> per Ayushmann ("body par lagana hai").
+- **OPEN with Ayushmann (1 item):**
+  1. **Ad fill timeline** — all slots fire correctly (HTTP 200,
+     programmatic) but return `empty.gif` (no-fill), incl. interstitial.
+     When will demand/campaigns go live so ads actually render?
+     (Expected normal ramp 24-72h for new account.) Also confirm the
+     interstitial overlay displays correctly once fill is active.
+- **Final step (after fill confirmed):** tell Prepp tech (Kunal) to
   redeploy prepp.in/games — do NOT redeploy piecemeal.
 
 ---
