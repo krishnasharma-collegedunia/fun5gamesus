@@ -153,14 +153,6 @@
     </div>
   </div>
 
-  <!-- VERTOZ INTERSTITIAL 320x480 (IXE150328V0593CG) — TEMPORARILY DISABLED.
-       overlayads.js made the homepage unresponsive in testing (screenshot +
-       DOM extraction timed out; game.html without it loads fine). Needs
-       Ayushmann/Vertoz clarification on correct deployment before re-enabling.
-  <script type="text/javascript" src="//banner.incrementxserv.com/scripts/overlayads.js?vzId=IXE150328V0593CG&vzR="></script>
-  -->
-
-
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="container">
@@ -180,5 +172,10 @@
   </footer>
 
   <script src="js/script.js"></script>
+
+  <!-- VERTOZ INTERSTITIAL 320x480 (IXE150328V0593CG) — placed as the LAST
+       element in <body> so page content + main JS load first (non-blocking).
+       overlayads.js self-manages its own overlay, timing, and close button. -->
+  <script type="text/javascript" src="//banner.incrementxserv.com/scripts/overlayads.js?vzId=IXE150328V0593CG&vzR="></script>
 </body>
 </html>
