@@ -90,10 +90,9 @@
 
   <!-- AD SLOT #3 (Vertoz Slot C): 970x250 after games grid, before Mobile Games banner -->
   <div class="container">
-    <div class="ad-slot ad-mid ad-vertoz ad-970x250" id="adMid" data-ad-slot="after_grid" data-ad-size="970x250,300x250">
+    <div class="ad-slot ad-mid ad-live ad-970x250" id="adMid" data-ad-slot="after_grid" data-ad-size="970x250,300x250">
       <div class="ad-inner">
-        <span class="ad-size-label">970x250</span>
-        <span class="ad-text">Advertisement</span>
+        <script type="text/javascript" src="//banner.incrementxserv.com/ixads/pageads.js?vzId=IXR543272V95G4B8&vzR="></script>
       </div>
     </div>
   </div>
@@ -137,10 +136,9 @@
 
   <!-- AD SLOT #4 (Vertoz Slot D): 970x250 after About Prepp Games section -->
   <div class="container">
-    <div class="ad-slot ad-footer ad-vertoz ad-970x250" id="adFooter" data-ad-slot="after_about" data-ad-size="970x250,300x250">
+    <div class="ad-slot ad-footer ad-live ad-970x250" id="adFooter" data-ad-slot="after_about" data-ad-size="970x250,300x250">
       <div class="ad-inner">
-        <span class="ad-size-label">970x250</span>
-        <span class="ad-text">Advertisement</span>
+        <script type="text/javascript" src="//banner.incrementxserv.com/ixads/pageads.js?vzId=IXF179982VD0DB55&vzR="></script>
       </div>
     </div>
   </div>
@@ -148,29 +146,16 @@
   <!-- AD SLOT #5 (Vertoz Slot — sticky): 728x90 / 320x50 sticky bottom -->
   <div class="ad-sticky-wrap" id="adStickyWrap">
     <button class="ad-sticky-close" id="adStickyClose" aria-label="Close ad">✕</button>
-    <div class="ad-slot ad-sticky ad-vertoz ad-728x90" id="adSticky" data-ad-slot="sticky_bottom" data-ad-size="728x90,320x50">
+    <div class="ad-slot ad-sticky ad-live ad-728x90" id="adSticky" data-ad-slot="sticky_bottom" data-ad-size="728x90,320x50">
       <div class="ad-inner">
-        <span class="ad-size-label">728x90</span>
-        <span class="ad-text">Advertisement</span>
+        <script type="text/javascript" src="//banner.incrementxserv.com/scripts/pageads.js?vzId=IXQ850276V0D358B&vzR="></script>
       </div>
     </div>
   </div>
 
-  <!-- VERTOZ SLOT H: INTERSTITIAL 320x480 (shown when user clicks a game card's PLAY button) -->
-  <div class="interstitial-overlay hidden" id="interstitialOverlay" aria-hidden="true" role="dialog" aria-label="Advertisement">
-    <div class="interstitial-modal">
-      <div class="ad-slot ad-vertoz ad-320x480" id="adInterstitial" data-ad-slot="interstitial" data-ad-size="320x480">
-        <div class="ad-inner">
-          <span class="ad-size-label">320x480</span>
-          <span class="ad-text">Advertisement</span>
-        </div>
-      </div>
-      <div class="interstitial-footer">
-        <span class="interstitial-countdown" id="interstitialCountdown">Game starts in 5s</span>
-        <button class="interstitial-close hidden" id="interstitialClose" aria-label="Close ad and start game">Skip Ad ✕</button>
-      </div>
-    </div>
-  </div>
+  <!-- VERTOZ INTERSTITIAL 320x480 — overlayads.js self-manages its own
+       full-screen overlay + timing + close button. No custom modal needed. -->
+  <script type="text/javascript" src="//banner.incrementxserv.com/scripts/overlayads.js?vzId=IXE150328V0593CG&vzR="></script>
 
   <!-- FOOTER -->
   <footer class="site-footer">

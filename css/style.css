@@ -1313,6 +1313,23 @@ body.has-sticky-ad { padding-bottom: 70px; }
    Layout/positions match Ayushmann's screenshots.
    ======================================== */
 
+/* LIVE Vertoz ad slots — no placeholder box. Keeps min-height (CLS guard)
+   but transparent + borderless so an unfilled slot shows nothing (clean),
+   and a filled ad renders directly. Size classes still drive min-height. */
+.ad-live .ad-inner {
+  background: transparent;
+  border: 0;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ad-live .ad-inner:empty { display: none; }
+.ad-live { padding: 0; }
+/* Live slot keeps the size-class min-height for CLS only when an ad is present.
+   When empty, the slot collapses (no ugly gap). */
+
 /* Vertoz placeholder visual — prominent size label like in Ayushmann's screenshots */
 .ad-vertoz .ad-inner {
   position: relative;
