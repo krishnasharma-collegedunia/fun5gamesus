@@ -1,7 +1,7 @@
 # 🎮 Prepp Games — Project Context
 
 **Last Updated:** May 15, 2026
-**Status:** LIVE — 13 Vertoz banner/display tags integrated & working on fun5games.us · interstitial (overlayads.js) DISABLED (breaks homepage) · awaiting ad fill (new account, normal) + Ayushmann interstitial guidance
+**Status:** All 14 Vertoz tags integrated + interstitial fixed (body-end) + browser-verified on fun5games.us. No-fill on fun5games.us is EXPECTED (not registered domain). Kunal redeploying prepp.in/games (registered domain → real fill there). Games confirmed working on prepp.in.
 
 ---
 
@@ -45,13 +45,24 @@
     (new account) OR overlayads.js timer/trigger logic. Confirm actual
     display with Ayushmann once fill is active.
 
-⏳ PENDING
-├── Vertoz ad FILL — currently no-fill (empty.gif) on ALL slots incl.
-│   interstitial. Expected to ramp 24-72h, or once Ayushmann confirms
-│   campaigns/demand are active. NO code change needed when it fills.
-├── Confirm interstitial actually displays once fill is live
-├── Prepp tech (Kunal) — redeploy prepp.in/games on next release
-│   ONCE fill confirmed (don't redeploy piecemeal)
+🔑 KEY INSIGHT — NO-FILL on fun5games.us is EXPECTED
+├── Network logs showed di=fun5games.us, allowhost=0, siteid=22483
+├── Vertoz approved/registered domain = prepp.in (NOT fun5games.us)
+├── So fun5games.us (test domain) → empty.gif/no-fill is CORRECT behavior
+└── Real ad fill will happen on prepp.in/games (the registered domain)
+    once it has live user traffic. Ayushmann confirmed (May 15):
+    "agar user jayega prepp se to check kr skte" — needs real prepp
+    traffic to verify/serve fill.
+
+⏳ PENDING / IN PROGRESS
+├── Kunal (Prepp tech) redeploying prepp.in/games — pull main @ c728f99
+│   (13 Vertoz tags + interstitial + GA4 17-events + Skibidi fix +
+│   .ad-live CSS). User notified Kunal May 15.
+├── Games CONFIRMED working on prepp.in/games (user play-tested) →
+│   subpath/relative-path setup is fine, redeploy is low-risk
+├── After redeploy: verify ad fill on prepp.in (real domain → should
+│   fill, unlike fun5games.us), confirm interstitial displays, check
+│   one game loads (iframe path), browser console clean
 └── Spare tag IXY973988VE9E5GC (970x250) unused — backup inventory
 
 🎯 NEXT TASKS
